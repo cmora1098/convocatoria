@@ -1,0 +1,85 @@
+<div class="auth-wrapper">
+  <!-- Panel Izquierdo -->
+  <div class="left-panel">
+    <div class="content">
+      <p>Bienvenido a la Plataforma de</p>
+      <h1>Convocatorias AGRO RURAL</h1>
+      <p>
+        ¡Atención postulantes! Aquí encontrarás las convocatorias más recientes
+        para trabajar en el Programa de Desarrollo Productivo Agrario Rural.
+      </p>
+      <p>Se ofrecerán plazas laborales para distintos niveles educativos,
+        incluyendo:</p>
+      <ul>
+        <li>Personas con secundaria completa</li>
+        <!-- Puedes agregar más si deseas -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- Panel Derecho -->
+  <div class="auth-content right-panel">
+    <div class="card">
+      <div class="card-body text-center">
+        <img src="assets/images/logoagrorural.png" alt="Logo AGRO RURAL" class="logo img-fluid mb-4" />
+
+        <!-- <form>
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-envelope"></i>
+            <input type="email" placeholder="Correo Electrónico" required
+              class="form-control" />
+          </div>
+
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="Contraseña" required
+              class="form-control" />
+          </div> -->
+
+        <form (ngSubmit)="login()" #loginForm="ngForm">
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-envelope"></i>
+            <input type="email" placeholder="Correo Electrónico" required class="form-control" [(ngModel)]="email"
+              name="email" />
+          </div>
+
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="Contraseña" required class="form-control" [(ngModel)]="password"
+              name="password" />
+          </div>
+
+          <!-- Captcha -->
+          <div class="captcha-container">
+            <canvas #captchaCanvas class="captcha-canvas" (click)="generateCaptcha()"></canvas>
+            <button type="button" (click)="generateCaptcha()" class="refresh-btn" title="Refrescar Captcha">↻</button>
+          </div>
+
+          <input type="text" [(ngModel)]="captchaInput" name="captcha" placeholder="Ingrese el captcha"
+            class="captcha-input" (input)="validateCaptcha()" />
+
+          <p *ngIf="captchaMessage" class="captcha-message">
+            {{ captchaMessage }}
+          </p>
+
+          <!-- <div class="form-group text-start mt-2">
+            <div class="checkbox checkbox-primary d-inline">
+              <input type="checkbox" id="checkbox-fill-a1" checked />
+              <label for="checkbox-fill-a1" class="cr">Guardar credenciales</label>
+            </div>
+          </div> -->
+
+          <button type="submit" class="btn-login">Ingresar</button>
+
+          <div class="extra-links mt-3">
+            <a [routerLink]="['/fpassword']">¿Olvidaste tu Contraseña?</a>
+            <p>
+              ¿Aún no se ha registrado?
+              <a [routerLink]="['/register']">Regístrese aquí</a>
+            </p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

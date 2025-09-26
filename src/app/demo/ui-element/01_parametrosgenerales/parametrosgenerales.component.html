@@ -1,0 +1,101 @@
+<!-- Vista de Lista de Convocatorias -->
+<div class="row btn-page">
+    <div class="col-md-12">
+        <app-card cardTitle="" [options]="false">
+
+            <!-- Botón principal -->
+            <div class="mb-3 text-start">
+                <button type="button" class="btn btn-primary" (click)="abrirModal()">
+                    <i class="feather icon-plus me-1"></i>
+                    Agregar Criterio
+                </button>
+            </div>
+
+
+            <!-- Separador -->
+            <hr />
+            <div class="my-4"></div>
+
+            <!-- Tabla dinámica -->
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Pauta Evaluación</th>
+                            <th>Descripción breve</th>
+                            <th>Peso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let criterio of criterios; let i = index">
+                            <td>{{ criterio.id }}</td>
+                            <td>{{ criterio.pauta }}</td>
+                            <td>{{ criterio.descripcion }}</td>
+                            <td>{{ criterio.peso }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning me-1" (click)="abrirModal(i)">
+                                    <i class="feather icon-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" (click)="eliminarCriterio(i)">
+                                    <i class="feather icon-trash-2"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <nav>
+                <ul class="pagination justify-content-end">
+                    <li class="page-item disabled"><a class="page-link">Anterior</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                </ul>
+            </nav>
+        </app-card>
+    </div>
+</div>
+
+<!-- Modal de edición -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editarModalLabel">
+                    {{ indiceEditando === null ? 'Agregar Criterio' : 'Editar Criterio' }}
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="pautaInput" class="form-label">Pauta de Evaluación</label>
+                        <input type="text" id="pautaInput" class="form-control" [(ngModel)]="criterioEdit.pauta"
+                            name="pauta" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcionInput" class="form-label">Descripción</label>
+                        <input type="text" id="descripcionInput" class="form-control"
+                            [(ngModel)]="criterioEdit.descripcion" name="descripcion" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="pesoInput" class="form-label">Peso (%)</label>
+                        <input type="text" id="pesoInput" class="form-control" [(ngModel)]="criterioEdit.peso"
+                            name="peso" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="cancelarEdicion()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="guardarCambios()">
+                    {{ indiceEditando === null ? 'Guardar' : 'Actualizar' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,485 @@
+<!-- Vista de Lista de Convocatorias -->
+<div class="row btn-page" *ngIf="mostrarLista">
+  <div class="col-md-12">
+    <app-card cardTitle="" [options]="false">
+
+      <!-- Botón principal -->
+      <div class="mb-3 text-start">
+        <button type="button" class="btn btn-primary" (click)="nuevaConvocatoria()">
+          <i class="feather icon-plus me-1"></i>
+          Publicar Nueva Convocatoria
+        </button>
+      </div>
+
+      <!-- Separador -->
+      <hr />
+
+      <!-- Filtros -->
+      <div class="row align-items-end g-2">
+        <div class="col-md-2">
+          <label class="form-label">Tipo</label>
+          <select class="form-control" [(ngModel)]="filtros.codTipoConvocatoria" name="tipo">
+            <option value="">Seleccione</option>
+            <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+              {{ tipo.descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Fecha Inicial</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio" />
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Fecha Fin</label>
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin" />
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Buscar Convocatoria</label>
+          <input type="text" class="form-control" [(ngModel)]="filtros.buscar" />
+        </div>
+
+        <div class="col-md-2">
+          <button type="button" class="btn btn-info w-100" (click)="listarConvocatorias()">
+            <i class="feather icon-search me-1"></i> Buscar
+          </button>
+        </div>
+      </div>
+
+      <div class="my-4"></div>
+
+      <!-- Tabla dinámica -->
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered" *ngIf="convocatorias.length > 0">
+          <thead class="table-light">
+            <tr>
+              <!-- <th>ID</th> -->
+              <th>Código</th>
+              <th>Convocatoria</th>
+              <th>Tipo</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let convocatoria of convocatorias">
+              <!-- <td>{{ convocatoria.iCodConvocatoria }}</td> -->
+              <td>CV-{{ convocatoria.iCodConvocatoria }}</td>
+              <td>{{ convocatoria.vTitulo }}</td>
+              <td>{{ convocatoria.vDescripcionConvocatoria }}</td>
+              <td>{{ convocatoria.dtFechaInicio | date: 'dd/MM/yyyy' }}</td>
+              <td>{{ convocatoria.dtFechaFin | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <button type="button" class="btn btn-sm"
+                  [ngClass]="{'btn-success': convocatoria.bActivo,'btn-danger': !convocatoria.bActivo}"> {{
+                  convocatoria.bActivo ? 'Activo' : 'Cerrado' }}</button>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')">
+                  Bases y Formatos
+                </button>
+                <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')">
+                  Comunicado
+                </button>
+                <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')">
+                  Resultados
+                </button>
+
+                <button class="btn btn-danger btn-sm" (click)="eliminarConvocatoria(convocatoria.id)">
+                  Eliminar
+                </button>
+
+                <button class="btn btn-sm btn-danger">
+                  <i class="feather icon-trash-2"></i>
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <!-- Sin resultados -->
+        <div *ngIf="convocatorias.length === 0" class="text-center text-muted my-4">
+          <p>No se encontraron convocatorias con los filtros aplicados.</p>
+        </div>
+      </div>
+
+      <!-- Resumen -->
+      <div *ngIf="convocatorias.length > 0" class="text-end my-2">
+        Página {{ paginaActual }} de {{ totalPaginas }}
+      </div>
+
+      <!-- Paginación -->
+      <nav *ngIf="totalPaginas > 1">
+        <ul class="pagination justify-content-end">
+
+          <!-- Anterior -->
+          <li class="page-item" [class.disabled]="paginaActual === 1">
+            <a class="page-link" (click)="anteriorPagina()">Anterior</a>
+          </li>
+
+          <!-- Botones de página -->
+          <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let index = index"
+            [class.active]="paginaActual === (index + 1)">
+            <a class="page-link" (click)="irPagina(index + 1)">{{ index + 1 }}</a>
+          </li>
+
+          <!-- Siguiente -->
+          <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+            <a class="page-link" (click)="siguientePagina()">Siguiente</a>
+          </li>
+
+        </ul>
+      </nav>
+
+    </app-card>
+  </div>
+</div>
+
+<!-- Modal para subir archivos masivos -->
+<div class="modal fade" id="modalInfoMasiva" tabindex="-1" aria-labelledby="modalInfoMasivaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow">
+
+      <!-- Modal Header -->
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalInfoMasivaLabel">
+          <i class="feather icon-upload-cloud me-2"></i>
+          Subir archivos de {{ faseActual | titlecase }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+
+        <!-- Archivos ya subidos -->
+        <div *ngIf="archivosExistentes.length > 0" class="mb-4">
+          <h6 class="text-success mb-3">
+            <i class="feather icon-folder"></i> Archivos ya subidos:
+          </h6>
+          <div class="row g-2">
+            <div *ngFor="let archivo of archivosExistentes" class="col-md-6">
+              <div class="card border-success shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div class="text-truncate w-75">
+                    <i class="feather icon-file-text text-success me-1"></i>
+                    {{ archivo.nombreArchivo || archivo.vRutaArchivo }}
+                  </div>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)"
+                      title="Ver archivo">
+                      <i class="feather icon-eye"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" (click)="descargarArchivo(archivo.urlArchivo)"
+                      title="Descargar">
+                      <i class="feather icon-download"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Subir nuevos archivos -->
+        <div class="mb-3">
+          <label class="form-label">Seleccionar archivos (PDF, DOCX, etc.):</label>
+          <input type="file" class="form-control" (change)="onArchivosSeleccionados($event)" multiple>
+        </div>
+
+        <!-- Archivos seleccionados -->
+        <div *ngIf="archivosSeleccionados.length > 0" class="mt-3">
+          <h6>
+            <i class="feather icon-file-plus"></i> Archivos seleccionados para subir:
+          </h6>
+          <ul class="list-group">
+            <li *ngFor="let archivo of archivosSeleccionados; let i = index"
+              class="list-group-item d-flex justify-content-between align-items-center">
+              {{ archivo.name }}
+              <button class="btn btn-sm btn-danger" (click)="eliminarArchivo(i)" title="Eliminar">
+                <i class="feather icon-trash-2"></i>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="feather icon-x"></i> Cancelar
+        </button>
+        <button class="btn btn-success" (click)="subirArchivo()">
+          <i class="feather icon-upload"></i> Subir
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Vista de Formulario de Nueva o Edición de Convocatoria -->
+<div class="row btn-page" *ngIf="!mostrarLista">
+  <div class="col-md-12">
+    <app-card [cardTitle]="modoEdicion ? 'Editar Convocatoria' : 'Nueva Convocatoria'" [options]="false">
+      <form>
+        <!-- Código (solo si estamos en modo edición) -->
+        <div *ngIf="modoEdicion" class="mb-3">
+          <label class="form-label">Código</label>
+          <input class="form-control" type="text" [value]="convocatoriaSeleccionada?.codigo" readonly>
+        </div>
+
+
+
+        <!-- Tipo de convocatoria -->
+        <!-- <div class="mb-3">
+          <label class="form-label">Tipo</label>
+          <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.tipo" name="tipo">
+            <option value selected>Seleccione</option>
+            <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+              {{ tipo.descripcion }}
+            </option>
+          </select>
+        </div> -->
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.tipo" name="tipo">
+              <option value selected>Seleccione</option>
+              <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+                {{ tipo.descripcion }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Unidad Zonal</label>
+            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.unidadzonal" name="unidadzonal">
+              <option value selected>Seleccione</option>
+              <option *ngFor="let unidadzonal of tiposUnidadZonal" [value]="unidadzonal.codUnidadZonal">
+                {{ unidadzonal.nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fechas -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha Inicio</label>
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaInicio"
+              name="fechaInicio">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha Fin</label>
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaFin" name="fechaFin">
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div *ngIf="modoEdicion" class="mb-3">
+          <label class="form-label">Estado</label>
+          <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.estado" name="estado">
+            <option value="Activo">Activo</option>
+            <option value="Cerrado">Cerrado</option>
+            <option value="En Evaluación">En Evaluación</option>
+          </select>
+        </div>
+
+        <!-- Título de la convocatoria -->
+        <div class="mb-3">
+          <label class="form-label">Título</label>
+          <input class="form-control" type="text" [(ngModel)]="convocatoriaSeleccionada.nombre" name="titulo">
+        </div>
+
+        <!-- Editor WYSIWYG para requisitos -->
+        <div class="mb-3">
+          <label class="form-label">Requisitos</label>
+          <quill-editor [(ngModel)]="convocatoriaSeleccionada.requisitos" name="requisitos"
+            style="height: 300px; width: 100%;"></quill-editor><!-- [modules]="quillModules" -->
+
+        </div>
+        <!-- Botón para seleccionar archivos -->
+        <!-- Subida de archivos -->
+        <!-- <div class="mb-3">
+          <label class="form-label">Adjuntar Archivos (PDF, Word, Excel, Imágenes)</label>
+          <input type="file" class="form-control" multiple (change)="onFileSelected($event)">
+        </div> -->
+
+        <!-- Vista previa de archivos seleccionados -->
+        <!-- <div *ngIf="archivosSeleccionados.length > 0" class="mb-3">
+          <label class="form-label">Archivos seleccionados:</label>
+          <ul class="list-group">
+            <li *ngFor="let archivo of archivosSeleccionados; let i = index"
+              class="list-group-item d-flex justify-content-between align-items-center">
+              {{ archivo.name }}
+              <button type="button" class="btn btn-sm btn-danger" (click)="eliminarArchivo(i)">
+                <i class="feather icon-x"></i>
+              </button>
+            </li>
+          </ul> 
+        </div> -->
+
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary" (click)="volverALista()">
+            <i class="feather icon-arrow-left me-1"></i>
+            Volver
+          </button>
+          <button type="button" class="btn btn-success"
+            (click)="modoEdicion ? actualizarConvocatoria() : guardarConvocatoria()">
+            <i class="feather icon-save me-1"></i>
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+        </div>
+      </form>
+    </app-card>
+  </div>
+</div>
+
+
+<div class="row btn-page">
+  <!-- [ button-icon ] start -->
+  <div class="col-md-6">
+    <app-card cardTitle="Button With Icon" [options]="false">
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-primary">
+          <i class="feather icon-thumbs-up me-1"></i>
+          Primary
+        </button>
+        <button type="button" class="btn btn-secondary">
+          <i class="feather icon-camera me-1"></i>
+          Secondary
+        </button>
+        <button type="button" class="btn btn-success">
+          <i class="feather icon-check-circle me-1"></i>
+          Success
+        </button>
+        <button type="button" class="btn btn-danger">
+          <i class="feather icon-slash me-1"></i>
+          Danger
+        </button>
+        <button type="button" class="btn btn-warning text-dark">
+          <i class="feather icon-alert-triangle me-1"></i>
+          Warning
+        </button>
+        <button type="button" class="btn btn-info">
+          <i class="feather icon-info me-1"></i>
+          Info
+        </button>
+      </div>
+    </app-card>
+  </div>
+  <!-- [ button-icon ] end -->
+  <!-- [ button-outline ] start -->
+  <div class="col-md-6">
+    <app-card cardTitle="Outline Icon BUttons" [options]="false">
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-outline-primary">
+          <i class="feather icon-thumbs-up me-1"></i>
+          Primary
+        </button>
+        <button type="button" class="btn btn-outline-secondary">
+          <i class="feather icon-camera me-1"></i>
+          Secondary
+        </button>
+        <button type="button" class="btn btn-outline-success">
+          <i class="feather icon-check-circle me-1"></i>
+          Success
+        </button>
+        <button type="button" class="btn btn-outline-danger">
+          <i class="feather icon-slash me-1"></i>
+          Danger
+        </button>
+        <button type="button" class="btn btn-outline-warning">
+          <i class="feather icon-alert-triangle me-1"></i>
+          Warning
+        </button>
+        <button type="button" class="btn btn-outline-info">
+          <i class="feather icon-info me-1"></i>
+          Info
+        </button>
+      </div>
+    </app-card>
+  </div>
+  <!-- [ button-outline ] end -->
+  <!-- [ only-icon ] start -->
+  <div class="col-md-6">
+    <app-card cardTitle="Only Icon" [options]="false">
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-icon btn-primary d-inline-flex">
+          <i class="feather icon-thumbs-up"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-secondary d-inline-flex">
+          <i class="feather icon-camera"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-success d-inline-flex">
+          <i class="feather icon-check-circle"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-danger d-inline-flex">
+          <i class="feather icon-slash"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-warning text-dark d-inline-flex">
+          <i class="feather icon-alert-triangle"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-info d-inline-flex">
+          <i class="feather icon-info"></i>
+        </button>
+      </div>
+    </app-card>
+  </div>
+  <!-- [ only-icon ] end -->
+  <!-- [ outline-icon ] start -->
+  <div class="col-md-6">
+    <app-card cardTitle="Outline Only" [options]="false">
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-icon btn-outline-primary d-inline-flex">
+          <i class="feather icon-thumbs-up"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-outline-secondary d-inline-flex">
+          <i class="feather icon-camera"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-outline-success d-inline-flex">
+          <i class="feather icon-check-circle"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-outline-danger d-inline-flex">
+          <i class="feather icon-slash"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-outline-warning d-inline-flex">
+          <i class="feather icon-alert-triangle"></i>
+        </button>
+        <button type="button" class="btn btn-icon btn-outline-info d-inline-flex">
+          <i class="feather icon-info"></i>
+        </button>
+      </div>
+    </app-card>
+  </div>
+  <!-- [ outline-icon ] end -->
+</div>

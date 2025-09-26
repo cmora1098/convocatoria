@@ -1,0 +1,87 @@
+<!-- <div class="auth-wrapper">
+     <div class="left-panel">
+        <div class="content">
+            <p>Bienvenido a la Plataforma de</p>
+            <h1>Convocatorias AGRO RURAL</h1>
+            <p>
+                ¡Atención postulantes! Aquí encontrarás las convocatorias más recientes
+                para trabajar en el Programa de Desarrollo Productivo Agrario Rural.
+            </p>
+            <p>Se ofrecerán plazas laborales para distintos niveles educativos,
+                incluyendo:</p>
+            <ul>
+                <li>Personas con secundaria completa</li>
+             </ul>
+        </div>
+    </div>
+
+
+     <div class="auth-content right-panel">
+        <div class="card">
+            <div class="card-body text-center">
+                <img src="assets/images/logoagrorural.png" alt="Logo AGRO RURAL" class="logo img-fluid mb-4" />
+
+                <form (ngSubmit)="restablecer()">
+                    <div class="form-group input-icon mb-3">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" placeholder="Nueva Contraseña" [(ngModel)]="nuevaContrasenia"
+                            name="nuevaContrasenia" required class="form-control" />
+                    </div>
+
+                    <div class="form-group input-icon mb-3">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" placeholder="Confirmar Contraseña" [(ngModel)]="confirmContrasenia"
+                            name="confirmContrasenia" required class="form-control" />
+                    </div>
+
+                    <button type="submit" class="btn-login">Restablecer</button>
+
+                    <div class="extra-links mt-3">
+                        <a [routerLink]="['/login']">Volver al Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<div class="auth-wrapper">
+  <!-- Panel Izquierdo -->
+  <div class="left-panel">
+    <div class="content">
+      <p>Bienvenido a la Plataforma de</p>
+      <h1>Convocatorias AGRO RURAL</h1>
+      <p>Restablece tu contraseña de forma segura para continuar usando la plataforma.</p>
+    </div>
+  </div>
+
+  <!-- Panel Derecho -->
+  <div class="auth-content right-panel">
+    <div class="card">
+      <div class="card-body text-center">
+        <img src="assets/images/logoagrorural.png" alt="Logo AGRO RURAL"
+          class="logo img-fluid mb-4" />
+
+        <form (ngSubmit)="restablecer()">
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="Nueva Contraseña" [(ngModel)]="nuevaContrasenia" 
+              name="nuevaContrasenia" required class="form-control" />
+          </div>
+
+          <div class="form-group input-icon mb-3">
+            <i class="fas fa-lock"></i>
+            <input type="password" placeholder="Confirmar Contraseña" [(ngModel)]="confirmContrasenia" 
+              name="confirmContrasenia" required class="form-control" />
+          </div>
+
+          <button type="submit" class="btn-login">Restablecer</button>
+
+          <div class="extra-links mt-3">
+            <a [routerLink]="['/login']">Volver al Login</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+<!-- <div class="navbar-wrapper">
+  <app-nav-content (NavMobCollapse)="navMobCollapse()" />
+</div> -->
+
+ <div class="navbar-wrapper">
+  <ng-container *ngFor="let group of navigation">
+    <app-nav-content [item]="group" (NavMobCollapse)="navMobCollapse()"></app-nav-content>
+  </ng-container>
+</div>

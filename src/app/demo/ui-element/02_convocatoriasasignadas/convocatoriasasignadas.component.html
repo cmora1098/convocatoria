@@ -1,0 +1,29 @@
+<div class="row btn-page">
+  <div class="col-md-12">
+    <app-card cardTitle="" [options]="false">
+      <div class="convocatorias-container">
+
+        <div class="filtros mb-3">
+          <button *ngFor="let f of ['Todos', 'En progreso', 'Finalizadas', 'Próxima a vencer']" class="btn me-2"
+            [ngClass]="{'btn-success': filtroActivo === f, 'btn-outline-secondary': filtroActivo !== f}"
+            (click)="setFiltro(f)">
+            {{ f }}
+          </button>
+        </div>
+
+        <div *ngFor="let convocatoria of convocatoriasFiltradas"
+          class="convocatoria-card mb-2 p-3 border rounded d-flex justify-content-between align-items-center"
+          [ngClass]="{'bg-light border-dark': convocatoria.titulo === 'Desarrollador de Software'}">
+
+          <div>
+            <h5 class="mb-1">{{ convocatoria.titulo }}</h5>
+            <small>{{ convocatoria.fechaInicio }} - {{ convocatoria.fechaFin }}</small><br>
+            <a href="#" (click)="verDetalles(convocatoria)">Ver Detalles</a>
+          </div>
+
+          <span class="badge bg-primary">{{ convocatoria.estado }}</span>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>

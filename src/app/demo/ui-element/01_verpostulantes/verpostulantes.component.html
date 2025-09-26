@@ -1,0 +1,179 @@
+<!-- Vista de Lista de Convocatorias -->
+<div class="row btn-page">
+    <div class="col-md-12">
+        <app-card cardTitle="" [options]="false">
+            <!-- Filtros -->
+            <div class="row align-items-end g-2">
+                <div class="col-md-2">
+                    <label class="form-label">Estado</label>
+                    <select class="form-control">
+                        <option value="">Todos</option>
+                        <option>Pendiente</option>
+                        <option>Evaluado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Inicial</label>
+                    <input type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">DNI o Nombre del Postulante</label>
+                    <input type="text" placeholder="DNI o Nombre del Postulante" class="form-control" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-info">
+                        <i class="feather icon-search me-1"></i>
+                        Buscar
+                    </button>
+                </div>
+            </div>
+
+            <div class="my-4"></div>
+
+            <!-- Tabla dinámica -->
+            <!-- Lista de Postulantes -->
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre del Postulante</th>
+                            <th>DNI</th>
+                            <th>Fecha de Postulación</th>
+                            <th>Puntaje</th>
+                            <th>Estado</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let postulante of postulantes">
+                            <td>{{ postulante.id }}</td>
+                            <td>{{ postulante.nombre }}</td>
+                            <td>{{ postulante.dni }}</td>
+                            <td>{{ postulante.fechaPostulacion }}</td>
+                            <td>{{ postulante.puntaje }}</td>
+                            <td>
+                                <button class="btn" [ngClass]="{
+              'btn-success': postulante.estado === 'Evaluado',
+              'btn-warning': postulante.estado === 'Pendiente'
+            }">
+                                    {{ postulante.estado }}
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" (click)="abrirModalDetalle(postulante)">
+                                    <i class="feather icon-align-justify"></i>
+                                </button>
+                                <button class="btn btn-sm btn-secondary" (click)="abrirModalDocumentos(postulante)">
+                                    <i class="feather icon-folder"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Modal: Datos Personales -->
+            <ng-template #modalDatos let-modal>
+                <div class="modal-header">
+                    <h5 class="modal-title">Datos Personales</h5>
+                    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <label><strong>Nombre Completo:</strong></label>
+                        <p>{{ seleccionado?.nombre }}</p>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label><strong>DNI:</strong></label>
+                            <p>{{ seleccionado?.dni }}</p>
+                        </div>
+                        <div class="col">
+                            <label><strong>Teléfono:</strong></label>
+                            <p>+51 {{ seleccionado?.telefono }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label><strong>Correo Electrónico:</strong></label>
+                        <p>{{ seleccionado?.correo }}</p>
+                    </div>
+                    <div>
+                        <label><strong>Dirección:</strong></label>
+                        <p>{{ seleccionado?.direccion }}</p>
+                    </div>
+
+                    <hr />
+
+                    <h6>Información de la Postulación</h6>
+                    <ul>
+                        <li><strong>CV:</strong> {{ seleccionado?.cv }}</li>
+                        <li><strong>Certificados:</strong> {{ seleccionado?.certificados }}</li>
+                    </ul>
+
+                    <h6>Datos de la Postulación</h6>
+                    <p><strong>Fecha:</strong> {{ seleccionado?.fechaPostulacion }}</p>
+                    <p><strong>Puntaje:</strong> {{ seleccionado?.puntaje }}</p>
+                    <p><strong>Puntaje Final:</strong> {{ seleccionado?.puntajeFinal }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Actualizar</button>
+                    <button class="btn btn-secondary" (click)="modal.dismiss()">Cancelar</button>
+                </div>
+            </ng-template>
+
+            <!-- Modal: Documentos Adjuntos -->
+            <ng-template #modalDocumentos let-modal>
+                <div class="modal-header">
+                    <h5 class="modal-title">Documentos Adjuntos</h5>
+                    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-success mb-2">Descargar Todos (ZIP)</button>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Documento</th>
+                                <th>Tipo</th>
+                                <th>Fecha Subida</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let doc of documentosPaginados">
+                                <td>{{ doc.nombre }}</td>
+                                <td>{{ doc.tipo }}</td>
+                                <td>{{ doc.fecha }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info me-1">Ver</button>
+                                    <button class="btn btn-sm btn-primary">Descargar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Paginación -->
+                    <nav>
+                        <ul class="pagination justify-content-end">
+                            <li class="page-item" [class.disabled]="pagina === 1">
+                                <a class="page-link" (click)="paginaAnterior()">Anterior</a>
+                            </li>
+                            <li class="page-item" [class.disabled]="pagina === totalPaginas">
+                                <a class="page-link" (click)="paginaSiguiente()">Siguiente</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </ng-template>
+
+        </app-card>
+    </div>
+</div>

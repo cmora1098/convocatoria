@@ -1,0 +1,39 @@
+.auth-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px;
+  background-color: #f8f9fa;
+}
+
+.auth-content {
+  width: 100%;
+  max-width: 1200px;
+}
+
+.title {
+  color: #1e8e3e;
+  font-weight: 700;
+}
+
+.table-header {
+  background-color: #1e8e3e !important;
+}
+
+.table th, .table td {
+  padding: 16px;
+  vertical-align: middle !important;
+}
+
+.table td {
+  font-size: 15px;
+}
+
+.btn-success {
+  background-color: #1e8e3e;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #166c2e;
+}
