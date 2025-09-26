@@ -11,6 +11,7 @@ import { ApiService } from '../../../services/api.service';
 import Swal from 'sweetalert2';  // Importamos SweetAlert2
 
 import { AuthService } from '../../../services/auth.service';
+import { HttpClient } from '@angular/common/http';
 
 declare var bootstrap: any;
 
@@ -21,7 +22,11 @@ declare var bootstrap: any;
   templateUrl: './gestionconvocatoria.component.html',
   styleUrls: ['./gestionconvocatoria.component.scss']
 })
+
+
 export class GestionConvocatoriaComponent {
+
+
 
   // Listado
   convocatorias: any[] = [];
@@ -143,7 +148,7 @@ export class GestionConvocatoriaComponent {
   tiposUnidadZonal: any[] = [];
 
 
-  constructor(private apiService: ApiService, private authService: AuthService) {
+  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
     this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
   }
 
@@ -184,124 +189,7 @@ export class GestionConvocatoriaComponent {
 
   }
 
-
-  // // Modal de subida de información masiva
-  // faseActual: string = ''; // bases, comunicado, resultados
-  // convocatoriaActual: any = null;
-
-  // // Para mostrar el modal (ej. con Bootstrap 5)
-  // modalInfoMasiva: any;
-
-
-  // abrirModal(convocatoria: any, tipo: string) {
-  //   this.convocatoriaActual = convocatoria;
-  //   this.faseActual = tipo;
-
-  //   // Abrimos el modal de Bootstrap (suponiendo que lo tienes definido en tu HTML con id="modalInfoMasiva")
-  //   const modalElement = document.getElementById('modalInfoMasiva');
-  //   if (modalElement) {
-  //     this.modalInfoMasiva = new bootstrap.Modal(modalElement);
-  //     this.modalInfoMasiva.show();
-  //   }
-  // }
-
-
-  // archivosSeleccionados: File[] = [];
-
-  // onArchivosSeleccionados(event: any) {
-  //   const archivos: FileList = event.target.files;
-
-  //   for (let i = 0; i < archivos.length; i++) {
-  //     const archivo = archivos[i];
-
-  //     // Opcional: puedes evitar duplicados
-  //     if (!this.archivosSeleccionados.find(f => f.name === archivo.name && f.size === archivo.size)) {
-  //       this.archivosSeleccionados.push(archivo);
-  //     }
-  //   }
-
-  // }
-
-  // eliminarArchivo(index: number) {
-  //   this.archivosSeleccionados.splice(index, 1);
-  // }
-
-  // private obtenerCodFormato(tipo: string): number {
-  //   switch (tipo) {
-  //     case 'bases': return 1;
-  //     case 'comunicado': return 2;
-  //     case 'resultados': return 3;
-  //     default: return 0;
-  //   }
-  // }
-
-  // subirArchivo() {
-
-  //   // console.log(this.codUsuario);
-  //   // console.log('ID de la convocatoria:', this.convocatoriaActual.iCodConvocatoria);
-
-  //   // return;
-  //   if (this.archivosSeleccionados.length === 0 || !this.convocatoriaActual || !this.faseActual || !this.codUsuario) {
-  //     Swal.fire({
-  //       icon: 'warning',
-  //       title: 'Falta información',
-  //       text: 'Verifica que hayas seleccionado archivos, convocatoria y tipo de fase.',
-  //       confirmButtonColor: '#2e7d32'
-  //     });
-  //     return;
-  //   }
-
-  //   const codFormato = this.obtenerCodFormato(this.faseActual);
-  //   if (codFormato === 0) {
-  //     Swal.fire({
-  //       icon: 'error',
-  //       title: 'Tipo no válido',
-  //       text: 'El tipo de fase no es válido.',
-  //       confirmButtonColor: '#2e7d32'
-  //     });
-  //     return;
-  //   }
-
-  //   const formData = new FormData();
-
-  //   // Agregar archivos
-  //   this.archivosSeleccionados.forEach((archivo) => {
-  //     formData.append('files', archivo);
-  //   });
-
-  //   // Agregar el array de formatos (uno por cada archivo)
-  //   const codFormatos = this.archivosSeleccionados.map(() => codFormato);
-  //   codFormatos.forEach(f => formData.append('formatos', f.toString()));
-
-  //   // Otros campos
-  //   formData.append('codConvocatoria', this.convocatoriaActual.iCodConvocatoria);
-  //   formData.append('codUsuario', this.codUsuario.toString());
-
-  //   this.apiService.subirArchivoMasivo(formData).subscribe({
-  //     next: () => {
-  //       Swal.fire({
-  //         icon: 'success',
-  //         title: '¡Archivos subidos!',
-  //         text: 'Los archivos se han subido correctamente.',
-  //         confirmButtonColor: '#2e7d32'
-  //       });
-  //       this.modalInfoMasiva.hide();
-  //       this.archivosSeleccionados = [];
-  //     },
-  //     error: (error) => {
-  //       console.error('Error al subir archivos:', error);
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Error al subir',
-  //         text: 'No se pudo subir los archivos. Intente nuevamente.',
-  //         confirmButtonColor: '#2e7d32'
-  //       });
-  //     }
-  //   });
-  // }
-
-
-
+ 
   // Nueva Convocatoria
 
   // Modelo de convocatoria
@@ -373,20 +261,36 @@ export class GestionConvocatoriaComponent {
   }
 
   verArchivo(rutaArchivo: string) {
-   // const url = `${this.apiService.baseUrl}/ArchivosConvocatoria/descargar${rutaArchivo}`;
-    const url = `${this.apiService.baseUrl}/${rutaArchivo}`;
+    const url = `${this.apiService.baseUrlConvocatoriaDoc}${rutaArchivo}`;
     window.open(url, '_blank');
   }
 
-  descargarArchivo(rutaArchivo: string) {
-    const url = `${this.apiService.baseUrl}/ArchivosConvocatoria/descargar${rutaArchivo}`;
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  eliminarArchivoGuardado(idAdjunto: string) {
+    const url = `${this.apiService.baseUrl}/ArchivosConvocatoria/${idAdjunto}`;
+
+    this.http.delete(url).subscribe({
+      next: () => {
+        Swal.fire({
+          title: 'Archivo eliminado',
+          text: 'Se eliminó correctamente el archivo seleccionado.',
+          icon: 'success',
+          confirmButtonColor: '#2e7d32'
+        }).then(() => {
+          window.location.reload(); // Esto recarga toda la página
+        });
+      },
+      error: (error) => {
+        console.error('Error al eliminar el archivo:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Ocurrió un error al eliminar el archivo.',
+          icon: 'error',
+          confirmButtonColor: '#d32f2f'
+        });
+      }
+    });
   }
+
 
   subirArchivo() {
     if (

@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   public baseUrl = 'https://localhost:7106/api';
+  public baseUrlConvocatoriaDoc = 'https://localhost:7106';
   // private baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
 
   constructor(private http: HttpClient) { }
@@ -42,6 +43,9 @@ export class ApiService {
   // ======================
   // Convocatorias
   // ====================== 
+
+
+
   // Listar 
   getConvocatoriasPaginado(params: any) {
     return this.http.get<any>(`${this.baseUrl}/Convocatorias/paginado`, { params });
@@ -58,6 +62,9 @@ export class ApiService {
   getArchivosConvocatoria(codConvocatoria: number, codFormato: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/ArchivosConvocatoria/listar/${codConvocatoria}?iCodFormato=${codFormato}`);
   }
+
+
+
 
 
 
