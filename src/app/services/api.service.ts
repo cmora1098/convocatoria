@@ -63,13 +63,9 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/ArchivosConvocatoria/listar/${codConvocatoria}?iCodFormato=${codFormato}`);
   }
 
-
-
-
-
-
+ 
   // Pruebas
-  eliminarConvocatoria(data: any) {
-    return this.http.post(`${this.baseUrl}/X`, data);
+  eliminarConvocatoria(idConvocatoria: any) {
+    return this.http.delete(`${this.baseUrl}/Convocatorias/${idConvocatoria}`);
   }
 }

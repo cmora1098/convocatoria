@@ -56,9 +56,10 @@
           <thead class="table-light">
             <tr>
               <!-- <th>ID</th> -->
-              <th>Código</th>
+              <th>Título</th>
               <th>Convocatoria</th>
               <th>Tipo</th>
+              <th>Unidad Zonal</th>
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
               <th>Estado</th>
@@ -68,9 +69,10 @@
           <tbody>
             <tr *ngFor="let convocatoria of convocatorias">
               <!-- <td>{{ convocatoria.iCodConvocatoria }}</td> -->
-              <td>CV-{{ convocatoria.iCodConvocatoria }}</td>
               <td>{{ convocatoria.vTitulo }}</td>
+              <td>{{ convocatoria.vRequisitos }}</td>
               <td>{{ convocatoria.vDescripcionConvocatoria }}</td>
+              <td>{{ convocatoria.vUnidadZonal }}</td>
               <td>{{ convocatoria.dtFechaInicio | date: 'dd/MM/yyyy' }}</td>
               <td>{{ convocatoria.dtFechaFin | date: 'dd/MM/yyyy' }}</td>
               <td>
@@ -79,18 +81,29 @@
                   convocatoria.bActivo ? 'Activo' : 'Cerrado' }}</button>
               </td>
               <td>
+
                 <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')">
                   Bases y Formatos
                 </button>
+
                 <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')">
                   Comunicado
                 </button>
+
                 <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')">
                   Resultados
-                </button>  
+                </button>
 
-                <button class="btn btn-sm btn-danger" (click)="eliminarConvocatoria(convocatoria.id)">
-                  <i class="feather icon-trash-2"></i>
+                <button class="btn btn-sm btn-dark me-1" (click)="abrirModalFases(convocatoria, 'fases')">
+                  <i class="feather icon-layers"></i> Fases
+                </button>
+
+                <button class="btn btn-sm btn-warning me-1" (click)="editarConvocatoria(convocatoria)">
+                  <i class="feather icon-edit"></i> Editar
+                </button>
+
+                <button class="btn btn-sm btn-danger" (click)="eliminarConvocatoria(convocatoria.iCodConvocatoria)">
+                  <i class="feather icon-trash-2"></i> Eliminar
                 </button>
               </td>
             </tr>
@@ -132,6 +145,94 @@
         </ul>
       </nav>
 
+    </app-card>
+  </div>
+</div>
+
+
+<!-- Vista de Formulario de Nueva o Edición de Convocatoria -->
+<div class="row btn-page" *ngIf="!mostrarLista">
+  <div class="col-md-12">
+    <app-card [cardTitle]="modoEdicion ? 'Editar Convocatoria' : 'Nueva Convocatoria'" [options]="false">
+      <form>
+        <!-- Código (solo si estamos en modo edición) -->
+        <div *ngIf="modoEdicion" class="mb-3">
+          <label class="form-label">ID</label>
+          <input class="form-control" type="text" [value]="convocatoriaSeleccionada?.id" readonly disabled>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.tipo" name="tipo">
+              <option value selected>Seleccione</option>
+              <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+                {{ tipo.descripcion }}
+              </option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Unidad Zonal</label>
+            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.unidadzonal" name="unidadzonal">
+              <option value selected>Seleccione</option>
+              <option *ngFor="let unidadzonal of tiposUnidadZonal" [value]="unidadzonal.codUnidadZonal">
+                {{ unidadzonal.nombre }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fechas -->
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha Inicio</label>
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaInicio"
+              name="fechaInicio">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Fecha Fin</label>
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaFin" name="fechaFin">
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div *ngIf="modoEdicion" class="mb-3">
+          <label class="form-label">Estado</label>
+          <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.estado" name="estado">
+            <option value="Activo">Activo</option>
+            <option value="Cerrado">Cerrado</option>
+            <option value="En Evaluación">En Evaluación</option>
+          </select>
+        </div>
+
+        <!-- Título de la convocatoria -->
+        <div class="mb-3">
+          <label class="form-label">Título</label>
+          <input class="form-control" type="text" [(ngModel)]="convocatoriaSeleccionada.nombre" name="titulo">
+        </div>
+
+        <!-- Editor WYSIWYG para requisitos -->
+        <div class="mb-3">
+          <label class="form-label">Requisitos</label>
+          <quill-editor [(ngModel)]="convocatoriaSeleccionada.requisitos" name="requisitos"
+            style="height: 300px; width: 100%;"></quill-editor><!-- [modules]="quillModules" -->
+
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between">
+          <button type="button" class="btn btn-secondary" (click)="volverALista()">
+            <i class="feather icon-arrow-left me-1"></i>
+            Volver
+          </button>
+          <button type="button" class="btn btn-success"
+            (click)="modoEdicion ? actualizarConvocatoria() : guardarConvocatoria()">
+            <i class="feather icon-save me-1"></i>
+            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+          </button>
+
+        </div>
+      </form>
     </app-card>
   </div>
 </div>
@@ -218,251 +319,4 @@
 
     </div>
   </div>
-</div>
-
-
- 
- 
-
-
-
-<!-- Vista de Formulario de Nueva o Edición de Convocatoria -->
-<div class="row btn-page" *ngIf="!mostrarLista">
-  <div class="col-md-12">
-    <app-card [cardTitle]="modoEdicion ? 'Editar Convocatoria' : 'Nueva Convocatoria'" [options]="false">
-      <form>
-        <!-- Código (solo si estamos en modo edición) -->
-        <div *ngIf="modoEdicion" class="mb-3">
-          <label class="form-label">Código</label>
-          <input class="form-control" type="text" [value]="convocatoriaSeleccionada?.codigo" readonly>
-        </div>
-
-
-
-        <!-- Tipo de convocatoria -->
-        <!-- <div class="mb-3">
-          <label class="form-label">Tipo</label>
-          <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.tipo" name="tipo">
-            <option value selected>Seleccione</option>
-            <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
-              {{ tipo.descripcion }}
-            </option>
-          </select>
-        </div> -->
-
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Tipo</label>
-            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.tipo" name="tipo">
-              <option value selected>Seleccione</option>
-              <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
-                {{ tipo.descripcion }}
-              </option>
-            </select>
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Unidad Zonal</label>
-            <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.unidadzonal" name="unidadzonal">
-              <option value selected>Seleccione</option>
-              <option *ngFor="let unidadzonal of tiposUnidadZonal" [value]="unidadzonal.codUnidadZonal">
-                {{ unidadzonal.nombre }}
-              </option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Fechas -->
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha Inicio</label>
-            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaInicio"
-              name="fechaInicio">
-          </div>
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha Fin</label>
-            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaFin" name="fechaFin">
-          </div>
-        </div>
-
-        <!-- Estado -->
-        <div *ngIf="modoEdicion" class="mb-3">
-          <label class="form-label">Estado</label>
-          <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.estado" name="estado">
-            <option value="Activo">Activo</option>
-            <option value="Cerrado">Cerrado</option>
-            <option value="En Evaluación">En Evaluación</option>
-          </select>
-        </div>
-
-        <!-- Título de la convocatoria -->
-        <div class="mb-3">
-          <label class="form-label">Título</label>
-          <input class="form-control" type="text" [(ngModel)]="convocatoriaSeleccionada.nombre" name="titulo">
-        </div>
-
-        <!-- Editor WYSIWYG para requisitos -->
-        <div class="mb-3">
-          <label class="form-label">Requisitos</label>
-          <quill-editor [(ngModel)]="convocatoriaSeleccionada.requisitos" name="requisitos"
-            style="height: 300px; width: 100%;"></quill-editor><!-- [modules]="quillModules" -->
-
-        </div>
-        <!-- Botón para seleccionar archivos -->
-        <!-- Subida de archivos -->
-        <!-- <div class="mb-3">
-          <label class="form-label">Adjuntar Archivos (PDF, Word, Excel, Imágenes)</label>
-          <input type="file" class="form-control" multiple (change)="onFileSelected($event)">
-        </div> -->
-
-        <!-- Vista previa de archivos seleccionados -->
-        <!-- <div *ngIf="archivosSeleccionados.length > 0" class="mb-3">
-          <label class="form-label">Archivos seleccionados:</label>
-          <ul class="list-group">
-            <li *ngFor="let archivo of archivosSeleccionados; let i = index"
-              class="list-group-item d-flex justify-content-between align-items-center">
-              {{ archivo.name }}
-              <button type="button" class="btn btn-sm btn-danger" (click)="eliminarArchivo(i)">
-                <i class="feather icon-x"></i>
-              </button>
-            </li>
-          </ul> 
-        </div> -->
-
-
-        <!-- Botones -->
-        <div class="d-flex justify-content-between">
-          <button type="button" class="btn btn-secondary" (click)="volverALista()">
-            <i class="feather icon-arrow-left me-1"></i>
-            Volver
-          </button>
-          <button type="button" class="btn btn-success"
-            (click)="modoEdicion ? actualizarConvocatoria() : guardarConvocatoria()">
-            <i class="feather icon-save me-1"></i>
-            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-          </button>
-
-        </div>
-      </form>
-    </app-card>
-  </div>
-</div>
-
-
-<div class="row btn-page">
-  <!-- [ button-icon ] start -->
-  <div class="col-md-6">
-    <app-card cardTitle="Button With Icon" [options]="false">
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-primary">
-          <i class="feather icon-thumbs-up me-1"></i>
-          Primary
-        </button>
-        <button type="button" class="btn btn-secondary">
-          <i class="feather icon-camera me-1"></i>
-          Secondary
-        </button>
-        <button type="button" class="btn btn-success">
-          <i class="feather icon-check-circle me-1"></i>
-          Success
-        </button>
-        <button type="button" class="btn btn-danger">
-          <i class="feather icon-slash me-1"></i>
-          Danger
-        </button>
-        <button type="button" class="btn btn-warning text-dark">
-          <i class="feather icon-alert-triangle me-1"></i>
-          Warning
-        </button>
-        <button type="button" class="btn btn-info">
-          <i class="feather icon-info me-1"></i>
-          Info
-        </button>
-      </div>
-    </app-card>
-  </div>
-  <!-- [ button-icon ] end -->
-  <!-- [ button-outline ] start -->
-  <div class="col-md-6">
-    <app-card cardTitle="Outline Icon BUttons" [options]="false">
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-outline-primary">
-          <i class="feather icon-thumbs-up me-1"></i>
-          Primary
-        </button>
-        <button type="button" class="btn btn-outline-secondary">
-          <i class="feather icon-camera me-1"></i>
-          Secondary
-        </button>
-        <button type="button" class="btn btn-outline-success">
-          <i class="feather icon-check-circle me-1"></i>
-          Success
-        </button>
-        <button type="button" class="btn btn-outline-danger">
-          <i class="feather icon-slash me-1"></i>
-          Danger
-        </button>
-        <button type="button" class="btn btn-outline-warning">
-          <i class="feather icon-alert-triangle me-1"></i>
-          Warning
-        </button>
-        <button type="button" class="btn btn-outline-info">
-          <i class="feather icon-info me-1"></i>
-          Info
-        </button>
-      </div>
-    </app-card>
-  </div>
-  <!-- [ button-outline ] end -->
-  <!-- [ only-icon ] start -->
-  <div class="col-md-6">
-    <app-card cardTitle="Only Icon" [options]="false">
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-icon btn-primary d-inline-flex">
-          <i class="feather icon-thumbs-up"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-secondary d-inline-flex">
-          <i class="feather icon-camera"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-success d-inline-flex">
-          <i class="feather icon-check-circle"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-danger d-inline-flex">
-          <i class="feather icon-slash"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-warning text-dark d-inline-flex">
-          <i class="feather icon-alert-triangle"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-info d-inline-flex">
-          <i class="feather icon-info"></i>
-        </button>
-      </div>
-    </app-card>
-  </div>
-  <!-- [ only-icon ] end -->
-  <!-- [ outline-icon ] start -->
-  <div class="col-md-6">
-    <app-card cardTitle="Outline Only" [options]="false">
-      <div class="d-flex flex-wrap gap-2">
-        <button type="button" class="btn btn-icon btn-outline-primary d-inline-flex">
-          <i class="feather icon-thumbs-up"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-outline-secondary d-inline-flex">
-          <i class="feather icon-camera"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-outline-success d-inline-flex">
-          <i class="feather icon-check-circle"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-outline-danger d-inline-flex">
-          <i class="feather icon-slash"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-outline-warning d-inline-flex">
-          <i class="feather icon-alert-triangle"></i>
-        </button>
-        <button type="button" class="btn btn-icon btn-outline-info d-inline-flex">
-          <i class="feather icon-info"></i>
-        </button>
-      </div>
-    </app-card>
-  </div>
-  <!-- [ outline-icon ] end -->
 </div>

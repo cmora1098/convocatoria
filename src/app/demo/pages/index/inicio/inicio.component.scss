@@ -1,39 +1,146 @@
+/* === CONTENEDOR PRINCIPAL === */
 .auth-wrapper {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 40px;
-  background-color: #f8f9fa;
+  padding: 20px;
 }
 
 .auth-content {
   width: 100%;
-  max-width: 1200px;
+  max-width: 95%; /* expansivo */
 }
 
-.title {
-  color: #1e8e3e;
-  font-weight: 700;
+/* === CARD === */
+.card {
+  width: 100%;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.table-header {
-  background-color: #1e8e3e !important;
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
-.table th, .table td {
-  padding: 16px;
-  vertical-align: middle !important;
+/* === FORMULARIO DE BÚSQUEDA === */
+form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
 }
 
-.table td {
+form .form-control {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  transition: all 0.2s ease;
+}
+
+form .form-control:focus {
+  border-color: #1e8e3e;
+  box-shadow: 0 0 6px rgba(30, 142, 62, 0.25);
+}
+
+form button {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+form button:hover {
+  background-color: #16692d;
+  transform: scale(1.02);
+}
+
+/* === TABLA === */
+.table-responsive {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
   font-size: 15px;
 }
 
-.btn-success {
-  background-color: #1e8e3e;
+.table-header {
+  background: linear-gradient(90deg, #1e8e3e, #34a853);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+.table th {
+  padding: 14px;
+  text-align: center;
+  vertical-align: middle;
+  color: #fff;
   border: none;
 }
 
-.btn-success:hover {
-  background-color: #166c2e;
+.table td {
+  padding: 14px;
+  vertical-align: middle;
+  background-color: #fff;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+/* hover filas */
+.table tbody tr {
+  transition: background 0.2s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #f1fdf4;
+}
+
+/* === BADGES === */
+.badge {
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.badge.bg-success {
+  background-color: #1e8e3e !important;
+}
+
+.badge.bg-danger {
+  background-color: #d93025 !important;
+}
+
+/* === BOTONES TABLA === */
+.table button {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.table button:hover {
+  transform: scale(1.1);
+}
+
+/* === PAGINACIÓN === */
+.pagination .page-link {
+  color: #1e8e3e;
+  border-radius: 8px;
+  font-weight: 500;
+  margin: 0 3px;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-link:hover {
+  background-color: rgba(30, 142, 62, 0.1);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #1e8e3e;
+  border-color: #1e8e3e;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(30, 142, 62, 0.4);
 }

@@ -23,9 +23,47 @@ declare var bootstrap: any;
   styleUrls: ['./gestionconvocatoria.component.scss']
 })
 
-
 export class GestionConvocatoriaComponent {
 
+  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
+    this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
+  }
+
+  ngOnInit(): void {
+    this.apiService.getTipoConvocatoria().subscribe({
+      next: (data) => {
+        this.tiposRegimen = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar tipos de regimen', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'Ocurrió un error al cargar los tipos de regimen.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+        });
+      }
+    });
+
+    this.apiService.getUnidadZonal().subscribe({
+      next: (data) => {
+        this.tiposUnidadZonal = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar tipos de regimen', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'Ocurrió un error al cargar los tipos de Unidad Zonal.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+        });
+      }
+    });
+
+    this.listarConvocatorias();
+  }
 
 
   // Listado
@@ -66,6 +104,7 @@ export class GestionConvocatoriaComponent {
     this.apiService.getConvocatoriasPaginado(params).subscribe({
       next: (data) => {
         // ✅ Corrección aquí:
+        console.log(data);
         this.convocatorias = data.items || [];
         this.totalPaginas = Math.ceil(data.totalRecords / this.pageSize);
         this.paginaActual = this.paginaActual;
@@ -111,7 +150,7 @@ export class GestionConvocatoriaComponent {
         this.apiService.eliminarConvocatoria(id).subscribe({
           next: () => {
             Swal.fire('¡Eliminado!', 'La convocatoria ha sido eliminada.', 'success');
-            this.listarConvocatorias(); // Recarga la lista
+            this.listarConvocatorias(); // Recargar la lista
           },
           error: (err) => {
             console.error(err);
@@ -122,20 +161,7 @@ export class GestionConvocatoriaComponent {
     });
   }
 
-
-
-
-
-
-
-
-
-
-
-  // Subida de Archivos por Fases.
-
-
-
+  // Subida de Archivos por Fases.  
   // Nueva Convocatoria
   codUsuario: number | null;
 
@@ -148,53 +174,9 @@ export class GestionConvocatoriaComponent {
   tiposUnidadZonal: any[] = [];
 
 
-  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
-    this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
-  }
 
-  ngOnInit(): void {
-    this.apiService.getTipoConvocatoria().subscribe({
-      next: (data) => {
-        this.tiposRegimen = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos de regimen', err);
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Ocurrió un error al cargar los tipos de regimen.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
-        });
-      }
-    });
-
-    this.apiService.getUnidadZonal().subscribe({
-      next: (data) => {
-        this.tiposUnidadZonal = data;
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos de regimen', err);
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Ocurrió un error al cargar los tipos de Unidad Zonal.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
-        });
-      }
-    });
-
-    this.listarConvocatorias();
-
-  }
-
- 
   // Nueva Convocatoria
-
-  // Modelo de convocatoria
-
-
+  // Modelo de convocatoria 
   archivosSeleccionados: File[] = [];
   archivosExistentes: any[] = [];
 
@@ -236,7 +218,7 @@ export class GestionConvocatoriaComponent {
         this.archivosExistentes = archivos.map(a => ({
           ...a,
           // Deja solo la ruta tal cual para pasar al método de descarga/ver
-          urlArchivo: a.vRutaArchivo
+          urlArchivo: a.urlArchivo
         }));
       },
       error: (err) => {
@@ -244,7 +226,6 @@ export class GestionConvocatoriaComponent {
       }
     });
   }
-
 
   onArchivosSeleccionados(event: any) {
     const archivos: FileList = event.target.files;
@@ -261,7 +242,7 @@ export class GestionConvocatoriaComponent {
   }
 
   verArchivo(rutaArchivo: string) {
-    const url = `${this.apiService.baseUrlConvocatoriaDoc}${rutaArchivo}`;
+    const url = `${rutaArchivo}`;
     window.open(url, '_blank');
   }
 
@@ -353,13 +334,28 @@ export class GestionConvocatoriaComponent {
   }
 
 
+
+  // Volver a la lista
+  volverALista() {
+    this.mostrarLista = true;
+  }
+
+
+  // Crear nueva convocatoria
+
+  // Quitar etiquetas HTML de Quill
+  private limpiarHtml(texto: string): string {
+    const div = document.createElement('div');
+    div.innerHTML = texto;
+    return div.textContent || div.innerText || '';
+  }
+
   convocatoriaSeleccionada: any = {
     requisitos: '',
     tipo: ''
   };
 
 
-  // Crear nueva convocatoria
   nuevaConvocatoria() {
     this.modoEdicion = false;
     this.mostrarLista = false;
@@ -368,19 +364,6 @@ export class GestionConvocatoriaComponent {
       tipo: '',
       unidadzonal: ''
     };
-    // this.archivosSeleccionados = [];
-  }
-
-  // Volver a la lista
-  volverALista() {
-    this.mostrarLista = true;
-  }
-
-  // Quitar etiquetas HTML de Quill
-  private limpiarHtml(texto: string): string {
-    const div = document.createElement('div');
-    div.innerHTML = texto;
-    return div.textContent || div.innerText || '';
   }
 
   guardarConvocatoria() {
@@ -423,7 +406,10 @@ export class GestionConvocatoriaComponent {
           text: 'La convocatoria ha sido guardada correctamente.',
           confirmButtonText: 'Aceptar',
           confirmButtonColor: '#2e7d32'
-        }).then(() => this.volverALista());
+        }).then(() =>
+          //this.volverALista()
+          window.location.reload()
+        );
       },
       error: (err) => {
         console.error('❌ Error al guardar convocatoria:', err);
@@ -439,45 +425,73 @@ export class GestionConvocatoriaComponent {
   }
 
 
-  // FALTA ACTUALIZAR -- 
-  actualizarConvocatoria() {
-    // Validaciones
-    if (
-      !this.convocatoriaSeleccionada.nombre ||
-      this.convocatoriaSeleccionada.tipo === '0' ||
-      !this.convocatoriaSeleccionada.fechaInicio ||
-      !this.convocatoriaSeleccionada.fechaFin
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: '¡Campos incompletos!',
-        text: 'Por favor, complete todos los campos obligatorios.',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'
-      });
-      return;
-    }
+  editarConvocatoria(convocatoria: any): void {
+    this.modoEdicion = true;
+    this.mostrarLista = false;
 
-    // Simulación de actualización
-    console.log('Actualizando convocatoria:', this.convocatoriaSeleccionada);
+    // Cargar la data seleccionada en el formulario
+    this.convocatoriaSeleccionada = {
+      id: convocatoria.iCodConvocatoria,
+      tipo: convocatoria.codTipoConvocatoria,
+      unidadzonal: convocatoria.codUnidadZonal,
+      fechaInicio: convocatoria.dtFechaInicio,
+      fechaFin: convocatoria.dtFechaFin,
+      estado: convocatoria.bActivo ? 'Activo' : 'Cerrado',
+      nombre: convocatoria.vTitulo,
+      requisitos: convocatoria.vRequisitos
+    };
 
-    // Aquí puedes llamar a tu API si lo tienes (ej. this.apiService.actualizarConvocatoria(...))
-
-    Swal.fire({
-      icon: 'success',
-      title: '¡Convocatoria actualizada!',
-      text: 'Los cambios han sido guardados correctamente.',
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#2e7d32'
-    }).then(() => {
-      this.volverALista();
-    });
+    console.log("Editando convocatoria:", this.convocatoriaSeleccionada);
   }
 
 
+  abrirModalFases(convocatoria: any, tipo: string) {
+    // Aquí manejas el modal según el tipo: bases, comunicado, resultados, fases
+    console.log("Abrir modal de", tipo, convocatoria);
+    this.convocatoriaSeleccionada = convocatoria;
+  }
+
+
+
+  // FALTA ACTUALIZAR -- 
+  actualizarConvocatoria() {
+ 
+    //   // Validaciones
+    //   if (
+    //     !this.convocatoriaSeleccionada.nombre ||
+    //     this.convocatoriaSeleccionada.tipo === '0' ||
+    //     !this.convocatoriaSeleccionada.fechaInicio ||
+    //     !this.convocatoriaSeleccionada.fechaFin
+    //   ) {
+    //     Swal.fire({
+    //       icon: 'warning',
+    //       title: '¡Campos incompletos!',
+    //       text: 'Por favor, complete todos los campos obligatorios.',
+    //       confirmButtonText: 'Aceptar',
+    //       confirmButtonColor: '#2e7d32'
+    //     });
+    //     return;
+    //   }
+
+    //   // Simulación de actualización
+    //   console.log('Actualizando convocatoria:', this.convocatoriaSeleccionada);
+
+    //   // Aquí puedes llamar a tu API si lo tienes (ej. this.apiService.actualizarConvocatoria(...))
+
+    //   Swal.fire({
+    //     icon: 'success',
+    //     title: '¡Convocatoria actualizada!',
+    //     text: 'Los cambios han sido guardados correctamente.',
+    //     confirmButtonText: 'Aceptar',
+    //     confirmButtonColor: '#2e7d32'
+    //   }).then(() => {
+    //     this.volverALista();
+    //   });
+    // }
+
+
+  }
+
+
+
 }
-
-
-
-
-
