@@ -133,22 +133,7 @@ export class SignUpComponent implements AfterViewInit {
       correoElectronico: this.email,
       contrasenia: this.password
     };
-
-    // this.apiService.post<any>('Usuarios/login', payload).subscribe({
-    //   next: (response) => {
-    //     console.log('Login exitoso', response);
-    //     // Puedes guardar un token o usuario en localStorage o service
-    //     // localStorage.setItem('token', response.token);
-    //     this.router.navigate(['/dashboard']); // o a donde desees redirigir
-    //   },
-    //   error: (error) => {
-    //     console.error('Error en login', error);
-    //     this.captchaMessage = 'Correo o contraseña incorrectos.';
-    //     this.generateCaptcha();
-    //     this.captchaInput = '';
-    //   }
-    // });
-
+ 
     this.apiService.post<any>('Usuarios/login', payload).subscribe({
       next: (response) => {
         console.log('Login exitoso', response);

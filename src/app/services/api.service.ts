@@ -33,6 +33,12 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/UnidadZonal/listar`);
   }
 
+  getFaseEstados(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/Estado/listar`);
+  }
+
+
+
   // ======================
   // Usuarios
   // ======================
@@ -44,10 +50,7 @@ export class ApiService {
   // Convocatorias
   // ====================== 
 
-
-
-  // Listar 
-  getConvocatoriasPaginado(params: any) {
+  getConvocatoriasPaginado(params: any) {  // Listar  
     return this.http.get<any>(`${this.baseUrl}/Convocatorias/paginado`, { params });
   }
 
@@ -59,13 +62,38 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/Convocatorias/insertar`, data);
   }
 
+  actualizarConvocatoria(id: number, data: any) {
+    return this.http.put(`${this.baseUrl}/Convocatorias/${id}`, data);
+  }
+
   getArchivosConvocatoria(codConvocatoria: number, codFormato: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/ArchivosConvocatoria/listar/${codConvocatoria}?iCodFormato=${codFormato}`);
   }
 
- 
-  // Pruebas
   eliminarConvocatoria(idConvocatoria: any) {
     return this.http.delete(`${this.baseUrl}/Convocatorias/${idConvocatoria}`);
   }
+
+  // Fases de Convocatorias
+  insertarFasesConvocatoria(data: any) {
+    return this.http.post(`${this.baseUrl}/ConvocatoriaFase/insertar-multiple`, data);
+  }
+
+  eliminarFaseConvocatoria(iCodFase: number) {
+    return this.http.delete(`${this.baseUrl}/ConvocatoriaFase/${iCodFase}`);
+  }
+
+
+  listarFasesConvocatoria(iCodConvocatoria: any) {
+    return this.http.get<any>(`${this.baseUrl}/ConvocatoriaFase/listar/${iCodConvocatoria}`);
+  }
+
+  // ======================
+  // Usuario
+  // ====================== 
+
+  getUsuarioPaginado(params: any) {  // Listar - Menú Principal
+    return this.http.get<any>(`${this.baseUrl}/Usuarios/listar`, { params });
+  }
+
 }

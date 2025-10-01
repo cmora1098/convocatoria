@@ -62,6 +62,22 @@ export class GestionConvocatoriaComponent {
       }
     });
 
+    this.apiService.getFaseEstados().subscribe({
+      next: (data) => {
+        this.estadosFase = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar tipos de regimen', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'Ocurrió un error al cargar los tipos de Unidad Zonal.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+        });
+      }
+    });
+
     this.listarConvocatorias();
   }
 
@@ -72,12 +88,14 @@ export class GestionConvocatoriaComponent {
   totalPaginas: number = 0;
   pageSize: number = 10;
 
-  filtros = {
+  filtros: any = {
     codTipoConvocatoria: '',
     fechaInicio: '',
     fechaFin: '',
-    buscar: ''
+    buscar: '',
+    bActivo: ''
   };
+
 
   listarConvocatorias() {
     const params: any = {
@@ -101,10 +119,12 @@ export class GestionConvocatoriaComponent {
       params.buscar = this.filtros.buscar;
     }
 
+    if (this.filtros.bActivo !== '' && this.filtros.bActivo !== null && this.filtros.bActivo !== undefined) {
+      params.bActivo = this.filtros.bActivo; // true o false
+    }
+
     this.apiService.getConvocatoriasPaginado(params).subscribe({
       next: (data) => {
-        // ✅ Corrección aquí:
-        console.log(data);
         this.convocatorias = data.items || [];
         this.totalPaginas = Math.ceil(data.totalRecords / this.pageSize);
         this.paginaActual = this.paginaActual;
@@ -114,6 +134,7 @@ export class GestionConvocatoriaComponent {
       }
     });
   }
+
 
   irPagina(pagina: number) {
     if (pagina < 1 || pagina > this.totalPaginas) return;
@@ -272,7 +293,6 @@ export class GestionConvocatoriaComponent {
     });
   }
 
-
   subirArchivo() {
     if (
       this.archivosSeleccionados.length === 0 ||
@@ -333,15 +353,15 @@ export class GestionConvocatoriaComponent {
     });
   }
 
-
-
   // Volver a la lista
   volverALista() {
     this.mostrarLista = true;
   }
 
 
-  // Crear nueva convocatoria
+  // **********************************************
+  // ******   CREAR NUEVA CONVOCATORIA     ********
+  // **********************************************
 
   // Quitar etiquetas HTML de Quill
   private limpiarHtml(texto: string): string {
@@ -355,7 +375,6 @@ export class GestionConvocatoriaComponent {
     tipo: ''
   };
 
-
   nuevaConvocatoria() {
     this.modoEdicion = false;
     this.mostrarLista = false;
@@ -367,13 +386,7 @@ export class GestionConvocatoriaComponent {
   }
 
   guardarConvocatoria() {
-    if (
-      !this.convocatoriaSeleccionada.nombre ||
-      !this.convocatoriaSeleccionada.tipo ||
-      !this.convocatoriaSeleccionada.unidadzonal ||
-      !this.convocatoriaSeleccionada.fechaInicio ||
-      !this.convocatoriaSeleccionada.fechaFin
-    ) {
+    if (!this.convocatoriaSeleccionada.nombre || !this.convocatoriaSeleccionada.tipo || !this.convocatoriaSeleccionada.unidadzonal || !this.convocatoriaSeleccionada.fechaInicio || !this.convocatoriaSeleccionada.fechaFin) {
       Swal.fire({
         icon: 'warning',
         title: '¡Campos incompletos!',
@@ -424,6 +437,185 @@ export class GestionConvocatoriaComponent {
     });
   }
 
+  // **********************************************
+  // ****** FIN CREAR NUEVA CONVOCATORIA   ********
+  // **********************************************
+
+
+
+  // **********************************************
+  // ************         FASES     ***************
+  // **********************************************
+
+  modalFasesMasiva: any; // Bootstrap modal
+  estadosFase: any[] = []; // Para el ComboBox de estados
+  currentCodConvocatoria: number | null = null;
+
+  // Data existente (del backend)
+  fasesExistentes: any[] = [];
+
+  // Data temporal (nuevas fases antes de guardar)
+  fasesTemp: any[] = [];
+
+  // Fase en edición
+  fase: any = {
+    codEstado: 0,
+    fechaInicio: '',
+    fechaFin: ''
+  };
+
+  // =========================
+  // Abrir modal y listar data
+  // =========================
+  abrirModalFases(convocatoria: any, tipo: string) {
+    this.currentCodConvocatoria = convocatoria.iCodConvocatoria;
+
+    // Limpiar fases temporales al abrir
+    this.fasesTemp = [];
+
+    // Cargar fases existentes desde API
+    this.apiService.listarFasesConvocatoria(this.currentCodConvocatoria).subscribe({
+      next: (data) => {
+        console.log('📥 Fases desde API:', data);
+        this.fasesExistentes = data.map((f: any) => ({
+          codFase: f.iCodFase,
+          codConvocatoria: f.iCodConvocatoria,
+          codEstado: f.iCodEstado,
+          descripcion: f.vDescripcionEstado,
+          fechaInicio: f.dtFechaInicio,
+          fechaFin: f.dtFechaFin,
+          activo: f.bActivo
+        }));
+      },
+      error: (err) => {
+        console.error('❌ Error al listar fases:', err);
+        this.fasesExistentes = [];
+      }
+    });
+
+    // Abrir Modal
+    const modalFasesElement = document.getElementById('modalFases');
+    if (modalFasesElement) {
+      this.modalFasesMasiva = new bootstrap.Modal(modalFasesElement);
+      this.modalFasesMasiva.show();
+    }
+  }
+
+  // =========================
+  // Agregar Fase Temporal
+  // =========================
+  agregarFase() {
+    if (!this.fase.codEstado || !this.fase.fechaInicio || !this.fase.fechaFin) {
+      Swal.fire('Error', 'Debe completar todos los campos antes de agregar.', 'warning');
+      return;
+    }
+
+    // Buscar la descripción del estado seleccionado
+    const estadoSel = this.estadosFase.find(e => e.codEstado == this.fase.codEstado);
+
+    // Clonar fase y añadir descripción
+    this.fasesTemp.push({
+      codEstado: this.fase.codEstado,
+      descripcion: estadoSel ? estadoSel.descripcion : '',
+      fechaInicio: this.fase.fechaInicio,
+      fechaFin: this.fase.fechaFin
+    });
+
+    // Reset form
+    this.fase = { codEstado: 0, fechaInicio: '', fechaFin: '' };
+  }
+
+  // =========================
+  // Eliminar Fase Temporal
+  // =========================
+  eliminarFase(index: number) {
+    this.fasesTemp.splice(index, 1);
+  }
+
+  // =========================
+  // Guardar Fases
+  // =========================
+  guardarFases() {
+    if (this.fasesTemp.length === 0) {
+      Swal.fire('Advertencia', 'Debes agregar al menos una fase antes de guardar.', 'warning');
+      return;
+    }
+
+    // Mapeamos fases al formato que espera el API
+    const fasesPayload = this.fasesTemp.map(f => ({
+      codConvocatoria: this.currentCodConvocatoria,
+      codEstado: f.codEstado,
+      fechaInicio: new Date(f.fechaInicio).toISOString(),
+      fechaFin: new Date(f.fechaFin).toISOString(),
+      codUsuarioRegistra: this.codUsuario
+    }));
+
+    this.apiService.insertarFasesConvocatoria(fasesPayload).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Fases registradas!',
+          text: 'Las fases se guardaron correctamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        }).then(() => {
+          this.modalFasesMasiva.hide();
+          this.fasesTemp = []; // limpiar temporal
+          // Recargar fases existentes para verlas en la tabla
+          if (this.currentCodConvocatoria) {
+            this.abrirModalFases({ iCodConvocatoria: this.currentCodConvocatoria }, 'fases');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('❌ Error al guardar fases:', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'No se pudieron guardar las fases. Intente nuevamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        });
+      }
+    });
+  }
+
+  eliminarFaseExistente(iCodFase: number) {
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: 'Esta acción eliminará la fase seleccionada.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.eliminarFaseConvocatoria(iCodFase).subscribe({
+          next: () => {
+            Swal.fire('Eliminado', 'La fase ha sido eliminada.', 'success').then(() => {
+              // 🔄 Refresca toda la página después de eliminar
+              window.location.reload();
+            });
+          },
+          error: (err) => {
+            console.error('❌ Error al eliminar fase:', err);
+            Swal.fire('Error', 'No se pudo eliminar la fase. Intente nuevamente.', 'error');
+          }
+        });
+      }
+    });
+  }
+
+
+
+  // **********************************************
+  // ************    FIN  FASES     ***************
+  // **********************************************
+
+
+
 
   editarConvocatoria(convocatoria: any): void {
     this.modoEdicion = true;
@@ -432,65 +624,74 @@ export class GestionConvocatoriaComponent {
     // Cargar la data seleccionada en el formulario
     this.convocatoriaSeleccionada = {
       id: convocatoria.iCodConvocatoria,
-      tipo: convocatoria.codTipoConvocatoria,
-      unidadzonal: convocatoria.codUnidadZonal,
-      fechaInicio: convocatoria.dtFechaInicio,
-      fechaFin: convocatoria.dtFechaFin,
-      estado: convocatoria.bActivo ? 'Activo' : 'Cerrado',
+      tipo: convocatoria.iCodTipoDocumento,
+      unidadzonal: convocatoria.iCodUnidadZonal,
+      fechaInicio: convocatoria.dtFechaInicio ? convocatoria.dtFechaInicio.split("T")[0] : null,
+      fechaFin: convocatoria.dtFechaFin ? convocatoria.dtFechaFin.split("T")[0] : null,
+      estado: convocatoria.bActivo ? 'Activo' : 'Inactivo',
       nombre: convocatoria.vTitulo,
       requisitos: convocatoria.vRequisitos
     };
 
-    console.log("Editando convocatoria:", this.convocatoriaSeleccionada);
   }
 
-
-  abrirModalFases(convocatoria: any, tipo: string) {
-    // Aquí manejas el modal según el tipo: bases, comunicado, resultados, fases
-    console.log("Abrir modal de", tipo, convocatoria);
-    this.convocatoriaSeleccionada = convocatoria;
-  }
-
-
-
-  // FALTA ACTUALIZAR -- 
   actualizarConvocatoria() {
- 
-    //   // Validaciones
-    //   if (
-    //     !this.convocatoriaSeleccionada.nombre ||
-    //     this.convocatoriaSeleccionada.tipo === '0' ||
-    //     !this.convocatoriaSeleccionada.fechaInicio ||
-    //     !this.convocatoriaSeleccionada.fechaFin
-    //   ) {
-    //     Swal.fire({
-    //       icon: 'warning',
-    //       title: '¡Campos incompletos!',
-    //       text: 'Por favor, complete todos los campos obligatorios.',
-    //       confirmButtonText: 'Aceptar',
-    //       confirmButtonColor: '#2e7d32'
-    //     });
-    //     return;
-    //   }
+    // Validaciones
+    if (
+      !this.convocatoriaSeleccionada.nombre ||
+      this.convocatoriaSeleccionada.tipo === '0' ||
+      !this.convocatoriaSeleccionada.fechaInicio ||
+      !this.convocatoriaSeleccionada.fechaFin
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: '¡Campos incompletos!',
+        text: 'Por favor, complete todos los campos obligatorios.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
 
-    //   // Simulación de actualización
-    //   console.log('Actualizando convocatoria:', this.convocatoriaSeleccionada);
+    // Convertir estado "Activo/Inactivo" a número
+    const estadoNumerico = this.convocatoriaSeleccionada.estado === 'Activo' ? 1 : 0;
 
-    //   // Aquí puedes llamar a tu API si lo tienes (ej. this.apiService.actualizarConvocatoria(...))
+    const data = {
+      iCodConvocatoria: this.convocatoriaSeleccionada.id,
+      vTitulo: this.convocatoriaSeleccionada.nombre,
+      iCodTipoConvocatoria: this.convocatoriaSeleccionada.tipo,
+      dtFechaInicio: this.convocatoriaSeleccionada.fechaInicio ? new Date(this.convocatoriaSeleccionada.fechaInicio).toISOString() : null,
+      dtFechaFin: this.convocatoriaSeleccionada.fechaFin ? new Date(this.convocatoriaSeleccionada.fechaFin).toISOString() : null,
+      vRequisitos: this.limpiarHtml(this.convocatoriaSeleccionada.requisitos),
+      iCodUnidadZonal: this.convocatoriaSeleccionada.unidadzonal,
+      iCodUsuarioRegistra: this.codUsuario,
+      // bActivo: estadoNumerico // 👈 lo agregamos para enviar el estado
+    };
 
-    //   Swal.fire({
-    //     icon: 'success',
-    //     title: '¡Convocatoria actualizada!',
-    //     text: 'Los cambios han sido guardados correctamente.',
-    //     confirmButtonText: 'Aceptar',
-    //     confirmButtonColor: '#2e7d32'
-    //   }).then(() => {
-    //     this.volverALista();
-    //   });
-    // }
-
-
+    // Llamada al service con el ID
+    this.apiService.actualizarConvocatoria(this.convocatoriaSeleccionada.id, data).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Convocatoria actualizada!',
+          text: 'Los cambios han sido guardados correctamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        }).then(() => window.location.reload());
+      },
+      error: (err) => {
+        console.error('❌ Error al guardar convocatoria:', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'No se pudo registrar la convocatoria. Intente nuevamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        });
+      }
+    });
   }
+
 
 
 

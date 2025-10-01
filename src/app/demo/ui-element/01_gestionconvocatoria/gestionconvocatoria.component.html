@@ -42,6 +42,16 @@
         </div>
 
         <div class="col-md-2">
+          <label class="form-label">Estado</label>
+          <select class="form-control" [(ngModel)]="filtros.bActivo" name="estado">
+            <option value="">Todos</option>
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </div>
+
+
+        <div class="col-md-2">
           <button type="button" class="btn btn-info w-100" (click)="listarConvocatorias()">
             <i class="feather icon-search me-1"></i> Buscar
           </button>
@@ -78,33 +88,40 @@
               <td>
                 <button type="button" class="btn btn-sm"
                   [ngClass]="{'btn-success': convocatoria.bActivo,'btn-danger': !convocatoria.bActivo}"> {{
-                  convocatoria.bActivo ? 'Activo' : 'Cerrado' }}</button>
+                  convocatoria.bActivo ? 'Activo' : 'Inactivo' }}</button>
               </td>
               <td>
 
-                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')">
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')"
+                  [disabled]="!convocatoria.bActivo">
                   Bases y Formatos
                 </button>
 
-                <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')">
+                <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')"
+                  [disabled]="!convocatoria.bActivo">
                   Comunicado
                 </button>
 
-                <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')">
+                <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')"
+                  [disabled]="!convocatoria.bActivo">
                   Resultados
                 </button>
 
-                <button class="btn btn-sm btn-dark me-1" (click)="abrirModalFases(convocatoria, 'fases')">
+                <button class="btn btn-sm btn-dark me-1" (click)="abrirModalFases(convocatoria, 'fases')"
+                  [disabled]="!convocatoria.bActivo">
                   <i class="feather icon-layers"></i> Fases
                 </button>
 
-                <button class="btn btn-sm btn-warning me-1" (click)="editarConvocatoria(convocatoria)">
+                <button class="btn btn-sm btn-warning me-1" (click)="editarConvocatoria(convocatoria)"
+                  [disabled]="!convocatoria.bActivo">
                   <i class="feather icon-edit"></i> Editar
                 </button>
 
-                <button class="btn btn-sm btn-danger" (click)="eliminarConvocatoria(convocatoria.iCodConvocatoria)">
+                <button class="btn btn-sm btn-danger" (click)="eliminarConvocatoria(convocatoria.iCodConvocatoria)"
+                  [disabled]="!convocatoria.bActivo">
                   <i class="feather icon-trash-2"></i> Eliminar
                 </button>
+
               </td>
             </tr>
 
@@ -196,14 +213,13 @@
         </div>
 
         <!-- Estado -->
-        <div *ngIf="modoEdicion" class="mb-3">
+        <!-- <div *ngIf="modoEdicion" class="mb-3">
           <label class="form-label">Estado</label>
           <select class="form-control" [(ngModel)]="convocatoriaSeleccionada.estado" name="estado">
             <option value="Activo">Activo</option>
-            <option value="Cerrado">Cerrado</option>
-            <option value="En Evaluación">En Evaluación</option>
+            <option value="Inactivo">Inactivo</option>
           </select>
-        </div>
+        </div> -->
 
         <!-- Título de la convocatoria -->
         <div class="mb-3">
@@ -317,6 +333,128 @@
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- Modal Fases -->
+<div class="modal fade" id="modalFases" tabindex="-1" aria-labelledby="modalFasesLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow">
+
+      <!-- Header -->
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalFasesLabel">
+          <i class="feather icon-layers me-2"></i>
+          Fases de la Convocatoria
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <!-- Formulario de inserción -->
+        <form class="row g-3 align-items-end">
+          <!-- Estado -->
+          <div class="col-md-4">
+            <label class="form-label">Estado</label>
+            <select class="form-control" [(ngModel)]="fase.codEstado" name="faseestado">
+              <option value="0">Seleccione</option>
+              <option *ngFor="let estado of estadosFase" [value]="estado.codEstado">{{ estado.descripcion }}</option>
+            </select>
+          </div>
+
+          <!-- Fecha Inicio -->
+          <div class="col-md-3">
+            <label class="form-label">Fecha Inicio</label>
+            <input type="date" class="form-control" [(ngModel)]="fase.fechaInicio" name="fechaInicio">
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="col-md-3">
+            <label class="form-label">Fecha Fin</label>
+            <input type="date" class="form-control" [(ngModel)]="fase.fechaFin" name="fechaFin">
+          </div>
+
+          <!-- Botón agregar -->
+          <div class="col-md-2 text-end">
+            <button type="button" class="btn btn-success w-100" (click)="agregarFase()">
+              <i class="feather icon-plus"></i>
+            </button>
+          </div>
+        </form>
+
+        <hr />
+
+        <!-- Tabla de fases existentes -->
+        <div class="table-responsive mt-3" *ngIf="fasesExistentes.length > 0">
+          <h6 class="text-success mb-2">📋 Fases Registradas</h6>
+          <table class="table table-bordered table-hover text-center">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of fasesExistentes">
+                <td>{{ f.codFase }}</td>
+                <td>{{ f.descripcion }}</td>
+                <td>{{ f.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ f.fechaFin | date: 'dd/MM/yyyy' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="eliminarFaseExistente(f.codFase)">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabla de fases temporales -->
+        <div class="table-responsive mt-4" *ngIf="fasesTemp.length > 0">
+          <h6 class="text-primary mb-2">📝 Nuevas Fases por Guardar</h6>
+          <table class="table table-bordered table-hover text-center">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Descripción</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of fasesTemp; let i = index">
+                <td>{{ f.codEstado }}</td>
+                <td>{{ f.descripcion }}</td>
+                <td>{{ f.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ f.fechaFin | date: 'dd/MM/yyyy' }}</td>
+                <td>
+                  <button class="btn btn-sm btn-danger" (click)="eliminarFase(i)">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="feather icon-x"></i> Cancelar
+        </button>
+        <button class="btn btn-success" (click)="guardarFases()">
+          <i class="feather icon-save"></i> Guardar
+        </button>
+      </div>
     </div>
   </div>
 </div>
