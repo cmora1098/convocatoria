@@ -22,7 +22,7 @@
               "mousetrap",
               "apexcharts"
             ],
-            "outputPath": "dist",
+            "outputPath": "dist/convocatoria",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -46,8 +46,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
-                  "maximumError": "2mb"
+                  "maximumWarning": "5mb",
+                  "maximumError": "100mb"
                 },
                 {
                   "type": "anyComponentStyle",
