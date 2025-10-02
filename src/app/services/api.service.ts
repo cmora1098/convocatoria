@@ -96,4 +96,13 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/Usuarios/listar`, { params });
   }
 
+  actualizarUsuario(idUsuario: number, data: any) {
+    return this.http.put(`${this.baseUrl}/Usuarios/Actualizar/${idUsuario}`, data);
+  }
+
+  eliminarUsuario(idConvocatoria: any) {
+    return this.http.delete(`${this.baseUrl}/Usuarios/eliminar/${idConvocatoria}`);
+  }
+
+
 }

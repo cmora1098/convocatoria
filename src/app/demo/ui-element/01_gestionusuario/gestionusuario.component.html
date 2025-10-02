@@ -74,14 +74,14 @@
                                     usuario.activo ? 'Activo' : 'Inactivo' }}</button>
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-warning me-1" [disabled]="!usuario.activo">
-                                    <!-- (click)="editarusuario(usuario)" -->
+                                <button class="btn btn-sm btn-warning me-1" [disabled]="!usuario.activo"
+                                    (click)="editarusuario(usuario)">
+
                                     <i class="feather icon-edit"></i> Editar
                                 </button>
 
-                                <button class="btn btn-sm btn-danger" [disabled]="!usuario.activo">
-                                    <!-- (click)="eliminarusuario(usuario.iCodusuario)" -->
-                                    <i class="feather icon-trash-2"></i> Eliminar
+                                <button class="btn btn-sm btn-danger" [disabled]="!usuario.activo" (click)="eliminarusuario(usuario.idUsuario)" >
+                                     <i class="feather icon-trash-2"></i> Eliminar
                                 </button>
 
                             </td>
@@ -123,7 +123,7 @@
 
                 </ul>
             </nav>
- 
+
         </app-card>
     </div>
 </div>
@@ -134,25 +134,102 @@
         <app-card [cardTitle]="modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario'" [options]="false">
             <form>
 
+                <!-- Campo ID -->
+                <div *ngIf="modoEdicion" class="mb-3">
+                    <label class="form-label">ID</label>
+                    <input class="form-control" name="id" type="text" [value]="usuarioSeleccionada?.id" readonly
+                        disabled>
+                </div>
+
+                <!-- Tipo de Documento y Número -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select id="tipo-doc" required class="form-control" name="tipoDoc"
+                            [(ngModel)]="usuarioSeleccionada.tipoDocumentos" aria-label="Tipo de Documento">
+
+                            <option [ngValue]="null">Seleccione</option>
+                            <option *ngFor="let tipo of tiposDocumentos" [ngValue]="tipo">
+                                {{ tipo.nombreDocumento }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Número de Documento</label>
+                        <input id="num-doc" type="text" placeholder="Número de Documento" required pattern="[0-9]*"
+                            [(ngModel)]="usuarioSeleccionada.NumDocumento" inputmode="numeric" class="form-control"
+                            name="NumDoc" aria-label="Número de Documento" />
+                    </div>
+                </div>
+
+                <!-- Apellidos -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="apellido-paterno" class="form-label">Apellido Paterno</label>
+                        <input id="apellido-paterno" type="text" placeholder="Apellido Paterno" name="apePat" required
+                            [(ngModel)]="usuarioSeleccionada.ApePaterno" class="form-control"
+                            aria-label="Apellido Paterno" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="apellido-materno" class="form-label">Apellido Materno</label>
+                        <input id="apellido-materno" type="text" placeholder="Apellido Materno" name="apeMat" required
+                            [(ngModel)]="usuarioSeleccionada.ApeMaterno" class="form-control"
+                            aria-label="Apellido Materno" />
+                    </div>
+                </div>
+
+                <!-- Nombre completo -->
+                <div class="form-group mb-3">
+                    <label for="nombre-completo" class="form-label">Nombre Completo</label>
+                    <input id="nombre-completo" type="text" placeholder="Nombre Completo" required class="form-control"
+                        name="NombreCompleto" [(ngModel)]="usuarioSeleccionada.NomCompleto"
+                        aria-label="Nombre Completo" />
+                </div>
+
+                <!-- Correo -->
+                <div class="form-group mb-3">
+                    <label for="correo" class="form-label">Correo Electrónico</label>
+                    <input id="correo" type="email" placeholder="Correo Electrónico" required class="form-control"
+                        name="email" [(ngModel)]="usuarioSeleccionada.Email" aria-label="Correo Electrónico" />
+                </div>
+
+                <!-- Contraseña -->
+                <div class="form-group mb-3">
+                    <label for="password" class="form-label">Contraseña</label>
+                    <input id="password" type="password" placeholder="Ingresa tu contraseña" name="Contrasenia" required
+                        [(ngModel)]="usuarioSeleccionada.Contrasenia" class="form-control" aria-label="Contraseña" />
+                </div>
+
+                <!-- Rol -->
+                <div class="form-group mb-3">
+                    <label class="form-label">Rol</label>
+                    <select class="form-control" name="rol" [(ngModel)]="usuarioSeleccionada.Rol">
+                        <option value="0">Seleccione</option>
+                        <option value="1">Administrador</option>
+                        <option value="2">Evaluador</option>
+                        <option value="3">Postulante</option>
+                    </select>
+                </div>
+
                 <!-- Botones -->
                 <div class="d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary" (click)="volverALista()">
                         <i class="feather icon-arrow-left me-1"></i>
                         Volver
                     </button>
-                    <!-- <button type="button" class="btn btn-success"
-            (click)="modoEdicion ? actualizarusuario() : guardarusuario()">
-            <i class="feather icon-save me-1"></i>
-            {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-          </button> -->
 
+                    <button type="button" class="btn btn-success"
+                        (click)="modoEdicion ? actualizarUsuario() : guardarUsuario()">
+                        <i class="feather icon-save me-1"></i>
+                        {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+                    </button>
                 </div>
 
             </form>
         </app-card>
     </div>
 </div>
-
 
 <div class="row btn-page">
     <!-- [ button-icon ] start -->

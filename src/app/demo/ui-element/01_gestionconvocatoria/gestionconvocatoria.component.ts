@@ -613,10 +613,7 @@ export class GestionConvocatoriaComponent {
   // **********************************************
   // ************    FIN  FASES     ***************
   // **********************************************
-
-
-
-
+ 
   editarConvocatoria(convocatoria: any): void {
     this.modoEdicion = true;
     this.mostrarLista = false;
