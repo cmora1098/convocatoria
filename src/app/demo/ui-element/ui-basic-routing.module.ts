@@ -82,6 +82,16 @@ const routes: Routes = [
         loadComponent: () => import('./02_convocatoriasasignadas/convocatoriasasignadas.component').then((c) => c.ConvocatoriasAsignadasComponent)
       },
       // Para el Rol del Evaluador - Fin
+
+      // Para el Rol del Postulante - Inicio
+      {
+        path: 'MiPerfil',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./03_miperfil/miperfil.component').then((c) => c.MiPerfilComponent)
+      },
+      // Para el Rol del Postulante - Fin
+
+
     ]
   }
 ];

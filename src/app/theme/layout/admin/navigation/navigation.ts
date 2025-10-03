@@ -360,7 +360,7 @@
 // ];
 
 
- export interface NavigationItem {
+export interface NavigationItem {
   id: string;
   title: string;
   type: 'item' | 'collapse' | 'group';
@@ -555,12 +555,29 @@ export const NavigationItems: NavigationItem[] = [
     roles: [3],
     children: [
       {
-        id: 'perfil',
-        title: 'Mi Perfil',
+        id: 'pinicio',
+        title: 'Inicio',
         type: 'item',
-        url: '/perfil',
-        icon: 'feather icon-user',
+        url: '/pinicio',
+        icon: 'feather icon-home',
+        classes: 'nav-item',
         roles: [3]
+      },
+      {
+        id: '03_miperfil',
+        title: 'Postulante',
+        type: 'collapse',
+        icon: 'feather icon-user',
+        roles: [3],
+        children: [
+          {
+            id: 'MiPerfil',
+            title: 'Mi Perfil',
+            type: 'item',
+            url: '/component/MiPerfil',
+            roles: [3]
+          }
+        ]
       },
       {
         id: 'postulaciones',
@@ -569,201 +586,59 @@ export const NavigationItems: NavigationItem[] = [
         url: '/postulaciones',
         icon: 'feather icon-briefcase',
         roles: [3]
+      },
+      {
+        id: 'signin',
+        title: 'Cerrar Sesión',
+        type: 'item',
+        url: '/login',
+        icon: 'feather icon-log-in',
+        target: true,
+        breadcrumbs: false,
+        roles: [1, 2, 3] // visible para todos
+      },
+
+
+      {
+        id: 'button',
+        title: 'Button',
+        type: 'item',
+        url: '/component/button'
+      },
+      {
+        id: 'badges',
+        title: 'Badges',
+        type: 'item',
+        url: '/component/badges'
+      },
+      {
+        id: 'breadcrumb-pagination',
+        title: 'Breadcrumb & Pagination',
+        type: 'item',
+        url: '/component/breadcrumb-paging'
+      },
+      {
+        id: 'collapse',
+        title: 'Collapse',
+        type: 'item',
+        url: '/component/collapse'
+      },
+      {
+        id: 'tabs-pills',
+        title: 'Tabs & Pills',
+        type: 'item',
+        url: '/component/tabs-pills'
+      },
+      {
+        id: 'typography',
+        title: 'Typography',
+        type: 'item',
+        url: '/component/typography'
       }
+
+
+
     ]
   }
 ];
 
-
-
-
-// export const AdminNavigation: NavigationItem[] = [
-//   {
-//     id: 'navigation',
-//     title: 'Inicio',
-//     type: 'group',
-//     icon: 'icon-group',
-//     children: [
-//       {
-//         id: 'dashboard',
-//         title: 'Dashboard',
-//         type: 'item',
-//         url: '/dashboard',
-//         icon: 'feather icon-home'
-//       }
-//     ]
-//   },
-//   {
-//     id: 'administrador',
-//     title: 'Componentes',
-//     type: 'group',
-//     icon: 'icon-group',
-//     children: [
-//       {
-//         id: 'navigation',
-//         title: 'Inicio',
-//         type: 'item',
-//         url: '/dashboard',
-//         classes: 'nav-item',
-//         icon: 'feather icon-home'
-//       },
-//       {
-//         id: '01_convocatoria',
-//         title: 'Convocatorias',
-//         type: 'collapse',
-//         icon: 'feather icon-file-text',
-//         children: [
-//           {
-//             id: 'GestionConvocatoria',
-//             title: 'Gestión de Convocatorias',
-//             type: 'item',
-//             url: '/component/GestionConvocatoria'
-//           }
-//         ]
-//       },
-//       {
-//         id: '02_postulaciones',
-//         title: 'Postulaciones',
-//         type: 'collapse',
-//         icon: 'feather icon-edit-2',
-//         children: [
-//           {
-//             id: 'vpostulantes',
-//             title: 'Ver Postulantes',
-//             type: 'item',
-//             url: '/component/VerPostulantes'
-//           }
-//         ]
-//       },
-//       {
-//         id: '03_evaluacion',
-//         title: 'Evaluación',
-//         type: 'collapse',
-//         icon: 'feather icon-clock',
-//         children: [
-//           {
-//             id: 'AsignarEvaluadores',
-//             title: 'Asignar Evaluadores',
-//             type: 'item',
-//             url: '/component/AsignarEvaluadores'
-//           },
-//           {
-//             id: 'ResultadosGenerales',
-//             title: 'Ver Resultados Generales',
-//             type: 'item',
-//             url: '/component/ResultadosGenerales'
-//           }
-//         ]
-//       },
-//       {
-//         id: '04_reportes',
-//         title: 'Reportes',
-//         type: 'collapse',
-//         icon: 'feather icon-inbox',
-//         children: [
-//           {
-//             id: 'ReportesAdministrador',
-//             title: 'Generar Reportes',
-//             type: 'item',
-//             url: '/component/ReportesAdministrador'
-//           }
-//         ]
-//       },
-//       {
-//         id: '05_gestionusuario',
-//         title: 'Usuarios',
-//         type: 'collapse',
-//         icon: 'feather icon-users',
-//         children: [
-//           {
-//             id: 'GestionUsuario',
-//             title: 'Gestión de Usuarios',
-//             type: 'item',
-//             url: '/component/GestionUsuario'
-//           }
-//         ]
-//       },
-//       {
-//         id: '06_parametrosgenerales',
-//         title: 'Configuración',
-//         type: 'collapse',
-//         icon: 'feather icon-settings',
-//         children: [
-//           {
-//             id: 'ParametrosGenerales',
-//             title: 'Parámetros Generales',
-//             type: 'item',
-//             url: '/component/ParametrosGenerales'
-//           }
-//         ]
-//       },
-//       {
-//         id: 'signin',
-//         title: 'Cerrar Sesión',
-//         type: 'item',
-//         url: '/login',
-//         icon: 'feather icon-log-in',
-//         target: true,
-//         breadcrumbs: false
-//       }
-//     ]
-//   },
-// ];
-
-// export const EvaluadorNavigation: NavigationItem[] = [
-//    {
-//     id: 'evaluador',
-//     title: 'Componentes ',
-//     type: 'group',
-//     icon: 'icon-group',
-//     children: [
-//       {
-//         id: 'enavigation',
-//         title: 'Inicio',
-//         type: 'item',
-//         url: '/edashboard',
-//         classes: 'nav-item',
-//         icon: 'feather icon-home'
-//       },
-//       {
-//         id: '02_convocatorias',
-//         title: 'Convocatorias',
-//         type: 'collapse',
-//         icon: 'feather icon-file-text ',
-//         children: [
-//           {
-//             id: 'ConvocatoriasAsignadas',
-//             title: 'Convocatorias Asignadas',
-//             type: 'item',
-//             url: '/component/ConvocatoriasAsignadas'
-//           }
-//         ]
-//       },
-//     ]
-//   },
-// ];
-
-// export const PostulanteNavigation: NavigationItem[] = [
-//   {
-//     id: 'postulante',
-//     title: 'Componentes',
-//     type: 'group',
-//     icon: 'icon-group',
-//     children: [
-//       {
-//         id: 'pdashboard',
-//         title: 'Inicio',
-//         type: 'item',
-//         url: '/pdashboard',
-//         icon: 'feather icon-home'
-//       },
-//       {
-//         id: 'misconvocatorias',
-//         title: 'Mis Convocatorias',
-//         type: 'item',
-//         url: '/component/MisConvocatorias',
-//         icon: 'feather icon-briefcase'
-//       }
-//     ]
-//   }
-// ];

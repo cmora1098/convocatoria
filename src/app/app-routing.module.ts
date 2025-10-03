@@ -33,6 +33,12 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         loadComponent: () => import('./demo/evaluador-panel/evaluador-panel.component').then((c) => c.EvaluadorPanelComponent)
       },
+      // Evaluador
+      {
+        path: 'pinicio',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./demo/postulante-panel/postulante-panel.component').then((c) => c.PostulantePanelComponent)
+      },
 
 
 

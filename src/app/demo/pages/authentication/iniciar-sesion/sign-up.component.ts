@@ -133,7 +133,7 @@ export class SignUpComponent implements AfterViewInit {
       correoElectronico: this.email,
       contrasenia: this.password
     };
- 
+
     this.apiService.post<any>('Usuarios/login', payload).subscribe({
       next: (response) => {
         console.log('Login exitoso', response);
@@ -141,7 +141,21 @@ export class SignUpComponent implements AfterViewInit {
         // Guardar usuario en el servicio de auth
         this.authService.setUser(response);
 
-        this.router.navigate(['/dashboard']);
+        // Redirigir según el rol del usuario
+        switch (response.codRol) {
+          case 1:
+            this.router.navigate(['/dashboard']);  // Admin
+            break;
+          case 2:
+            this.router.navigate(['/edashboard']); // Evaluador
+            break;
+          case 3:
+            this.router.navigate(['/pinicio']);    // Postulante
+            break;
+          default:
+            this.router.navigate(['/Inicio']);     // fallback
+            break;
+        }
       },
       error: (error) => {
         console.error('Error en login', error);
@@ -150,6 +164,7 @@ export class SignUpComponent implements AfterViewInit {
         this.captchaInput = '';
       }
     });
+
 
   }
 
