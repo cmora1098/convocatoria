@@ -11,12 +11,55 @@ import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
+import * as dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
+
 interface Formacion {
   nivel: string;
   institucion: string;
   cespecializacion: string;
   fechaInicio: string; // Podrías cambiarlo a Date si prefieres manejar objetos de fecha
 }
+
+interface Colegiatura {
+  colegio: string;
+  numero: string;
+  habilitado: string;
+}
+
+interface CursoDiplomado {
+  denominacion: string;
+  institucion: string;
+  horas: number | null;
+}
+
+interface Idioma {
+  idioma: string;
+  institucion: string;
+  nivel: string;
+}
+
+interface Duracion {
+  años: number;
+  meses: number;
+  días: number;
+}
+
+interface ExperienciaLaboral {
+  tipo: 'GENERAL' | 'ESPECIFICA';
+  entidad: string;
+  unidad: string;
+  cargo: string;
+  sector: 'PÚBLICO' | 'PRIVADO' | '';
+  fechaInicio: string;
+  fechaFin: string;
+  total: string;
+  duracion?: Duracion;
+  funciones: string[];
+  temas?: { [key: string]: boolean };
+}
+
 
 @Component({
   selector: 'app-miperfil',
@@ -53,6 +96,19 @@ export class MiPerfilComponent {
     });
   }
 
+  // items = [
+  //   'Datos Personales',
+  //   'Formación Académica',
+  //   'Colegiatura',
+  //   'Experiencia Laboral',
+  //   'Cursos, Diplomados y/o Especialización',
+  //   'Idiomas',
+  //   'Ofimática',
+  //   'Referencias Laborales',
+  //   'Bonificaciones adicionales (FF. AA., Discapacidad, Deportista Calificado y/o Ley N° 31533 y su reglamento)',
+  //   'Declaración Jurada',
+  //   'Disponibilidad de Viajar'
+  // ];
 
   items = [
     'Datos Personales',
@@ -62,15 +118,21 @@ export class MiPerfilComponent {
     'Cursos, Diplomados y/o Especialización',
     'Idiomas',
     'Ofimática',
-    'Referencias Laborales',
-    'Bonificaciones adicionales (FF. AA., Discapacidad, Deportista Calificado y/o Ley N° 31533 y su reglamento)',
+    'Bonificaciones adicionales (FF. AA., Discapacidad)',
     'Declaración Jurada',
-    'Disponibilidad de Viajar'
   ];
+
+  volver() {
+    alert('Volviendo...');
+  }
+
+  // ********************************* //
+  // ******  DATOS PERSONALES ******* //  
+  // ******************************* //
 
   datos: { [key: string]: any } = {
     'Datos Personales': {
-      tipoDocumento: 'DNI',
+      tipoDocumento: null,
       nroDocumento: '',
       ruc: '',
       apellidoPaterno: '',
@@ -95,25 +157,69 @@ export class MiPerfilComponent {
       otros: ''
     },
     'Formación Académica': { titulo: '', institucion: '', anio: '' },
-    'Colegiatura': { numeroColegiatura: '', fechaExp: '' }
+    'Colegiatura': { numeroColegiatura: '', fechaExp: '' },
+    'Ofimática': { nivelIntermedio: '' },
+    'Bonificaciones adicionales (FF. AA., Discapacidad)': {
+      licenciadoFuerzasArmadas: '',
+      codigoLicenciado: '',
+      tieneDiscapacidad: '',
+      codigoDiscapacidad: '',
+      ajustesSeleccionados: []
+    }
+
   };
 
   guardarDatosPersonales(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+    const datosPersonales = this.datos[seccion];
+
+    // Validación básica
+    const camposRequeridos = [
+      { campo: 'nroDocumento', label: 'Nro. Documento' },
+      { campo: 'apellidoPaterno', label: 'Apellido Paterno' },
+      { campo: 'apellidoMaterno', label: 'Apellido Materno' },
+      { campo: 'nombres', label: 'Nombres' },
+      { campo: 'fechaNacimiento', label: 'Fecha de Nacimiento' },
+      { campo: 'sexo', label: 'Sexo' },
+      { campo: 'estadoCivil', label: 'Estado Civil' },
+      { campo: 'email', label: 'Correo electrónico' },
+      { campo: 'celular', label: 'Celular' }
+    ];
+
+    let camposVacios = camposRequeridos.filter(c => !datosPersonales[c.campo]);
+
+    if (camposVacios.length > 0) {
+      const listaCampos = camposVacios.map(c => `• ${c.label}`).join('<br>');
+
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        html: `Debes completar los siguientes campos:<br><br>${listaCampos}`,
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (datosPersonales.email && !emailRegex.test(datosPersonales.email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Correo inválido',
+        text: 'Por favor ingresa un correo electrónico válido.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Guardado exitoso
+    console.log('Datos guardados para', seccion, datosPersonales);
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado exitoso',
+      text: `Los datos personales han sido guardados correctamente.`,
+      confirmButtonColor: '#1e8e3e'
+    });
   }
-
-  volver() {
-    alert('Volviendo...');
-  }
-
-  // ********************************* //
-  // ******  DATOS PERSONALES ******* //  
-  // ******************************* //
-
-
-
-
 
 
   // ***************************************** //
@@ -204,67 +310,576 @@ export class MiPerfilComponent {
   // ******************************* //
   // *******  COLEGIATURA  ******** //  
   // ***************************** //
+  colegiatura: Colegiatura = {
+    colegio: '',
+    numero: '',
+    habilitado: ''
+  };
+
   guardarColegiatura(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+    const { colegio, numero, habilitado } = this.colegiatura;
+
+    if (!colegio || !numero || !habilitado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Debe completar todos los campos requeridos.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Validación número de colegiatura: al menos 4 dígitos numéricos
+    const numeroValido = /^[0-9]{4,}$/.test(numero);
+    if (!numeroValido) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Número inválido',
+        text: 'El número de colegiatura debe contener al menos 4 dígitos numéricos.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Simula guardar (reemplaza con tu lógica real)
+    console.log('Datos guardados para', seccion, this.colegiatura);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado',
+      text: `Los datos de colegiatura han sido guardados correctamente.`,
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
   }
 
   // ***************************************** //
-  // ******  EXPERIENCIA LABORAL ******* //  
+  // ******  EXPERIENCIA LABORAL ******* //  ///////////// PENDIENTE /////////////
   // *************************************** //
-  guardarExperienciaLaboral(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+  indiceExperienciaLaboralEditando: number | null = null;
+  experienciasLaborales: ExperienciaLaboral[] = [];
+  experienciaLaboralActual: ExperienciaLaboral = this.nuevaExperienciaLaboral('GENERAL');
+  experienciaLaboralGeneral = '0 Años 0 Meses 0 Días';
+  experienciaLaboralEspecifica = '0 Años 0 Meses 0 Días';
+  experienciaLaboralPublica = '0 Años 0 Meses 0 Días';
+
+  temasEspecificos = [
+    'Actividades Agrícolas',
+    'Actividades Agropecuarias',
+    'Temas Sanitarios',
+    'Acceso a Mercados Externos'
+  ];
+
+  nuevaExperienciaLaboral(tipo: 'GENERAL' | 'ESPECIFICA'): ExperienciaLaboral {
+    return {
+      tipo,
+      entidad: '',
+      unidad: '',
+      cargo: '',
+      sector: '',
+      fechaInicio: '',
+      fechaFin: '',
+      total: '',
+      funciones: [''],
+      temas: {}
+    };
   }
 
+  abrirModalExperienciaLaboral(tipo: 'GENERAL' | 'ESPECIFICA') {
+    this.indiceExperienciaLaboralEditando = null;
+    this.experienciaLaboralActual = this.nuevaExperienciaLaboral(tipo);
+    this.mostrarModalExperienciaLaboral();
+  }
+
+  mostrarModalExperienciaLaboral() {
+    const modal = new (window as any).bootstrap.Modal(document.getElementById('modalExperiencia'));
+    modal.show();
+  }
+
+  agregarFuncionLaboral() {
+    this.experienciaLaboralActual.funciones.push('');
+  }
+
+  eliminarFuncionLaboral(i: number) {
+    this.experienciaLaboralActual.funciones.splice(i, 1);
+  }
+
+  calcularDuracionExperienciaLaboral() {
+    if (!this.experienciaLaboralActual.fechaInicio || !this.experienciaLaboralActual.fechaFin) return;
+
+    const inicio = dayjs(this.experienciaLaboralActual.fechaInicio);
+    const fin = dayjs(this.experienciaLaboralActual.fechaFin);
+
+    if (fin.isBefore(inicio)) {
+      this.experienciaLaboralActual.total = '';
+      this.experienciaLaboralActual.duracion = undefined;
+      return;
+    }
+
+    const diff = dayjs.duration(fin.diff(inicio));
+    const años = Math.floor(diff.asYears());
+    const meses = Math.floor(diff.asMonths() % 12);
+    const días = Math.floor(diff.asDays() % 30);
+
+    this.experienciaLaboralActual.total = `${años} Años ${meses} Meses ${días} Días`;
+    this.experienciaLaboralActual.duracion = { años, meses, días };
+  }
+
+  guardarExperienciaLaboral() {
+    if (this.indiceExperienciaLaboralEditando !== null) {
+      this.experienciasLaborales[this.indiceExperienciaLaboralEditando] = { ...this.experienciaLaboralActual };
+      this.indiceExperienciaLaboralEditando = null;
+    } else {
+      this.experienciasLaborales.push({ ...this.experienciaLaboralActual });
+    }
+
+    const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExperiencia'));
+    modal.hide();
+    this.calcularTotalesExperienciaLaboral();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado',
+      text: 'La experiencia laboral ha sido registrada correctamente.',
+      confirmButtonColor: '#1e8e3e'
+    });
+  }
+
+  eliminarExperienciaLaboral(exp: ExperienciaLaboral) {
+    this.experienciasLaborales = this.experienciasLaborales.filter(e => e !== exp);
+    this.calcularTotalesExperienciaLaboral();
+  }
+
+  editarExperienciaLaboral(exp: ExperienciaLaboral) {
+    const index = this.experienciasLaborales.indexOf(exp);
+    if (index !== -1) {
+      this.indiceExperienciaLaboralEditando = index;
+      this.experienciaLaboralActual = JSON.parse(JSON.stringify(exp));
+      this.mostrarModalExperienciaLaboral();
+    }
+  }
+
+  calcularTotalesExperienciaLaboral() {
+    let totalGeneral: Duracion = { años: 0, meses: 0, días: 0 };
+    let totalEspecifica: Duracion = { años: 0, meses: 0, días: 0 };
+    let totalPublica: Duracion = { años: 0, meses: 0, días: 0 };
+
+    for (const exp of this.experienciasLaborales) {
+      if (!exp.duracion) continue;
+
+      if (exp.tipo === 'GENERAL') totalGeneral = this.sumarDuracion(totalGeneral, exp.duracion);
+      if (exp.tipo === 'ESPECIFICA') totalEspecifica = this.sumarDuracion(totalEspecifica, exp.duracion);
+      if (exp.sector === 'PÚBLICO') totalPublica = this.sumarDuracion(totalPublica, exp.duracion);
+    }
+
+    this.experienciaLaboralGeneral = this.formatearDuracion(totalGeneral);
+    this.experienciaLaboralEspecifica = this.formatearDuracion(totalEspecifica);
+    this.experienciaLaboralPublica = this.formatearDuracion(totalPublica);
+  }
+
+  sumarDuracion(d1: Duracion, d2: Duracion): Duracion {
+    let años = d1.años + d2.años;
+    let meses = d1.meses + d2.meses;
+    let días = d1.días + d2.días;
+
+    if (días >= 30) {
+      meses += Math.floor(días / 30);
+      días %= 30;
+    }
+    if (meses >= 12) {
+      años += Math.floor(meses / 12);
+      meses %= 12;
+    }
+    return { años, meses, días };
+  }
+
+  formatearDuracion(d: Duracion): string {
+    return `${d.años} Años ${d.meses} Meses ${d.días} Días`;
+  }
+
+  // ********************************************************************************************************** //
   // ***************************************** //
   // ******  CURSOS / DIPLOMADOS / ES ******* //  
   // *************************************** //
-  guardarCursosDiplomados(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+  cursosDiplomados: CursoDiplomado[] = [];
+  cursoDiplomado: CursoDiplomado = this.nuevoCursoDiplomado();
+  mostrarModalCursoDiplomado = false;
+  editIndexCursoDiplomado: number | null = null;
+
+  // Crear nueva estructura vacía
+  nuevoCursoDiplomado(): CursoDiplomado {
+    return {
+      denominacion: '',
+      institucion: '',
+      horas: null
+    };
   }
 
+  // Abrir modal
+  abrirModalCursoDiplomado() {
+    this.cursoDiplomado = this.nuevoCursoDiplomado();
+    this.editIndexCursoDiplomado = null;
+    this.mostrarModalCursoDiplomado = true;
+  }
 
+  // Cerrar modal
+  cerrarModalCursoDiplomado() {
+    this.mostrarModalCursoDiplomado = false;
+  }
+
+  // Guardar registro (modal)
+  guardarCursoDiplomado() {
+    const { denominacion, institucion, horas } = this.cursoDiplomado;
+
+    if (!denominacion || !institucion || horas === null) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Debe completar todos los campos obligatorios (*)',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    if (horas <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Horas inválidas',
+        text: 'La duración debe ser mayor a cero.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    const existeDuplicado = this.cursosDiplomados.some((curso, index) =>
+      index !== this.editIndexCursoDiplomado &&
+      curso.denominacion.trim().toLowerCase() === denominacion.trim().toLowerCase() &&
+      curso.institucion.trim().toLowerCase() === institucion.trim().toLowerCase()
+    );
+
+    if (existeDuplicado) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Curso duplicado',
+        text: 'Este curso o diplomado ya ha sido registrado.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    if (this.editIndexCursoDiplomado !== null) {
+      this.cursosDiplomados[this.editIndexCursoDiplomado] = { ...this.cursoDiplomado };
+    } else {
+      this.cursosDiplomados.push({ ...this.cursoDiplomado });
+    }
+
+    this.cerrarModalCursoDiplomado();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado',
+      text: 'El registro se ha guardado correctamente.',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
+  }
+
+  // Editar registro
+  editarCursoDiplomado(index: number) {
+    this.cursoDiplomado = { ...this.cursosDiplomados[index] };
+    this.editIndexCursoDiplomado = index;
+    this.mostrarModalCursoDiplomado = true;
+  }
+
+  // Eliminar registro
+  eliminarCursoDiplomado(index: number) {
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: 'Esta acción eliminará el curso, diplomado o especialización.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.cursosDiplomados.splice(index, 1);
+        Swal.fire({
+          icon: 'success',
+          title: 'Eliminado',
+          text: 'El registro fue eliminado correctamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        });
+      }
+    });
+  }
+
+  // Guardar datos finales del formulario
+  guardarCursosDiplomados(seccion: string) {
+    if (this.cursosDiplomados.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin registros',
+        text: 'Debe agregar al menos un curso o diplomado.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Datos guardados',
+      text: 'Los cursos, diplomados o especializaciones han sido guardados correctamente.',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
+
+    console.log('Datos guardados para', seccion, this.cursosDiplomados);
+  }
+
+  // ********************************************************************************************************** //
   // *********************** //
   // ******  IDIOMAS ******* //  
   // *********************** //
-  guardarIdiomas(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+  idiomas: Idioma[] = [];
+  idioma: Idioma = this.nuevoIdioma();
+  mostrarModalIdioma = false;
+  editIndexIdioma: number | null = null;
+
+  // Crear una estructura de idioma vacía
+  nuevoIdioma(): Idioma {
+    return {
+      idioma: '',
+      institucion: '',
+      nivel: ''
+    };
   }
 
+  // Abrir modal de idioma
+  abrirModalIdioma() {
+    this.idioma = this.nuevoIdioma();
+    this.editIndexIdioma = null;
+    this.mostrarModalIdioma = true;
+  }
+
+  // Cerrar modal de idioma
+  cerrarModalIdioma() {
+    this.mostrarModalIdioma = false;
+  }
+
+  // Guardar idioma (nuevo o editado)
+  guardarIdioma() {
+    // Validar campos obligatorios
+    if (!this.idioma.idioma || !this.idioma.institucion || !this.idioma.nivel) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Debe completar todos los campos obligatorios (*)',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    // Validar duplicado si está agregando nuevo
+    if (
+      this.editIndexIdioma === null &&
+      this.idiomas.some(
+        i => i.idioma.trim().toLowerCase() === this.idioma.idioma.trim().toLowerCase()
+      )
+    ) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Idioma ya registrado',
+        text: 'Este idioma ya ha sido agregado.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    // Guardar nuevo o actualizar existente
+    if (this.editIndexIdioma !== null) {
+      this.idiomas[this.editIndexIdioma] = { ...this.idioma };
+    } else {
+      this.idiomas.push({ ...this.idioma });
+    }
+
+    this.cerrarModalIdioma();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Idioma guardado',
+      text: 'El idioma ha sido registrado correctamente.',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
+  }
+
+  // Editar idioma
+  editarIdioma(index: number) {
+    this.idioma = { ...this.idiomas[index] };
+    this.editIndexIdioma = index;
+    this.mostrarModalIdioma = true;
+  }
+
+  // Eliminar idioma
+  eliminarIdioma(index: number) {
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: 'Esta acción eliminará el registro de idioma.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#6c757d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.idiomas.splice(index, 1);
+        Swal.fire({
+          icon: 'success',
+          title: 'Eliminado',
+          text: 'El registro fue eliminado correctamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'
+        });
+      }
+    });
+  }
+
+  // Guardar final
+  guardarIdiomas(seccion: string) {
+    if (this.idiomas.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Sin idiomas',
+        text: 'Debe agregar al menos un idioma antes de guardar.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Idiomas guardados',
+      text: 'Los idiomas han sido registrados correctamente.',
+      confirmButtonColor: '#2e7d32'
+    });
+
+    console.log('Datos guardados para', seccion, this.idiomas);
+  }
+
+  // ********************************************************************************************************** //
   // ************************* //  
   // ******  OFIMATICA ******* //  
   // ************************* //  
   guardarOfimatica(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
-  }
-  // ************************************* //
-  // ******  REFERENCIA LABORALES ******* //  
-  // *********************************** //
-  guardarReferenciasLaborales(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+    const datosOfimatica = this.datos[seccion];
+
+    if (!datosOfimatica.nivelIntermedio) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campo obligatorio',
+        text: 'Debe indicar si cuenta con conocimientos de ofimática a nivel intermedio.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado exitoso',
+      text: `La sección "${seccion}" ha sido guardada correctamente.`,
+      confirmButtonColor: '#1e8e3e'
+    });
   }
 
-
+  // ********************************************************************************************************** //
   // ******************************************* //
   // ******  Bonificaciones Adicionales ******* //  
-  // ***************************************** //
+  // ***************************************** //  
+  personasdiscapacidad: string[] = [
+    'Que las evaluaciones del proceso de selección se efectúen en el primer piso',
+    'Ubicarse en las primeras filas donde se realizan las evaluaciones ',
+    'Apoyo visual, gestual y oral para mejorar la comprensión de las instrucciones ',
+    'Intérprete de señas durante la evaluación o entrevista personal',
+    'Autorizar que el postulante con discapacidad responda o realice preguntas escritas durante la entrevista '
+  ];
+  ajustesSeleccionados: boolean[] = new Array(this.personasdiscapacidad.length).fill(false);
   guardarBonificacionesAdicionales(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
+    const datos = this.datos[seccion];
+
+    // Validaciones simples
+    if (!datos.licenciadoFuerzasArmadas || !datos.tieneDiscapacidad) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Debe seleccionar si es licenciado y si tiene discapacidad.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Validación de código si es "sí"
+    if (datos.licenciadoFuerzasArmadas === 'si' && !datos.codigoLicenciado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Código requerido',
+        text: 'Debe ingresar el número de carnet de licenciado.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    if (datos.tieneDiscapacidad === 'si' && !datos.codigoDiscapacidad) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Código requerido',
+        text: 'Debe ingresar el número de carnet de discapacidad.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Validar al menos un ajuste razonable
+    const ajustesMarcados = this.ajustesSeleccionados
+      .map((checked, i) => (checked ? this.personasdiscapacidad[i] : null))
+      .filter(v => v !== null);
+
+    if (ajustesMarcados.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Ajustes razonables',
+        text: 'Debe seleccionar al menos un ajuste razonable.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Guardar ajustes seleccionados
+    this.datos[seccion].ajustesSeleccionados = ajustesMarcados;
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado exitoso',
+      text: `La sección "${seccion}" ha sido guardada correctamente.`,
+      confirmButtonColor: '#1e8e3e'
+    });
   }
 
+  // ********************************************************************************************************** //
   // ***************************************** //
-  // ******  DECLARACION JURADA ******* //  
+  // *********  DECLARACION JURADA ********** //  
   // *************************************** //
-  guardarDeclaracionJurada(seccion: string) {
-    console.log('Datos guardados para', seccion, this.datos[seccion]);
-    alert(`Datos guardados para ${seccion}`);
-  }
 
   declaracionesJurada: string[] = [
     'No tener condena por delito doloso, con sentencia firme',
@@ -274,30 +889,74 @@ export class MiPerfilComponent {
     'No estar inscrito en el Registro Único de Condenados Inhabilitados por Delitos contra la Administración Pública, creado por Decreto Legislativo N° 1243',
     'Gozar de buen estado de salud física y mental'
   ];
+  declaracionesSeleccionadas: boolean[] = new Array(this.declaracionesJurada.length).fill(false);
+  guardarDeclaracionJurada(seccion: string) {
+    const todasMarcadas = this.declaracionesSeleccionadas.every(seleccionada => seleccionada);
+
+    if (!todasMarcadas) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Declaración incompleta',
+        html: 'Debes aceptar todas las declaraciones juradas para continuar.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    // Guardar lógicamente si se necesita
+    const declaracionesAceptadas = this.declaracionesJurada.filter((_, i) => this.declaracionesSeleccionadas[i]);
+    console.log('Declaraciones aceptadas:', declaracionesAceptadas);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Guardado exitoso',
+      text: `La sección "${seccion}" ha sido guardada correctamente.`,
+      confirmButtonColor: '#1e8e3e'
+    });
+  }
+
+  // ********************************************************************************************************** //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
   // ***************************************** //
   // ******  DISPONIBILIDAD DE VIAJAR ******* //  
   // *************************************** //
-  guardarDisponibilidadViajar(seccion: string) {
-    const datosSeccion = this.datos[seccion];
+  // guardarDisponibilidadViajar(seccion: string) {
+  //   const datosSeccion = this.datos[seccion];
 
-    // Validar que se haya seleccionado una opción
-    if (datosSeccion.disponibleInterior === undefined || datosSeccion.disponibleInterior === null) {
-      alert('Por favor, seleccione si tiene disponibilidad para trabajar en el interior del país.');
-      return;
-    }
+  //   // Validar que se haya seleccionado una opción
+  //   if (datosSeccion.disponibleInterior === undefined || datosSeccion.disponibleInterior === null) {
+  //     alert('Por favor, seleccione si tiene disponibilidad para trabajar en el interior del país.');
+  //     return;
+  //   }
 
-    // Aquí podrías guardar los datos, enviarlos a una API, etc.
-    console.log('Datos guardados para:', seccion);
-    console.log('Tipo Documento:', datosSeccion.tipoDocumentos);
-    console.log('Nro Documento:', datosSeccion.nroDocumento);
-    console.log('RUC:', datosSeccion.ruc);
-    console.log('Disponibilidad para interior del país:', datosSeccion.disponibleInterior ? 'Sí' : 'No');
+  //   // Aquí podrías guardar los datos, enviarlos a una API, etc.
+  //   console.log('Datos guardados para:', seccion);
+  //   console.log('Tipo Documento:', datosSeccion.tipoDocumentos);
+  //   console.log('Nro Documento:', datosSeccion.nroDocumento);
+  //   console.log('RUC:', datosSeccion.ruc);
+  //   console.log('Disponibilidad para interior del país:', datosSeccion.disponibleInterior ? 'Sí' : 'No');
 
-    alert(`Datos guardados para ${seccion}`);
-  }
-
+  //   alert(`Datos guardados para ${seccion}`);
+  // }  
 
 }
