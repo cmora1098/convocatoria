@@ -83,11 +83,20 @@ const routes: Routes = [
       },
       // Para el Rol del Evaluador - Fin
 
+
+
+
+      // *****************************************************************************************************************************************************
       // Para el Rol del Postulante - Inicio
       {
         path: 'MiPerfil',
         canActivate: [AuthGuard],
         loadComponent: () => import('./03_miperfil/miperfil.component').then((c) => c.MiPerfilComponent)
+      }, 
+      {
+        path: 'BuscarConvocatoria',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./03_buscarconvocatoria/buscarconvocatoria.component').then((c) => c.BuscarConvocatoriaComponent)
       },
       // Para el Rol del Postulante - Fin
 

@@ -61,17 +61,21 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
-import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
-import { ChatMsgComponent } from './chat-msg/chat-msg.component';
+// import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
+// import { ChatMsgComponent } from './chat-msg/chat-msg.component';
 
 
 import { AuthService } from '../../../../../services/auth.service';
 import { Router } from '@angular/router';
 
+
+import Swal from 'sweetalert2';
+
+
 @Component({
   selector: 'app-nav-right',
   standalone: true,
-  imports: [SharedModule, ChatUserListComponent, ChatMsgComponent],
+  imports: [SharedModule], // ChatUserListComponent, ChatMsgComponent
   templateUrl: './nav-right.component.html',
   styleUrls: ['./nav-right.component.scss'],
   providers: [NgbDropdownConfig],
@@ -142,4 +146,65 @@ export class NavRightComponent {
         return 'Usuario';
     }
   }
+
+
+  // PARA EL CAMBIO DE CONTRASEÑA
+  mostrarModalPassword = false;
+  passwordActual = '';
+  nuevaPassword = '';
+  verPasswordActual = false;
+  verNuevaPassword = false;
+
+  // Abrir modal
+  abrirModalPassword() {
+    this.passwordActual = '';
+    this.nuevaPassword = '';
+    this.verPasswordActual = false;
+    this.verNuevaPassword = false;
+    this.mostrarModalPassword = true;
+  }
+
+  // Cerrar modal
+  cerrarModalPassword() {
+    this.mostrarModalPassword = false;
+  }
+
+  // Guardar contraseña
+  guardarPassword() {
+    if (!this.passwordActual || !this.nuevaPassword) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos obligatorios',
+        text: 'Debe completar ambos campos',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    if (this.nuevaPassword.length < 6) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Contraseña débil',
+        text: 'La nueva contraseña debe tener al menos 6 caracteres',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
+    this.cerrarModalPassword();
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Contraseña actualizada',
+      text: 'La contraseña ha sido cambiada correctamente',
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
+  }
+
+
+
+
 }

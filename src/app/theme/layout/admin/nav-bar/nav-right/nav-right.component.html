@@ -153,7 +153,7 @@
 
 <ul class="navbar-nav ms-auto">
   <!-- 🔔 Notificaciones -->
-  <li>
+  <!-- <li>
     <div class="dropdown" ngbDropdown placement="auto">
       <a ngbDropdownToggle href="javascript:">
         <i class="icon feather icon-bell" title="Notification"></i>
@@ -192,17 +192,17 @@
         </div>
       </div>
     </div>
-  </li>
+  </li> -->
 
   <!-- 📩 Chat -->
-  <li (click)="this.visibleUserList = !this.visibleUserList">
+  <!-- <li (click)="this.visibleUserList = !this.visibleUserList">
     <div class="dropdown">
       <a href="javascript:" class="displayChatbox dropdown-toggle">
         <i class="icon feather icon-mail" title="Mail InBox"></i>
         <span class="badge bg-success"><span class="sr-only"></span></span>
       </a>
     </div>
-  </li>
+  </li> -->
 
   <!-- 👤 Usuario logeado -->
   <li>
@@ -216,8 +216,8 @@
           <div>
             <span class="fw-bold d-block">{{ user?.nombres }}</span>
             <small class="text-muted d-block"><b>{{
-              user?.correoElectronico
-              }}</b></small>
+                user?.correoElectronico
+                }}</b></small>
             <small class="badge" [ngClass]="{
                 'bg-primary': user?.codRol === 1,
                 'bg-success': user?.codRol === 2,
@@ -253,6 +253,13 @@
               Mis Postulaciones
             </a>
           </li> -->
+          <li *ngIf="user?.codRol === 3">
+            <a href="javascript:" class="dropdown-item" (click)="abrirModalPassword()">
+              <i class="feather icon-edit"></i>
+              Cambiar contraseña
+            </a>
+          </li>
+
           <li>
             <a href="javascript:" class="dropdown-item" (click)="logout()">
               <i class="feather icon-log-out"></i>
@@ -265,8 +272,59 @@
   </li>
 </ul>
 
+<!-- Modal Cambiar Contraseña -->
+<div class="modal fade" id="modalCambiarPassword" tabindex="-1" [ngClass]="{ 'show d-block': mostrarModalPassword }"
+  role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">Cambiar Contraseña</h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalPassword()"></button>
+      </div>
+
+      <div class="modal-body">
+        <form>
+
+          <!-- Contraseña actual -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Contraseña actual *</label>
+            <div class="input-group">
+              <input [type]="verPasswordActual ? 'text' : 'password'" class="form-control" [(ngModel)]="passwordActual"
+                name="passwordActual" placeholder="Ingrese su contraseña actual" />
+              <button class="btn btn-outline-secondary" type="button" (click)="verPasswordActual = !verPasswordActual">
+                <i class="feather" [ngClass]="verPasswordActual ? 'icon-eye-off' : 'icon-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nueva contraseña -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Nueva contraseña *</label>
+            <div class="input-group">
+              <input [type]="verNuevaPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="nuevaPassword"
+                name="nuevaPassword" placeholder="Ingrese su nueva contraseña" />
+              <button class="btn btn-outline-secondary" type="button" (click)="verNuevaPassword = !verNuevaPassword">
+                <i class="feather" [ngClass]="verNuevaPassword ? 'icon-eye-off' : 'icon-eye'"></i>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalPassword()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardarPassword()">Guardar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
 <!-- Chat windows -->
-@if (visibleUserList) {
+<!-- @if (visibleUserList) {
 <section class="header-user-list" [ngClass]="{ open: visibleUserList }" [@slideInOutLeft]>
   <app-chat-user-list (ChatToggle)="onChatToggle($event)"
     (ChatCollapse)="this.visibleUserList = !this.visibleUserList; this.chatMessage = false" />
@@ -287,4 +345,4 @@
 <section class="header-chat" [ngClass]="{ open: chatMessage }" [@slideInOutRight]>
   <app-chat-msg (ChatToggle)="this.chatMessage = !this.chatMessage" [friendId]="friendId" />
 </section>
-}
+} -->

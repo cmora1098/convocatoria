@@ -141,8 +141,7 @@
                                 </div>
                             </form>
 
-                            <!-- Collapse Formación Académica -->
-                            <form *ngIf="item === 'Formación Académica'">
+                            <form #form="ngForm" *ngIf="item === 'Formación Académica'">
                                 <div class="mb-3">
                                     <small class="text-muted d-block mb-2">
                                         Registre en esta sección la información relacionada a su formación académica.
@@ -181,86 +180,99 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                            </form>
 
-                            <!-- Modal Formación Académica -->
-                            <div class="modal fade" id="modalFormacionAcademica" tabindex="-1"
-                                [ngClass]="{ 'show d-block': mostrarModalFormacion }">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
+                                <!-- Modal Formación Académica -->
+                                <div class="modal fade" id="modalFormacionAcademica" tabindex="-1"
+                                    [ngClass]="{ 'show d-block': mostrarModalFormacion }">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
 
-                                        <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title">Datos de Formación Académica</h5>
-                                            <button type="button" class="btn-close btn-close-white"
-                                                (click)="cerrarModalFormacion()"></button>
-                                        </div>
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title">Datos sobre la formación académica</h5>
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    (click)="cerrarModalFormacion()"></button>
+                                            </div>
 
-                                        <div class="modal-body">
-                                            <form>
-                                                <div class="row">
-                                                    <!-- Nivel Académico -->
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label fw-bold">Nivel Académico *</label>
-                                                        <select class="form-select" [(ngModel)]="formacion.nivel"
-                                                            name="nivel">
-                                                            <option value="">-- Seleccionar --</option>
-                                                            <option>Primaria</option>
-                                                            <option>Secundaria</option>
-                                                            <option>Carrera Técnica</option>
-                                                            <option>Egresado Universitario</option>
-                                                            <option>Bachiller Universitario</option>
-                                                            <option>Título Universitario</option>
-                                                            <option>Estudios de Maestría</option>
-                                                            <option>Egresado de Maestría</option>
-                                                            <option>Grado de Maestría</option>
-                                                            <option>Estudios de Doctorado</option>
-                                                            <option>Egresado de Doctorado</option>
-                                                            <option>Grado de Doctorado</option>
-                                                        </select>
+                                            <div class="modal-body">
+                                                <form #form="ngForm">
+                                                    <!-- Nivel Académico / Institución-->
+                                                    <div class="row">
+                                                        <!-- Nivel Académico -->
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label fw-bold">Nivel Académico *</label>
+                                                            <select class="form-select" [(ngModel)]="formacion.nivel"
+                                                                name="nivel" required>
+                                                                <option value="">-- Seleccionar --</option>
+                                                                <option>Primaria</option>
+                                                                <option>Secundaria</option>
+                                                                <option>Carrera Técnica</option>
+                                                                <option>Egresado Universitario</option>
+                                                                <option>Bachiller Universitario</option>
+                                                                <option>Título Universitario</option>
+                                                                <option>Estudios de Maestría</option>
+                                                                <option>Egresado de Maestría</option>
+                                                                <option>Grado de Maestría</option>
+                                                                <option>Estudios de Doctorado</option>
+                                                                <option>Egresado de Doctorado</option>
+                                                                <option>Grado de Doctorado</option>
+                                                            </select>
+                                                        </div>
+
+                                                        <!-- Institución -->
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label fw-bold">Colegio / Institución /
+                                                                Universidad *</label>
+                                                            <input type="text" class="form-control"
+                                                                [(ngModel)]="formacion.institucion" name="institucion"
+                                                                required />
+                                                        </div>
                                                     </div>
 
-                                                    <!-- Institución -->
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label fw-bold">Colegio / Institución /
-                                                            Universidad *</label>
-                                                        <input type="text" class="form-control"
-                                                            [(ngModel)]="formacion.institucion" name="institucion" />
-                                                    </div>
-                                                </div>
-
-                                                <div class="row">
                                                     <!-- Especialización -->
-                                                    <div class="col-md-12 mb-3">
-                                                        <label class="form-label fw-bold">Profesión /
-                                                            Especialidad</label>
-                                                        <input type="text" class="form-control"
-                                                            [(ngModel)]="formacion.cespecializacion"
-                                                            name="cespecializacion" />
+                                                    <div class="row">
+                                                        <div class="col-md-12 mb-3">
+                                                            <label class="form-label fw-bold">Profesión /
+                                                                Especialidad</label>
+                                                            <input type="text" class="form-control"
+                                                                [(ngModel)]="formacion.cespecializacion"
+                                                                name="cespecializacion" />
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <div class="row">
                                                     <!-- Fecha -->
-                                                    <div class="col-md-6 mb-3">
-                                                        <label class="form-label fw-bold">Fecha Egreso / Bachiller /
-                                                            Título *</label>
-                                                        <input type="date" class="form-control"
-                                                            [(ngModel)]="formacion.fechaInicio" name="fechaInicio" />
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label fw-bold">Fecha Egreso / Bachiller /
+                                                                Título *</label>
+                                                            <input type="date" class="form-control"
+                                                                [(ngModel)]="formacion.fechaInicio" name="fechaInicio"
+                                                                required />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </form>
-                                        </div>
+                                                </form>
+                                            </div>
 
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                (click)="cerrarModalFormacion()">Cancelar</button>
-                                            <button type="button" class="btn btn-primary"
-                                                (click)="guardarFormacion()">Guardar</button>
-                                        </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    (click)="cerrarModalFormacion()">Cancelar</button>
+                                                <button type="button" class="btn btn-primary"
+                                                    (click)="guardarFormacion()">Guardar</button>
+                                            </div>
 
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+
+                                <!-- Botones inferiores -->
+                                <div class="d-flex justify-content-end gap-2 mt-3">
+                                    <button type="submit" class="btn btn-danger"
+                                        [disabled]="form.invalid">Guardar</button>
+                                    <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
+                                </div>
+                            </form>
+
+
+
 
                             <form *ngIf="item === 'Colegiatura'" (ngSubmit)="guardarColegiatura(item)" #formDP="ngForm">
                                 <div class="row">
@@ -335,7 +347,6 @@
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
-
 
                             <form *ngIf="item === 'Experiencia Laboral'" #formExp="ngForm"
                                 (ngSubmit)="guardarExperienciaLaboral()">
@@ -517,7 +528,7 @@
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
                                             <form #formModal="ngForm" (ngSubmit)="guardarExperienciaLaboral()">
-                                                <div class="modal-header bg-dark text-white">
+                                                <div class="modal-header bg-primary text-white">
                                                     <h5 class="modal-title">Registrar Experiencia {{
                                                         experienciaLaboralActual.tipo }}</h5>
                                                     <button type="button" class="btn-close"
@@ -727,7 +738,6 @@
                                         [disabled]="formDP.invalid || cursosDiplomados.length === 0">Guardar</button>
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
-
                             </form>
 
                             <form *ngIf="item === 'Idiomas'" (ngSubmit)="guardarIdiomas(item)" #formDP="ngForm">

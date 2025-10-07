@@ -564,6 +564,22 @@ export const NavigationItems: NavigationItem[] = [
         roles: [3]
       },
       {
+        id: '03_buscarconvocatoria',
+        title: 'Convocatorias',
+        type: 'collapse',
+        icon: 'feather icon-briefcase',
+        roles: [3],
+        children: [
+          {
+            id: 'BuscarConvocatoria',
+            title: 'Buscar Convocatoria',
+            type: 'item',
+            url: '/component/BuscarConvocatoria',
+            roles: [3]
+          }
+        ]
+      },
+      {
         id: '03_miperfil',
         title: 'Postulante',
         type: 'collapse',
@@ -578,15 +594,7 @@ export const NavigationItems: NavigationItem[] = [
             roles: [3]
           }
         ]
-      },
-      {
-        id: 'postulaciones',
-        title: 'Postulaciones',
-        type: 'item',
-        url: '/postulaciones',
-        icon: 'feather icon-briefcase',
-        roles: [3]
-      },
+      }, 
       {
         id: 'signin',
         title: 'Cerrar Sesión',
