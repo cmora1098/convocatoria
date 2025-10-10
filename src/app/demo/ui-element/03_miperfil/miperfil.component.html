@@ -89,42 +89,42 @@
                                 </div>
 
                                 <div class="row">
-                                    <!-- Departamento Nacimiento -->
+                                    <!-- Departamento -->
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Departamento</label>
                                         <select class="form-control"
                                             [(ngModel)]="datos['Datos Personales'].departamentoNacimiento"
                                             name="departamentoNacimiento"
                                             (change)="onDepartamentoChange(datos['Datos Personales'].departamentoNacimiento)">
-                                            <option value="">--Seleccionar--</option>
+                                            <option value="">-- Seleccionar --</option>
                                             <option *ngFor="let dpto of departamentos" [value]="dpto.vCodDepartamento">
                                                 {{ dpto.vNomDepartamento }}
                                             </option>
                                         </select>
                                     </div>
 
-                                    <!-- Provincia Nacimiento -->
+                                    <!-- Provincia -->
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Provincia</label>
                                         <select class="form-control"
                                             [(ngModel)]="datos['Datos Personales'].provinciaNacimiento"
                                             name="provinciaNacimiento"
                                             (change)="onProvinciaChange(datos['Datos Personales'].provinciaNacimiento)"
-                                            [disabled]="provincias.length === 0">
-                                            <option value="">--Seleccionar--</option>
+                                            [disabled]="!provincias.length">
+                                            <option value="">-- Seleccionar --</option>
                                             <option *ngFor="let prov of provincias" [value]="prov.vCodProvincia">
                                                 {{ prov.vNomProvincia }}
                                             </option>
                                         </select>
                                     </div>
 
-                                    <!-- Distrito Nacimiento -->
+                                    <!-- Distrito -->
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Distrito</label>
                                         <select class="form-control"
                                             [(ngModel)]="datos['Datos Personales'].distritoNacimiento"
-                                            name="distritoNacimiento" [disabled]="distritos.length === 0">
-                                            <option value="">--Seleccionar--</option>
+                                            name="distritoNacimiento" [disabled]="!distritos.length">
+                                            <option value="">-- Seleccionar --</option>
                                             <option *ngFor="let dist of distritos" [value]="dist.vCodDistrito">
                                                 {{ dist.vNomDistrito }}
                                             </option>
@@ -193,7 +193,7 @@
                                     </thead>
                                     <tbody>
                                         <tr *ngFor="let f of formaciones; let i = index">
-                                            <td>{{ f.nivel }}</td>
+                                            <td>{{ obtenerNombreNivel(f.nivel) }}</td>
                                             <td>{{ f.institucion }}</td>
                                             <td>{{ f.cespecializacion }}</td>
                                             <td>{{ f.fechaInicio | date:'longDate' }}</td>
@@ -231,20 +231,13 @@
                                                             <select class="form-select" [(ngModel)]="formacion.nivel"
                                                                 name="nivel" required
                                                                 [ngClass]="{'is-invalid': modalForm.submitted && !formacion.nivel}">
-                                                                <option value="">-- Seleccionar --</option>
-                                                                <option>Primaria</option>
-                                                                <option>Secundaria</option>
-                                                                <option>Carrera Técnica</option>
-                                                                <option>Egresado Universitario</option>
-                                                                <option>Bachiller Universitario</option>
-                                                                <option>Título Universitario</option>
-                                                                <option>Estudios de Maestría</option>
-                                                                <option>Egresado de Maestría</option>
-                                                                <option>Grado de Maestría</option>
-                                                                <option>Estudios de Doctorado</option>
-                                                                <option>Egresado de Doctorado</option>
-                                                                <option>Grado de Doctorado</option>
+                                                                <option value="0">-- Seleccionar --</option>
+                                                                <option *ngFor="let n of nivelesAcademicos"
+                                                                    [value]="n.id">
+                                                                    {{ n.nombre }}
+                                                                </option>
                                                             </select>
+
                                                             <div class="invalid-feedback">Este campo es obligatorio.
                                                             </div>
                                                         </div>
@@ -308,46 +301,41 @@
                                         <label class="form-label">Colegio Profesional *</label>
                                         <select class="form-control" name="colegioprofesional"
                                             [(ngModel)]="colegiatura.colegio" required>
-                                            <option value="">-- SELECCIONE COLEGIO PROFESIONAL --</option>
-                                            <option value="abogados">COLEGIO DE ABOGADOS DEL PERÚ</option>
-                                            <option value="antropologos">COLEGIO DE ANTROPÓLOGOS DEL PERÚ</option>
-                                            <option value="arqueologos">COLEGIO DE ARQUEÓLOGOS DEL PERÚ</option>
-                                            <option value="arquitectos">COLEGIO DE ARQUITECTOS DEL PERÚ</option>
-                                            <option value="bibliotecologos">COLEGIO DE BIBLIOTECÓLOGOS DEL PERÚ</option>
-                                            <option value="biologos">COLEGIO DE BIÓLOGOS DEL PERÚ</option>
-                                            <option value="contadores">COLEGIO DE CONTADORES PÚBLICOS DEL PERÚ</option>
-                                            <option value="economistas">COLEGIO DE ECONOMISTAS DEL PERÚ</option>
-                                            <option value="enfermeros">COLEGIO DE ENFERMERAS(OS) DEL PERÚ</option>
-                                            <option value="estadisticos">COLEGIO DE ESTADÍSTICOS DEL PERÚ</option>
-                                            <option value="fisicos">COLEGIO DE FÍSICOS DEL PERÚ</option>
-                                            <option value="geografos">COLEGIO DE GEÓGRAFOS DEL PERÚ</option>
-                                            <option value="ingenieros">COLEGIO DE INGENIEROS DEL PERÚ</option>
-                                            <option value="administradores">COLEGIO DE LICENCIADOS EN ADMINISTRACIÓN
+                                            <option value="0">-- SELECCIONE COLEGIO PROFESIONAL --</option>
+                                            <option value="1">COLEGIO DE ABOGADOS DEL PERÚ</option>
+                                            <option value="2">COLEGIO DE ANTROPÓLOGOS DEL PERÚ</option>
+                                            <option value="3">COLEGIO DE ARQUEÓLOGOS DEL PERÚ</option>
+                                            <option value="4">COLEGIO DE ARQUITECTOS DEL PERÚ</option>
+                                            <option value="5">COLEGIO DE BIBLIOTECÓLOGOS DEL PERÚ</option>
+                                            <option value="6">COLEGIO DE BIÓLOGOS DEL PERÚ</option>
+                                            <option value="7">COLEGIO DE CONTADORES PÚBLICOS DEL PERÚ</option>
+                                            <option value="8">COLEGIO DE ECONOMISTAS DEL PERÚ</option>
+                                            <option value="9">COLEGIO DE ENFERMERAS(OS) DEL PERÚ</option>
+                                            <option value="10">COLEGIO DE ESTADÍSTICOS DEL PERÚ</option>
+                                            <option value="11">COLEGIO DE FÍSICOS DEL PERÚ</option>
+                                            <option value="12">COLEGIO DE GEÓGRAFOS DEL PERÚ</option>
+                                            <option value="13">COLEGIO DE INGENIEROS DEL PERÚ</option>
+                                            <option value="14">COLEGIO DE LICENCIADOS EN ADMINISTRACIÓN</option>
+                                            <option value="15">COLEGIO DE LICENCIADOS EN COOPERATIVISMO DEL PERÚ
                                             </option>
-                                            <option value="cooperativismo">COLEGIO DE LICENCIADOS EN COOPERATIVISMO DEL
-                                                PERÚ</option>
-                                            <option value="turismo">COLEGIO DE LICENCIADOS EN TURISMO DEL PERÚ</option>
-                                            <option value="matematicos">COLEGIO DE MATEMÁTICOS DEL PERÚ</option>
-                                            <option value="medicos">COLEGIO MÉDICO DEL PERÚ</option>
-                                            <option value="veterinarios">COLEGIO MÉDICO VETERINARIO DEL PERÚ</option>
-                                            <option value="notarios">COLEGIO DE NOTARIOS DEL PERÚ</option>
-                                            <option value="nutricionistas">COLEGIO DE NUTRICIONISTAS DEL PERÚ</option>
-                                            <option value="obstetras">COLEGIO DE OBSTETRAS DEL PERÚ</option>
-                                            <option value="odontologos">COLEGIO ODONTOLÓGICO DEL PERÚ</option>
-                                            <option value="marina">COLEGIO DE OFICIALES DE MARINA MERCANTE DEL PERÚ
-                                            </option>
-                                            <option value="periodistas">COLEGIO DE PERIODISTAS DEL PERÚ</option>
-                                            <option value="profesores">COLEGIO DE PROFESORES DEL PERÚ</option>
-                                            <option value="psicologos">COLEGIO DE PSICÓLOGOS DEL PERÚ</option>
-                                            <option value="quimicos">COLEGIO DE QUÍMICOS DEL PERÚ</option>
-                                            <option value="quimicofarmaceuticos">COLEGIO QUÍMICO-FARMACÉUTICO DEL PERÚ
-                                            </option>
-                                            <option value="relacionistas">COLEGIO DE RELACIONISTAS PÚBLICOS DEL PERÚ
-                                            </option>
-                                            <option value="sociologos">COLEGIO DE SOCIÓLOGOS DEL PERÚ</option>
-                                            <option value="tecnologos">COLEGIO TECNÓLOGO MÉDICO DEL PERÚ</option>
-                                            <option value="trabajo_social">COLEGIO DE TRABAJADORES SOCIALES DEL PERÚ
-                                            </option>
+                                            <option value="16">COLEGIO DE LICENCIADOS EN TURISMO DEL PERÚ</option>
+                                            <option value="17">COLEGIO DE MATEMÁTICOS DEL PERÚ</option>
+                                            <option value="18">COLEGIO MÉDICO DEL PERÚ</option>
+                                            <option value="19">COLEGIO MÉDICO VETERINARIO DEL PERÚ</option>
+                                            <option value="20">COLEGIO DE NOTARIOS DEL PERÚ</option>
+                                            <option value="21">COLEGIO DE NUTRICIONISTAS DEL PERÚ</option>
+                                            <option value="22">COLEGIO DE OBSTETRAS DEL PERÚ</option>
+                                            <option value="23">COLEGIO ODONTOLÓGICO DEL PERÚ</option>
+                                            <option value="24">COLEGIO DE OFICIALES DE MARINA MERCANTE DEL PERÚ</option>
+                                            <option value="25">COLEGIO DE PERIODISTAS DEL PERÚ</option>
+                                            <option value="26">COLEGIO DE PROFESORES DEL PERÚ</option>
+                                            <option value="27">COLEGIO DE PSICÓLOGOS DEL PERÚ</option>
+                                            <option value="28">COLEGIO DE QUÍMICOS DEL PERÚ</option>
+                                            <option value="29">COLEGIO QUÍMICO-FARMACÉUTICO DEL PERÚ</option>
+                                            <option value="30">COLEGIO DE RELACIONISTAS PÚBLICOS DEL PERÚ</option>
+                                            <option value="31">COLEGIO DE SOCIÓLOGOS DEL PERÚ</option>
+                                            <option value="32">COLEGIO TECNÓLOGO MÉDICO DEL PERÚ</option>
+                                            <option value="33">COLEGIO DE TRABAJADORES SOCIALES DEL PERÚ</option>
                                         </select>
                                     </div>
 
@@ -361,12 +349,14 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">¿Se encuentra habilitado?</label>
                                         <select class="form-control" name="habilitado"
-                                            [(ngModel)]="colegiatura.habilitado" required>
-                                            <option value="">-- SELECCIONE --</option>
-                                            <option value="si">SÍ</option>
-                                            <option value="no">NO</option>
+                                            [(ngModel)]="colegiatura.habilitado" [ngModelOptions]="{standalone: true}"
+                                            required>
+                                            <option [ngValue]="null">-- SELECCIONE --</option>
+                                            <option [ngValue]="true">SÍ</option>
+                                            <option [ngValue]="false">NO</option>
                                         </select>
                                     </div>
+
                                 </div>
 
                                 <div class="d-flex justify-content-end gap-2 mt-3">
@@ -874,9 +864,9 @@
                             <form *ngIf="item === 'Ofimática'" (ngSubmit)="guardarOfimatica(item)" #formDP="ngForm">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">¿Ofimática a nivel intermedio?</label>
-                                    <select class="form-control" name="nivelIntermedio" required
-                                        [(ngModel)]="datos[item].nivelIntermedio">
-                                        <option value="">-- SELECCIONE --</option>
+                                    <select name="nivelIntermedio" required class="form-control"
+                                        [(ngModel)]="datos['Ofimática'].nivelIntermedio">
+                                        <option value="0">-- SELECCIONE --</option>
                                         <option value="true">SÍ</option>
                                         <option value="false">NO</option>
                                     </select>
@@ -983,53 +973,6 @@
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
-
-                            <!-- <form *ngIf="item === 'Referencias Laborales'"
-                                (ngSubmit)="guardarReferenciasLaborales(item)" #formDP="ngForm">
-
-
-                                <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <button type="submit" class="btn btn-danger"
-                                        [disabled]="formDP.invalid">Guardar</button>
-                                    <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
-                                </div>
-                            </form> -->
-
-                            <!-- <form *ngIf="item === 'Disponibilidad de Viajar'"
-                                (ngSubmit)="guardarDisponibilidadViajar(item)" #formDP="ngForm">
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">
-                                        Disponibilidad para trabajar en el interior del País:
-                                    </label>
-                                    <small class="text-muted d-block mb-2">
-                                        Registre en esta sección si cuenta con disponibilidad para trasladarse a las
-                                        diferentes sedes del AGRORURAL a nivel nacional, según las necesidades de la
-                                        institución.
-                                    </small>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="disponibilidad"
-                                            id="disponibleSi" [value]="true" required>
-                                        <label class="form-check-label" for="disponibleSi">Sí</label>
-                                    </div>
-
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="disponibilidad"
-                                            id="disponibleNo" [value]="false">
-                                        <label class="form-check-label" for="disponibleNo">No</label>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <button type="submit" class="btn btn-danger" [disabled]="formDP.invalid">
-                                        Guardar
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" (click)="volver()">
-                                        Volver
-                                    </button>
-                                </div>
-                            </form> -->
 
                         </div>
                     </div>

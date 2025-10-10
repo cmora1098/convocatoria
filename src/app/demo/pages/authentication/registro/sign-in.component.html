@@ -8,8 +8,7 @@
         ¡Atención postulantes! Aquí encontrarás las convocatorias más recientes
         para trabajar en el Programa de Desarrollo Productivo Agrario Rural.
       </p>
-      <p>Se ofrecerán plazas laborales para distintos niveles educativos,
-        incluyendo:</p>
+      <p>Se ofrecerán plazas laborales para distintos niveles educativos, incluyendo:</p>
       <ul>
         <li>Personas con secundaria completa</li>
       </ul>
@@ -20,101 +19,88 @@
   <div class="auth-content right-panel">
     <div class="card">
       <div class="card-body">
-        <!-- Logo opcional -->
-        <!-- <img src="assets/images/logo.png" alt="Logo AGRO RURAL" class="logo img-fluid mb-4" /> -->
 
         <h2 class="text-center mb-4">Registrar Cuenta</h2>
 
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-          <!-- Fila 1: Tipo de Documento y Número de Documento -->
-          <!-- <div class="form-group row mb-3">
-            <div class="col-6">
-              <label for="tipo-doc" class="form-label">Tipo de Documento</label> 
-              <select id="tipo-doc" required class="form-control" aria-label="Tipo de Documento"
-                formControlName="tipoDocumento">
-                <option value disabled selected>Seleccione</option>
-                <option [value]="0">DNI</option>
-                <option [value]="1">Carné de Extranjería</option>
-                <option [value]="2">Pasaporte</option>
-              </select> 
-            </div>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
 
-            <div class="col-6">
-              <label for="num-doc" class="form-label">Número de
-                Documento</label>
-              <input id="num-doc" type="text" formControlName="numDocumento" placeholder="Número de Documento" required pattern="[0-9]*"
-                inputmode="numeric" class="form-control" aria-label="Número de Documento" />
-            </div>
-          </div> -->
-
+          <!-- Tipo y Número de Documento -->
           <div class="form-group row mb-3">
             <div class="col-6">
               <label for="tipo-doc" class="form-label">Tipo de Documento</label>
-              <select id="tipo-doc" required class="form-control" aria-label="Tipo de Documento"
-                formControlName="tipoDocumento">
+              <select id="tipo-doc" class="form-control" aria-label="Tipo de Documento" formControlName="tipoDocumento">
                 <option value="0" selected>Seleccione</option>
-                <!-- Aquí mapeamos las opciones desde la variable "tiposDocumentos" -->
-                <option *ngFor="let tipo of tiposDocumentos" [value]="tipo.codTipoDocumento">{{ tipo.nombreDocumento }}
+                <option *ngFor="let tipo of tiposDocumentos" [value]="tipo.codTipoDocumento">
+                  {{ tipo.nombreDocumento }}
                 </option>
               </select>
+              <small class="text-danger" id="errorTipoDocumento"></small>
             </div>
             <div class="col-6">
-              <label for="num-doc" class="form-label">Número de
-                Documento</label>
-              <input id="num-doc" type="text" formControlName="numDocumento" placeholder="Número de Documento" required
-                pattern="[0-9]*" inputmode="numeric" class="form-control" aria-label="Número de Documento" />
+              <label for="num-doc" class="form-label">Número de Documento</label>
+              <input id="num-doc" type="text" formControlName="numDocumento" placeholder="Número de Documento"
+                maxlength="15" pattern="[0-9]*" inputmode="numeric" class="form-control"
+                aria-label="Número de Documento" (keypress)="soloNumeros($event)" />
+              <small class="text-danger" id="errorNumDocumento"></small>
             </div>
           </div>
 
-
-          <!-- Fila 2: Apellido Paterno y Apellido Materno -->
+          <!-- Apellidos -->
           <div class="form-group row mb-3">
             <div class="col-6">
-              <label for="apellido-paterno" class="form-label">Apellido
-                Paterno</label>
+              <label for="apellido-paterno" class="form-label">Apellido Paterno</label>
               <input id="apellido-paterno" type="text" formControlName="apePaterno" placeholder="Apellido Paterno"
-                required class="form-control" aria-label="Apellido Paterno" />
+                class="form-control" aria-label="Apellido Paterno" (keypress)="soloLetras($event)" />
+              <small class="text-danger" id="errorApePaterno"></small>
             </div>
-
             <div class="col-6">
-              <label for="apellido-materno" class="form-label">Apellido
-                Materno</label>
+              <label for="apellido-materno" class="form-label">Apellido Materno</label>
               <input id="apellido-materno" type="text" formControlName="apeMaterno" placeholder="Apellido Materno"
-                required class="form-control" aria-label="Apellido Materno" />
+                class="form-control" aria-label="Apellido Materno" (keypress)="soloLetras($event)" />
+              <small class="text-danger" id="errorApeMaterno"></small>
             </div>
           </div>
 
-          <!-- Nombre Completo -->
+          <!-- Nombre -->
           <div class="form-group mb-3">
-            <label for="nombre-completo" class="form-label">Nombre
-              Completo</label>
-            <input id="nombre-completo" type="text" formControlName="nombres" placeholder="Nombre Completo" required
-              class="form-control" aria-label="Nombre Completo" />
+            <label for="nombre-completo" class="form-label">Nombre Completo</label>
+            <input id="nombre-completo" type="text" formControlName="nombres" placeholder="Nombre Completo"
+              class="form-control" aria-label="Nombre Completo" (keypress)="soloLetras($event)" />
+            <small class="text-danger" id="errorNombres"></small>
           </div>
 
-          <!-- Correo Electrónico -->
+          <!-- Correo -->
           <div class="form-group mb-3">
             <label for="correo" class="form-label">Correo Electrónico</label>
             <input id="correo" type="email" formControlName="correoElectronico" placeholder="Correo Electrónico"
-              required class="form-control" aria-label="Correo Electrónico" />
+              class="form-control" aria-label="Correo Electrónico" />
+            <small class="text-danger" id="errorCorreo"></small>
           </div>
 
           <!-- Contraseña -->
-          <div class="form-group mb-3">
+          <div class="mb-3 password-wrapper">
             <label for="password" class="form-label">Contraseña</label>
-            <input id="password" type="password" formControlName="contrasenia" placeholder="Ingresa tu contraseña"
-              required class="form-control" aria-label="Contraseña" />
+            <div class="input-group">
+              <input [type]="verContrasenia ? 'text' : 'password'" id="password" formControlName="contrasenia"
+                placeholder="Ingresa tu contraseña" class="form-control" />
+              <span class="input-group-text password-toggle" (click)="toggleVerContrasenia()" style="cursor: pointer;">
+                <i class="fa" [ngClass]="verContrasenia ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </span>
+            </div>
+            <small class="text-danger" id="errorContrasenia"></small>
           </div>
 
+          <!-- Términos y Condiciones -->
           <div class="terms-text mb-3">
             Al continuar con el registro de su cuenta, usted acepta los
             siguientes
-            <a href="javascript:void(0);" tabindex="0">Términos y
-              Condiciones</a>.
+            <a href="javascript:void(0);" tabindex="0">Términos y Condiciones</a>.
           </div>
 
+          <!-- Botón de Registro -->
           <button type="submit" class="btn-login w-100">Registrar</button>
 
+          <!-- Enlace a Login -->
           <div class="extra-links mt-3 text-center">
             <p>
               ¿Ya tienes una cuenta?
@@ -126,5 +112,4 @@
       </div>
     </div>
   </div>
-
 </div>

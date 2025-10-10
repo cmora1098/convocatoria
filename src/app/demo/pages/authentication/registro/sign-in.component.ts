@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ApiService } from '../../../../services/api.service';
-import { Router } from '@angular/router';
-import { FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import Swal from 'sweetalert2';  // Importamos SweetAlert2
+import { FormBuilder, FormGroup, FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-sign-in',
@@ -15,7 +14,8 @@ import Swal from 'sweetalert2';  // Importamos SweetAlert2
 })
 export class SignInComponent implements OnInit {
   registerForm: FormGroup;
-  tiposDocumentos: any[] = []; // Para almacenar los tipos de documentos que vienen de la API
+  tiposDocumentos: any[] = [];
+  verContrasenia: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -23,23 +23,22 @@ export class SignInComponent implements OnInit {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      tipoDocumento: [0, Validators.required],
-      numDocumento: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      apePaterno: ['', Validators.required],
-      apeMaterno: ['', Validators.required],
-      nombres: ['', Validators.required],
-      correoElectronico: ['', [Validators.required, Validators.email]],
-      contrasenia: ['', Validators.required],
-      codRol: [3], // o el valor por defecto de rol que manejes
+      tipoDocumento: [0],
+      numDocumento: [''],
+      apePaterno: [''],
+      apeMaterno: [''],
+      nombres: [''],
+      correoElectronico: [''],
+      contrasenia: [''],
+      codRol: [3],
       activo: [true]
     });
   }
 
   ngOnInit(): void {
-    // Aquí hacemos la llamada al servicio para obtener los tipos de documentos
     this.apiService.getTipoDocumentos().subscribe({
       next: (data) => {
-        this.tiposDocumentos = data; // Asignamos los datos obtenidos a la propiedad
+        this.tiposDocumentos = data;
       },
       error: (err) => {
         console.error('Error al cargar tipos de documentos', err);
@@ -48,27 +47,108 @@ export class SignInComponent implements OnInit {
           title: '¡Error!',
           text: 'Ocurrió un error al cargar los tipos de documentos.',
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+          confirmButtonColor: '#2e7d32'
         });
       }
     });
   }
 
-  onSubmit() {
-    // Validamos si el tipo de documento es 0 (sin seleccionar)
-    if (this.registerForm.get('tipoDocumento')?.value === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: '¡Atención!',
-        text: 'Por favor, seleccione un tipo de documento.',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'   // Verde AgroRural
-      });
+  toggleVerContrasenia(): void {
+    this.verContrasenia = !this.verContrasenia;
+  }
+
+  soloNumeros(event: KeyboardEvent) {
+    const input = event.target as HTMLInputElement;
+    const tipoDoc = this.registerForm.get('tipoDocumento')?.value;
+
+    let maxLength = 0;
+    if (tipoDoc === 1) maxLength = 8;      // DNI
+    else if (tipoDoc === 3) maxLength = 15; // Pasaporte
+
+    const charCode = event.charCode || event.keyCode;
+
+    if (charCode < 48 || charCode > 57) {
+      event.preventDefault();
       return;
     }
 
-    if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched();
+    if (maxLength > 0 && input.value.length >= maxLength) {
+      event.preventDefault();
+    }
+  }
+
+  soloLetras(event: KeyboardEvent) {
+    const char = event.key;
+    const regex = /^[a-zA-ZÀ-ÿ\s]+$/;
+    if (!regex.test(char)) {
+      event.preventDefault();
+    }
+  }
+
+  limpiarErrores() {
+    const ids = ['errorTipoDocumento', 'errorNumDocumento', 'errorApePaterno', 'errorApeMaterno', 'errorNombres', 'errorCorreo', 'errorContrasenia'];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '';
+    });
+  }
+
+  validarFormulario(): boolean {
+    this.limpiarErrores();
+    const form = this.registerForm.value;
+    let valido = true;
+
+    if (![1, 3].includes(+form.tipoDocumento)) {
+      this.setError('errorTipoDocumento', 'Por favor, seleccione un tipo de documento válido.');
+      valido = false;
+    }
+
+    if (form.tipoDocumento == 1) {
+      if (!/^\d{8}$/.test(form.numDocumento)) {
+        this.setError('errorNumDocumento', 'El DNI debe tener exactamente 8 dígitos.');
+        valido = false;
+      }
+    } else if (form.tipoDocumento == 3) {
+      if (!/^\d{8,15}$/.test(form.numDocumento)) {
+        this.setError('errorNumDocumento', 'El pasaporte debe tener entre 8 y 15 dígitos.');
+        valido = false;
+      }
+    }
+
+    if (!form.apePaterno || form.apePaterno.trim().length < 2) {
+      this.setError('errorApePaterno', 'El apellido paterno debe tener al menos 2 letras.');
+      valido = false;
+    }
+    if (!form.apeMaterno || form.apeMaterno.trim().length < 2) {
+      this.setError('errorApeMaterno', 'El apellido materno debe tener al menos 2 letras.');
+      valido = false;
+    }
+    if (!form.nombres || form.nombres.trim().length < 2) {
+      this.setError('errorNombres', 'El nombre debe tener al menos 2 letras.');
+      valido = false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.correoElectronico || !emailRegex.test(form.correoElectronico)) {
+      this.setError('errorCorreo', 'Por favor, ingrese un correo electrónico válido.');
+      valido = false;
+    }
+
+    if (!form.contrasenia || form.contrasenia.length < 6 || form.contrasenia.length > 30) {
+      this.setError('errorContrasenia', 'La contraseña debe tener entre 6 y 30 caracteres.');
+      valido = false;
+    }
+
+    return valido;
+  }
+
+  setError(id: string, mensaje: string) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = mensaje;
+  }
+
+  onSubmit(): void {
+    if (!this.validarFormulario()) {
       return;
     }
 
@@ -81,24 +161,21 @@ export class SignInComponent implements OnInit {
           title: '¡Registro exitoso!',
           text: 'Te has registrado correctamente.',
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+          confirmButtonColor: '#2e7d32'
         });
-        this.router.navigate(['/login']);
+        this.router.navigate(['login']);
       },
       error: (error) => {
         console.error('Error en registro', error);
-        // Comprobamos si el error tiene un mensaje personalizado de la API
         const errorMessage = error?.error?.mensaje || 'Ocurrió un error al registrar. Verifica los datos o contacta al administrador.';
-
         Swal.fire({
           icon: 'error',
           title: '¡Error!',
           text: errorMessage,
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+          confirmButtonColor: '#2e7d32'
         });
       }
     });
-
   }
 }

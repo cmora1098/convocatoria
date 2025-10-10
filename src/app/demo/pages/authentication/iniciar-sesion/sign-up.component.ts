@@ -21,20 +21,20 @@ export class SignUpComponent implements AfterViewInit {
 
   email: string = '';
   password: string = '';
-
+  mostrarContrasenia: boolean = false;  // variable para mostrar/ocultar
 
   @ViewChild('captchaCanvas', { static: false }) captchaCanvas!: ElementRef<HTMLCanvasElement>;
-
-  // constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private apiService: ApiService,
     private router: Router,
-    private authService: AuthService // lo inyectamos
-
+    private authService: AuthService
   ) { }
 
+  toggleMostrarContrasenia() {
+    this.mostrarContrasenia = !this.mostrarContrasenia;
+  }
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -144,16 +144,16 @@ export class SignUpComponent implements AfterViewInit {
         // Redirigir según el rol del usuario
         switch (response.codRol) {
           case 1:
-            this.router.navigate(['/dashboard']);  // Admin
+            this.router.navigate(['dashboard']);  // Admin
             break;
           case 2:
-            this.router.navigate(['/edashboard']); // Evaluador
+            this.router.navigate(['edashboard']); // Evaluador
             break;
           case 3:
-            this.router.navigate(['/pinicio']);    // Postulante
+            this.router.navigate(['pinicio']);    // Postulante
             break;
           default:
-            this.router.navigate(['/Inicio']);     // fallback
+            this.router.navigate(['Inicio']);     // fallback
             break;
         }
       },
@@ -164,9 +164,5 @@ export class SignUpComponent implements AfterViewInit {
         this.captchaInput = '';
       }
     });
-
-
   }
-
 }
-

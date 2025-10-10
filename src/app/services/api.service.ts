@@ -122,13 +122,48 @@ export class ApiService {
   // Mi Perfil - Postulante
   // ====================== 
 
-  insertarDatosPersonales(data: any) {
-    return this.http.post(`${this.baseUrl}/Postulante/insertar`, data);
+  // *******************************************************************
+  // DATOS PERSONALES
+  // *******************************************************************
+  getDatosPersonales(iCodUsuario: number) {
+    return this.http.get<any>(`${this.baseUrl}/DatosPersonales/${iCodUsuario}`);
   }
+
+  insertarDatosPersonales(data: any) {
+    return this.http.post(`${this.baseUrl}/DatosPersonales`, data);
+  }
+
+  actualizarDatosPersonales(data: any) {
+    return this.http.put(`${this.baseUrl}/DatosPersonales`, data);
+  }
+  // *******************************************************************
+  // FORMACIÓN ACADÉMICA
+  // *******************************************************************
+  getFormacionAcademicaPorUsuario(iCodUsuario: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/FormacionAcademica/usuario/${iCodUsuario}`);
+  }
+
+  insertarFormacionAcademica(data: any) {
+    return this.http.post(`${this.baseUrl}/FormacionAcademica`, data);
+  }
+
+  actualizarFormacionAcademica(data: any) {
+    return this.http.put(`${this.baseUrl}/FormacionAcademica`, data);
+  }
+
+  eliminarFormacionAcademica(id: number) {
+    return this.http.delete(`${this.baseUrl}/FormacionAcademica/${id}`);
+  }
+
+  // *******************************************************************
+  // COLEGIATURA
+  // *******************************************************************
 
   insertarColegiatura(data: any) {
     return this.http.post(`${this.baseUrl}/Colegiatura`, data);
   }
+
+
 
   // *******************************************************************
   // IDIOMAS
@@ -160,10 +195,9 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/OfimaticaNivelIntermedio/insert`, data);
   }
 
-  actualizarOfimatica(id: number, data: any) {
-    return this.http.put(`${this.baseUrl}/OfimaticaNivelIntermedio/update/${id}`, data);
+  actualizarOfimatica(id: number, estado: boolean) {
+    return this.http.put(`${this.baseUrl}/OfimaticaNivelIntermedio/update/${id}`, estado);
   }
-
 
 
 

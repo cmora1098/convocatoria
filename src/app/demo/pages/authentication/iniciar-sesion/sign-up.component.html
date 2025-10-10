@@ -12,7 +12,6 @@
         incluyendo:</p>
       <ul>
         <li>Personas con secundaria completa</li>
-        <!-- Puedes agregar más si deseas -->
       </ul>
     </div>
   </div>
@@ -23,19 +22,6 @@
       <div class="card-body text-center">
         <img src="assets/images/logoagrorural.png" alt="Logo AGRO RURAL" class="logo img-fluid mb-4" />
 
-        <!-- <form>
-          <div class="form-group input-icon mb-3">
-            <i class="fas fa-envelope"></i>
-            <input type="email" placeholder="Correo Electrónico" required
-              class="form-control" />
-          </div>
-
-          <div class="form-group input-icon mb-3">
-            <i class="fas fa-lock"></i>
-            <input type="password" placeholder="Contraseña" required
-              class="form-control" />
-          </div> -->
-
         <form (ngSubmit)="login()" #loginForm="ngForm">
           <div class="form-group input-icon mb-3">
             <i class="fas fa-envelope"></i>
@@ -43,11 +29,16 @@
               name="email" />
           </div>
 
-          <div class="form-group input-icon mb-3">
+          <div class="form-group input-icon mb-3 position-relative">
             <i class="fas fa-lock"></i>
-            <input type="password" placeholder="Contraseña" required class="form-control" [(ngModel)]="password"
-              name="password" />
+            <input [type]="mostrarContrasenia ? 'text' : 'password'" placeholder="Contraseña" required
+              class="form-control" [(ngModel)]="password" name="password" />
+            <button type="button" (click)="toggleMostrarContrasenia()" class="toggle-password"
+              title="{{ mostrarContrasenia ? 'Ocultar contraseña' : 'Mostrar contraseña' }}">
+              <i class="fas" [ngClass]="mostrarContrasenia ? 'fa-eye-slash' : 'fa-eye'"></i>
+            </button>
           </div>
+
 
           <!-- Captcha -->
           <div class="captcha-container">
@@ -62,13 +53,6 @@
             {{ captchaMessage }}
           </p>
 
-          <!-- <div class="form-group text-start mt-2">
-            <div class="checkbox checkbox-primary d-inline">
-              <input type="checkbox" id="checkbox-fill-a1" checked />
-              <label for="checkbox-fill-a1" class="cr">Guardar credenciales</label>
-            </div>
-          </div> -->
-
           <button type="submit" class="btn-login">Ingresar</button>
 
           <div class="extra-links mt-3">
@@ -79,6 +63,7 @@
             </p>
           </div>
         </form>
+
       </div>
     </div>
   </div>
