@@ -11,6 +11,9 @@ import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
+import { NgForm } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+
 import * as dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
@@ -35,10 +38,12 @@ interface CursoDiplomado {
 }
 
 interface Idioma {
-  idioma: string;
-  institucion: string;
-  nivel: string;
+  iCodIdioma?: number;
+  vIdioma: string;
+  vInstitucion: string;
+  vNivelAlcanzado: string;
 }
+
 
 interface Duracion {
   años: number;
@@ -69,46 +74,21 @@ interface ExperienciaLaboral {
   styleUrls: ['./miperfil.component.scss']
 })
 export class MiPerfilComponent {
+  tiposDocumentos: any[] = []; // Para almacenar los tipos de documentos que vienen de la API
+  departamentos: any[] = []; // Para almacenar los tipos de documentos que vienen de la API
+  provincias: any[] = [];
+  distritos: any[] = [];
 
   codUsuario: number | null;
-  tiposDocumentos: any[] = []; // Para almacenar los tipos de documentos que vienen de la API
 
-  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
-    this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
-  }
+  email: string | null;
+  tpdoc: string | null;
+  ndocumento: string | null;
+  apepat: string | null;
+  apemat: string | null;
+  nomcompleto: string | null;
 
-  ngOnInit(): void {
-    this.apiService.getTipoDocumentos().subscribe({
-      next: (data) => {
-        console.log(data);
-        this.tiposDocumentos = data; // Asignamos los datos obtenidos a la propiedad
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos de documentos', err);
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Ocurrió un error al cargar los tipos de documentos.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
-        });
-      }
-    });
-  }
-
-  // items = [
-  //   'Datos Personales',
-  //   'Formación Académica',
-  //   'Colegiatura',
-  //   'Experiencia Laboral',
-  //   'Cursos, Diplomados y/o Especialización',
-  //   'Idiomas',
-  //   'Ofimática',
-  //   'Referencias Laborales',
-  //   'Bonificaciones adicionales (FF. AA., Discapacidad, Deportista Calificado y/o Ley N° 31533 y su reglamento)',
-  //   'Declaración Jurada',
-  //   'Disponibilidad de Viajar'
-  // ];
+  ofimaticaActual: any = null;
 
   items = [
     'Datos Personales',
@@ -121,14 +101,6 @@ export class MiPerfilComponent {
     'Bonificaciones adicionales (FF. AA., Discapacidad)',
     'Declaración Jurada',
   ];
-
-  volver() {
-    alert('Volviendo...');
-  }
-
-  // ********************************* //
-  // ******  DATOS PERSONALES ******* //  
-  // ******************************* //
 
   datos: { [key: string]: any } = {
     'Datos Personales': {
@@ -166,22 +138,157 @@ export class MiPerfilComponent {
       codigoDiscapacidad: '',
       ajustesSeleccionados: []
     }
-
   };
 
+  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
+    this.codUsuario = this.authService.getUserId();
+    this.email = this.authService.getEmail();
+    this.tpdoc = this.authService.getTipoDocumento();
+    this.ndocumento = this.authService.getNroDocumento();
+    this.apepat = this.authService.getApellidoPaterno();
+    this.apemat = this.authService.getApellidoMaterno();
+    this.nomcompleto = this.authService.getNombreCompleto();
+  }
+
+  ngOnInit(): void {
+    this.apiService.getTipoDocumentos().subscribe({
+      next: (data) => {
+        this.tiposDocumentos = data; // Asignamos los datos obtenidos a la propiedad
+        this.datos['Datos Personales'].tipoDocumento = this.tpdoc; //valor de Tipo de Documento asignado
+      },
+      error: (err) => {
+        console.error('Error al cargar tipos de documentos', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'Ocurrió un error al cargar los tipos de documentos.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+        });
+      }
+    });
+
+    this.apiService.getUbigeoDpto().subscribe({
+      next: (data) => {
+        this.departamentos = data; // Asignamos los datos obtenidos a la propiedad
+        console.log('Departamentos cargados:', data); // 🧪
+        // 👇 Si ya hay datos previos, precarga provincias y distritos
+        const dpto = this.datos['Datos Personales'].departamentoNacimiento;
+        const prov = this.datos['Datos Personales'].provinciaNacimiento;
+        if (dpto) {
+          this.onDepartamentoChange(dpto, true, prov);
+        }
+
+      },
+      error: (err) => {
+        console.error('Error al cargar los Departamentos', err);
+        Swal.fire({
+          icon: 'error',
+          title: '¡Error!',
+          text: 'Ocurrió un error al cargar los Departamentos.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+        });
+      }
+    });
+
+    if (this.codUsuario) {
+      this.apiService.getListarIdiomas(this.codUsuario).subscribe({
+        next: (data) => {
+          this.idiomas = data;
+          console.log(data);
+        },
+        error: (err) => {
+          console.error('Error al cargar idiomas', err);
+        }
+      });
+    }
+
+    this.cargarOfimatica();
+
+
+  }
+
+  // ✅ Evento al cambiar el departamento
+  onDepartamentoChange(codDepartamento: string, precarga = false, codProvinciaPreload?: string): void {
+    this.provincias = [];
+    this.distritos = [];
+
+    this.datos['Datos Personales'].provinciaNacimiento = '';
+    this.datos['Datos Personales'].distritoNacimiento = '';
+
+    if (codDepartamento) {
+      this.apiService.getUbigeoProv(codDepartamento).subscribe({
+        next: (provs) => {
+          this.provincias = provs;
+
+          // Si es precarga, cargamos provincias y luego distritos
+          if (precarga && codProvinciaPreload) {
+            this.datos['Datos Personales'].provinciaNacimiento = codProvinciaPreload;
+            this.onProvinciaChange(codProvinciaPreload, true);
+          }
+        },
+        error: () => this.showError('Ocurrió un error al cargar las provincias.')
+      });
+    }
+  }
+
+  // ✅ Evento al cambiar la provincia
+  onProvinciaChange(codProvincia: string, precarga = false): void {
+    this.distritos = [];
+    this.datos['Datos Personales'].distritoNacimiento = '';
+
+    if (codProvincia) {
+      this.apiService.getUbigeoDis(codProvincia).subscribe({
+        next: (dists) => {
+          this.distritos = dists;
+
+          // Precarga el distrito si ya estaba seteado
+          if (precarga) {
+            const distritoPreload = this.datos['Datos Personales'].distritoNacimiento;
+            if (distritoPreload) {
+              this.datos['Datos Personales'].distritoNacimiento = distritoPreload;
+            }
+          }
+        },
+        error: () => this.showError('Ocurrió un error al cargar los distritos.')
+      });
+    }
+  }
+
+  // 🔁 Función reutilizable para mostrar errores
+  private showError(mensaje: string): void {
+    Swal.fire({
+      icon: 'error',
+      title: '¡Error!',
+      text: mensaje,
+      confirmButtonText: 'Aceptar',
+      confirmButtonColor: '#2e7d32'
+    });
+  }
+
+  volver() {
+    alert('Volviendo...');
+  }
+
+
+
+  // ********************************* //
+  // ******  DATOS PERSONALES ******* //  
+  // ******************************* // 
   guardarDatosPersonales(seccion: string) {
     const datosPersonales = this.datos[seccion];
 
     // Validación básica
     const camposRequeridos = [
-      { campo: 'nroDocumento', label: 'Nro. Documento' },
-      { campo: 'apellidoPaterno', label: 'Apellido Paterno' },
-      { campo: 'apellidoMaterno', label: 'Apellido Materno' },
-      { campo: 'nombres', label: 'Nombres' },
+      // { campo: 'nroDocumento', label: 'Nro. Documento' },
+      // { campo: 'apellidoPaterno', label: 'Apellido Paterno' },
+      // { campo: 'apellidoMaterno', label: 'Apellido Materno' },
+      // { campo: 'nombres', label: 'Nombres' },
       { campo: 'fechaNacimiento', label: 'Fecha de Nacimiento' },
       { campo: 'sexo', label: 'Sexo' },
       { campo: 'estadoCivil', label: 'Estado Civil' },
-      { campo: 'email', label: 'Correo electrónico' },
+      // { campo: 'email', label: 'Correo electrónico' },
       { campo: 'celular', label: 'Celular' }
     ];
 
@@ -210,6 +317,47 @@ export class MiPerfilComponent {
       });
       return;
     }
+
+    // ✅ Mapear datos al formato del backend
+    const payload = {
+      codPostulante: this.codUsuario,
+      codUsuario: this.codUsuario,
+      // codigoPostulacion: null,
+      fechaNacimiento: new Date(datosPersonales.fechaNacimiento).toISOString(),
+      codSexo: datosPersonales.sexo,
+      codEstadoCivil: datosPersonales.estadoCivil,
+      codDepartamento: datosPersonales.departamentoNacimiento,
+      codProvincia: datosPersonales.provinciaNacimiento,
+      codDistrito: datosPersonales.distritoNacimiento,
+      domicilio: datosPersonales.domicilio,
+      celular: datosPersonales.celular,
+      telefono: datosPersonales.telefono,
+      correo: this.email,
+      fechaRegistro: new Date().toISOString(),
+      activo: true
+    };
+
+    // ✅ Enviar al backend
+    this.apiService.insertarDatosPersonales(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado exitoso',
+          text: 'Los datos personales han sido enviados correctamente.',
+          confirmButtonColor: '#1e8e3e'
+        });
+      },
+      error: (err) => {
+        console.error('Error al guardar datos personales:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar los datos.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
+
 
     // Guardado exitoso
     console.log('Datos guardados para', seccion, datosPersonales);
@@ -252,8 +400,10 @@ export class MiPerfilComponent {
     this.mostrarModalFormacion = false;
   }
 
-  // Guardar registro
-  guardarFormacion() {
+  // Guardar formación con validaciones
+  guardarFormacion(form: NgForm) {
+    form.control.markAllAsTouched();
+
     if (!this.formacion.nivel || !this.formacion.institucion || !this.formacion.fechaInicio) {
       Swal.fire({
         icon: 'warning',
@@ -265,23 +415,58 @@ export class MiPerfilComponent {
       return;
     }
 
+    // Validar fecha futura
+    const hoy = new Date().toISOString().split('T')[0];
+    if (this.formacion.fechaInicio > hoy) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha no puede ser en el futuro.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    // Validar duplicados
+    const yaExiste = this.formaciones.some((f, i) =>
+      i !== this.editIndexFormacion &&
+      f.nivel === this.formacion.nivel &&
+      f.institucion.trim().toLowerCase() === this.formacion.institucion.trim().toLowerCase() &&
+      f.fechaInicio === this.formacion.fechaInicio
+    );
+
+    if (yaExiste) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Registro duplicado',
+        text: 'Ya existe un registro con los mismos datos.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    // Guardar o actualizar
     if (this.editIndexFormacion !== null) {
       this.formaciones[this.editIndexFormacion] = { ...this.formacion };
     } else {
       this.formaciones.push({ ...this.formacion });
+      // Ordenar por fecha (opcional)
+      this.formaciones.sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
     }
 
     this.cerrarModalFormacion();
   }
 
-  // Editar registro
+  // Editar
   editarFormacion(index: number) {
     this.formacion = { ...this.formaciones[index] };
     this.editIndexFormacion = index;
     this.mostrarModalFormacion = true;
   }
 
-  // Eliminar registro
+  // Eliminar
   eliminarFormacion(index: number) {
     Swal.fire({
       title: '¿Está seguro?',
@@ -306,7 +491,6 @@ export class MiPerfilComponent {
     });
   }
 
-
   // ******************************* //
   // *******  COLEGIATURA  ******** //  
   // ***************************** //
@@ -317,6 +501,33 @@ export class MiPerfilComponent {
   };
 
   guardarColegiatura(seccion: string) {
+
+    // const guardarColegiatura = {
+    //   iCodColegiatura:  ,
+    //   iCodPostulante:  this.codUsuario,
+    //   iCodColegioProfesional:  ,
+    //   vNroColegiatura:  ,
+    //   bHabilitado: ,
+    //   iCodUsuarioRegistra:  this.codUsuario,
+    //   dtFechaRegistro:  ,
+    //   bActivo: 
+    // };
+
+    // {
+    //   "iCodColegiatura": 0,
+    //     "iCodPostulante": 0,
+    //       "iCodColegioProfesional": 0,
+    //         "vNroColegiatura": "string",
+    //           "bHabilitado": true,
+    //             "iCodUsuarioRegistra": 0,
+    //               "dtFechaRegistro": "2025-10-09T17:05:28.402Z",
+    //                 "bActivo": true
+    // }
+
+
+    console.log(this.codUsuario); // Rol de Usuario
+    return;
+
     const { colegio, numero, habilitado } = this.colegiatura;
 
     if (!colegio || !numero || !habilitado) {
@@ -355,8 +566,14 @@ export class MiPerfilComponent {
     });
   }
 
+
+
+
+
+
+
   // ***************************************** //
-  // ******  EXPERIENCIA LABORAL ******* //  ///////////// PENDIENTE /////////////
+  // ******  EXPERIENCIA LABORAL ******* //  
   // *************************************** //
   indiceExperienciaLaboralEditando: number | null = null;
   experienciasLaborales: ExperienciaLaboral[] = [];
@@ -657,9 +874,9 @@ export class MiPerfilComponent {
   // Crear una estructura de idioma vacía
   nuevoIdioma(): Idioma {
     return {
-      idioma: '',
-      institucion: '',
-      nivel: ''
+      vIdioma: '',
+      vInstitucion: '',
+      vNivelAlcanzado: ''
     };
   }
 
@@ -675,64 +892,29 @@ export class MiPerfilComponent {
     this.mostrarModalIdioma = false;
   }
 
-  // Guardar idioma (nuevo o editado)
-  guardarIdioma() {
-    // Validar campos obligatorios
-    if (!this.idioma.idioma || !this.idioma.institucion || !this.idioma.nivel) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campos obligatorios',
-        text: 'Debe completar todos los campos obligatorios (*)',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'
-      });
-      return;
-    }
-
-    // Validar duplicado si está agregando nuevo
-    if (
-      this.editIndexIdioma === null &&
-      this.idiomas.some(
-        i => i.idioma.trim().toLowerCase() === this.idioma.idioma.trim().toLowerCase()
-      )
-    ) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Idioma ya registrado',
-        text: 'Este idioma ya ha sido agregado.',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'
-      });
-      return;
-    }
-
-    // Guardar nuevo o actualizar existente
-    if (this.editIndexIdioma !== null) {
-      this.idiomas[this.editIndexIdioma] = { ...this.idioma };
-    } else {
-      this.idiomas.push({ ...this.idioma });
-    }
-
-    this.cerrarModalIdioma();
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Idioma guardado',
-      text: 'El idioma ha sido registrado correctamente.',
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#2e7d32'
-    });
-  }
-
   // Editar idioma
   editarIdioma(index: number) {
-    this.idioma = { ...this.idiomas[index] };
+    this.idioma = { ...this.idiomas[index] }; // incluye iCodIdioma
     this.editIndexIdioma = index;
     this.mostrarModalIdioma = true;
   }
 
+
   // Eliminar idioma
   eliminarIdioma(index: number) {
+    const idioma = this.idiomas[index];
+    const id = idioma.iCodIdioma;
+
+    if (id === undefined) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'El ID del idioma es inválido o no existe.',
+        confirmButtonColor: '#d33'
+      });
+      return;
+    }
+
     Swal.fire({
       title: '¿Está seguro?',
       text: 'Esta acción eliminará el registro de idioma.',
@@ -744,44 +926,186 @@ export class MiPerfilComponent {
       cancelButtonColor: '#6c757d'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.idiomas.splice(index, 1);
-        Swal.fire({
-          icon: 'success',
-          title: 'Eliminado',
-          text: 'El registro fue eliminado correctamente.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'
+        this.apiService.eliminarIdioma(id).subscribe({
+          next: () => {
+            this.apiService.getListarIdiomas(this.codUsuario!).subscribe({
+              next: (data) => {
+                this.idiomas = data;
+              },
+              error: (err) => {
+                console.error('Error al actualizar lista después de eliminar:', err);
+              }
+            });
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Eliminado',
+              text: 'El registro fue eliminado correctamente.',
+              confirmButtonText: 'Aceptar',
+              confirmButtonColor: '#2e7d32'
+            });
+          },
+          error: (err) => {
+            console.error('Error al eliminar idioma:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Ocurrió un error al eliminar el idioma.',
+              confirmButtonColor: '#d33'
+            });
+          }
         });
       }
     });
   }
 
+
   // Guardar final
-  guardarIdiomas(seccion: string) {
-    if (this.idiomas.length === 0) {
+  // guardarIdioma() {
+  //   if (!this.idioma.idioma || !this.idioma.institucion || !this.idioma.nivel) {
+  //     Swal.fire({
+  //       icon: 'warning',
+  //       title: 'Campos incompletos',
+  //       text: 'Por favor complete todos los campos obligatorios.',
+  //       confirmButtonColor: '#d33'
+  //     });
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     iCodIdioma: 0,
+  //     iCodPostulante: this.codUsuario,
+  //     vIdioma: this.idioma.idioma,
+  //     vInstitucion: this.idioma.institucion,
+  //     vNivelAlcanzado: this.idioma.nivel,
+  //     dtFechaRegistro: new Date().toISOString(),
+  //     iCodUsuarioRegistra: this.codUsuario,
+  //     bActivo: true
+  //   };
+
+  //   this.apiService.insertarIdioma(payload).subscribe({
+  //     next: () => {
+  //       this.idiomas.push({ ...this.idioma }); // agregamos al array local si quieres mostrarlo en tabla
+  //       this.cerrarModalIdioma();
+  //       Swal.fire({
+  //         icon: 'success',
+  //         title: 'Idioma registrado',
+  //         text: 'El idioma ha sido registrado correctamente.',
+  //         confirmButtonColor: '#2e7d32'
+  //       });
+
+  //       // Limpiar datos del idioma actual
+  //       this.idioma = { idioma: '', institucion: '', nivel: '' };
+  //     },
+  //     error: (err) => {
+  //       console.error('Error al insertar idioma:', err);
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Error',
+  //         text: 'Ocurrió un error al registrar el idioma.',
+  //         confirmButtonColor: '#d33'
+  //       });
+  //     }
+  //   });
+  // }
+
+  guardarIdioma() {
+    if (
+      !this.idioma.vIdioma ||
+      !this.idioma.vInstitucion ||
+      !this.idioma.vNivelAlcanzado
+    ) {
       Swal.fire({
         icon: 'warning',
-        title: 'Sin idiomas',
-        text: 'Debe agregar al menos un idioma antes de guardar.',
+        title: 'Campos incompletos',
+        text: 'Por favor complete todos los campos obligatorios.',
         confirmButtonColor: '#d33'
       });
       return;
     }
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Idiomas guardados',
-      text: 'Los idiomas han sido registrados correctamente.',
-      confirmButtonColor: '#2e7d32'
-    });
+    const isEditando = this.editIndexIdioma !== null;
+    const iCodIdioma = isEditando && this.idiomas[this.editIndexIdioma!]?.iCodIdioma
+      ? this.idiomas[this.editIndexIdioma!].iCodIdioma
+      : 0;
 
-    console.log('Datos guardados para', seccion, this.idiomas);
+    const payload = {
+      iCodIdioma,
+      iCodPostulante: this.codUsuario,
+      vIdioma: this.idioma.vIdioma,
+      vInstitucion: this.idioma.vInstitucion,
+      vNivelAlcanzado: this.idioma.vNivelAlcanzado,
+      dtFechaRegistro: new Date().toISOString(),
+      iCodUsuarioRegistra: this.codUsuario,
+      bActivo: true
+    };
+
+    // ✅ Elegir entre insertar o actualizar según si es edición
+    const request = isEditando
+      ? this.apiService.actualizarIdioma(payload)
+      : this.apiService.insertarIdioma(payload);
+
+    request.subscribe({
+      next: () => {
+        this.apiService.getListarIdiomas(this.codUsuario!).subscribe({
+          next: (data) => {
+            this.idiomas = data;
+          },
+          error: (err) => {
+            console.error('Error al actualizar lista de idiomas', err);
+          }
+        });
+
+        this.cerrarModalIdioma();
+        Swal.fire({
+          icon: 'success',
+          title: isEditando ? 'Idioma actualizado' : 'Idioma registrado',
+          text: isEditando
+            ? 'El idioma ha sido actualizado correctamente.'
+            : 'El idioma ha sido registrado correctamente.',
+          confirmButtonColor: '#2e7d32'
+        });
+
+        this.idioma = this.nuevoIdioma();
+        this.editIndexIdioma = null;
+      },
+      error: (err) => {
+        console.error('Error al guardar idioma:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar el idioma.',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
   }
 
   // ********************************************************************************************************** //
   // ************************* //  
   // ******  OFIMATICA ******* //  
   // ************************* //  
+  cargarOfimatica() {
+    if (this.codUsuario != null) {
+
+      this.apiService.getOfimaticaByPostulante(this.codUsuario).subscribe({
+        next: (data) => {
+          if (data) {
+            this.ofimaticaActual = data;
+            // Aquí asignamos 'true' o 'false' como string para el select
+            this.datos['Ofimática'].nivelIntermedio = data.bTieneConocimiento ? 'true' : 'false';
+          } else {
+            this.datos['Ofimática'].nivelIntermedio = ''; // valor inicial vacío
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar datos de Ofimática:', err);
+          this.datos['Ofimática'].nivelIntermedio = '';
+        }
+      });
+    }
+  }
+
   guardarOfimatica(seccion: string) {
     const datosOfimatica = this.datos[seccion];
 
@@ -795,12 +1119,63 @@ export class MiPerfilComponent {
       return;
     }
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Guardado exitoso',
-      text: `La sección "${seccion}" ha sido guardada correctamente.`,
-      confirmButtonColor: '#1e8e3e'
-    });
+    // Convierte string "true"/"false" a boolean true/false
+    const tieneConocimientoBoolean = datosOfimatica.nivelIntermedio === 'true';
+
+    const payload = {
+      iCodOfimaticaNivelIntermedio: this.ofimaticaActual ? this.ofimaticaActual.iCodOfimaticaNivelIntermedio : 0,
+      iCodPostulante: this.codUsuario,
+      bTieneConocimiento: tieneConocimientoBoolean,  // booleano correcto
+      dtFechaRegistro: new Date().toISOString(),
+      iCodUsuarioRegistra: this.codUsuario,
+      bActivo: true
+    };
+
+    console.log('Payload a enviar:', payload); // para depurar
+
+    if (payload.iCodOfimaticaNivelIntermedio && payload.iCodOfimaticaNivelIntermedio > 0) {
+      // Actualizar
+      this.apiService.actualizarOfimatica(payload.iCodOfimaticaNivelIntermedio, payload).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Guardado exitoso',
+            text: `La sección "${seccion}" ha sido actualizada correctamente.`,
+            confirmButtonColor: '#1e8e3e'
+          });
+        },
+        error: (err) => {
+          console.error('Error al actualizar ofimática:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar la sección de Ofimática.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    } else {
+      // Insertar nuevo
+      this.apiService.insertarOfimatica(payload).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Guardado exitoso',
+            text: `La sección "${seccion}" ha sido guardada correctamente.`,
+            confirmButtonColor: '#1e8e3e'
+          });
+        },
+        error: (err) => {
+          console.error('Error al guardar ofimática:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al guardar la sección de Ofimática.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    }
   }
 
   // ********************************************************************************************************** //

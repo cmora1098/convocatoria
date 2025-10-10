@@ -94,8 +94,20 @@
 
                 <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')"
                   [disabled]="!convocatoria.bActivo">
-                  Bases y Formatos
+                  Bases
                 </button>
+
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'perfil')"
+                  [disabled]="!convocatoria.bActivo">
+                  Perfil de Puesto
+                </button>
+
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'cronograma')"
+                  [disabled]="!convocatoria.bActivo">
+                  Cronograma
+                </button>
+
+
 
                 <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')"
                   [disabled]="!convocatoria.bActivo">

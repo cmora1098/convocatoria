@@ -10,7 +10,7 @@ import { Observable } from 'rxjs';
 export class ApiService {
   public baseUrl = 'https://localhost:7106/api';
   public baseUrlConvocatoriaDoc = 'https://localhost:7106';
-  // private baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
+  private apiUbigeoDpto = 'https://localhost:7068';
 
   constructor(private http: HttpClient) { }
 
@@ -37,7 +37,17 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/Estado/listar`);
   }
 
+  getUbigeoDpto(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUbigeoDpto}/departamentos`);
+  }
 
+  getUbigeoProv(codigodepa: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUbigeoDpto}/provincias/${codigodepa}`);
+  }
+
+  getUbigeoDis(codigoprovincia: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUbigeoDpto}/distritos/${codigoprovincia}`);
+  }
 
   // ======================
   // Usuarios
@@ -103,6 +113,60 @@ export class ApiService {
   eliminarUsuario(idConvocatoria: any) {
     return this.http.delete(`${this.baseUrl}/Usuarios/eliminar/${idConvocatoria}`);
   }
+
+
+
+
+
+  // ======================
+  // Mi Perfil - Postulante
+  // ====================== 
+
+  insertarDatosPersonales(data: any) {
+    return this.http.post(`${this.baseUrl}/Postulante/insertar`, data);
+  }
+
+  insertarColegiatura(data: any) {
+    return this.http.post(`${this.baseUrl}/Colegiatura`, data);
+  }
+
+  // *******************************************************************
+  // IDIOMAS
+  // *******************************************************************
+  insertarIdioma(data: any) {
+    return this.http.post(`${this.baseUrl}/Idioma/insert`, data);
+  }
+
+  getListarIdiomas(idPostulante: number) {
+    return this.http.get<any>(`${this.baseUrl}/Idioma/getbypostulante/${idPostulante}`);
+  }
+
+  actualizarIdioma(data: any) {
+    return this.http.put(`${this.baseUrl}/Idioma/update`, data);
+  }
+
+  eliminarIdioma(id: number) {
+    return this.http.delete(`${this.baseUrl}/Idioma/delete/${id}`);
+  }
+
+  // *******************************************************************
+  // OFIMATICA
+  // *******************************************************************
+  getOfimaticaByPostulante(iCodPostulante: number) {
+    return this.http.get<any>(`${this.baseUrl}/OfimaticaNivelIntermedio/getByPostulante/${iCodPostulante}`);
+  }
+
+  insertarOfimatica(data: any) {
+    return this.http.post(`${this.baseUrl}/OfimaticaNivelIntermedio/insert`, data);
+  }
+
+  actualizarOfimatica(id: number, data: any) {
+    return this.http.put(`${this.baseUrl}/OfimaticaNivelIntermedio/update/${id}`, data);
+  }
+
+
+
+
 
 
 }

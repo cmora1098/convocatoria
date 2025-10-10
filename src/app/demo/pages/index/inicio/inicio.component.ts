@@ -138,6 +138,8 @@ export class InicioComponent implements OnInit {
       case 'bases': return 1;
       case 'comunicado': return 2;
       case 'resultados': return 3;
+      case 'perfil': return 4;
+      case 'cronograma': return 5;
       default: return 0;
     }
   }
@@ -147,6 +149,8 @@ export class InicioComponent implements OnInit {
       case 'bases': return 'bases';
       case 'comunicado': return 'comunicados';
       case 'resultados': return 'resultados';
+      case 'perfil': return 'perfil';
+      case 'cronograma': return 'cronograma';
       default: return 'documentos';
     }
   }
@@ -196,7 +200,7 @@ export class InicioComponent implements OnInit {
     });
   }
 
-   verArchivo(rutaArchivo: string) {
+  verArchivo(rutaArchivo: string) {
     const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
     window.open(url, '_blank');
   }
