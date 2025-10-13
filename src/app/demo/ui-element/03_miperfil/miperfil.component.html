@@ -682,9 +682,8 @@
 
                             <!-- CURSOS, DIPLOMADOS Y/O ESPECIALIZACIÓN -->
                             <form *ngIf="item === 'Cursos, Diplomados y/o Especialización'"
-                                (ngSubmit)="guardarCursosDiplomados(item)" #formDP="ngForm">
+                                (ngSubmit)="guardarCursoDiplomado()" #formDP="ngForm">
 
-                                <!-- Descripción -->
                                 <div class="mb-3">
                                     <small class="text-muted d-block mb-2">
                                         Registre aquí cursos, programas de especialización y/o diplomados que haya
@@ -693,11 +692,9 @@
                                     </small>
                                 </div>
 
-                                <!-- Botón Agregar -->
                                 <button type="button" class="btn btn-primary mb-3"
                                     (click)="abrirModalCursoDiplomado()">Agregar</button>
 
-                                <!-- Tabla de registros -->
                                 <table class="table table-striped table-bordered" *ngIf="cursosDiplomados.length > 0">
                                     <thead class="table-dark">
                                         <tr>
@@ -724,53 +721,65 @@
                                 </table>
 
                                 <!-- Modal Bootstrap -->
-                                <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);"
-                                    *ngIf="mostrarModalCursoDiplomado">
+                                <div class="modal fade" tabindex="-1"
+                                    [ngClass]="{ 'show d-block': mostrarModalCursoDiplomado }"
+                                    style="background: rgba(0,0,0,0.5);" *ngIf="mostrarModalCursoDiplomado">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header">
+
+                                            <div class="modal-header bg-primary text-white">
                                                 <h5 class="modal-title">Agregar / Editar Curso o Diplomado</h5>
-                                                <button type="button" class="btn-close"
+                                                <button type="button" class="btn-close btn-close-white"
                                                     (click)="cerrarModalCursoDiplomado()"></button>
                                             </div>
+
                                             <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Denominación del curso y/o programa de
-                                                        especialización y/o diplomado</label>
-                                                    <input type="text" class="form-control"
-                                                        [(ngModel)]="cursoDiplomado.denominacion" name="denominacion"
-                                                        required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Nombre de la Institución</label>
-                                                    <input type="text" class="form-control"
-                                                        [(ngModel)]="cursoDiplomado.institucion" name="institucion"
-                                                        required>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Horas</label>
-                                                    <input type="number" class="form-control"
-                                                        [(ngModel)]="cursoDiplomado.horas" name="horas" min="1"
-                                                        required>
-                                                </div>
+                                                <form #modalForm="ngForm" novalidate>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Denominación del curso y/o
+                                                            programa de especialización y/o diplomado *</label>
+                                                        <input type="text" class="form-control"
+                                                            [(ngModel)]="cursoDiplomado.denominacion"
+                                                            name="denominacion" required
+                                                            [ngClass]="{'is-invalid': modalForm.submitted && !cursoDiplomado.denominacion}">
+                                                        <div class="invalid-feedback">Este campo es obligatorio.</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Nombre de la Institución
+                                                            *</label>
+                                                        <input type="text" class="form-control"
+                                                            [(ngModel)]="cursoDiplomado.institucion" name="institucion"
+                                                            required
+                                                            [ngClass]="{'is-invalid': modalForm.submitted && !cursoDiplomado.institucion}">
+                                                        <div class="invalid-feedback">Este campo es obligatorio.</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Horas *</label>
+                                                        <input type="number" class="form-control" min="1"
+                                                            [(ngModel)]="cursoDiplomado.horas" name="horas" required
+                                                            [ngClass]="{'is-invalid': modalForm.submitted && (!cursoDiplomado.horas || cursoDiplomado.horas < 1)}">
+                                                        <div class="invalid-feedback">Debe ingresar un número mayor a 0.
+                                                        </div>
+                                                    </div>
+
+                                                </form>
                                             </div>
+
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary"
                                                     (click)="cerrarModalCursoDiplomado()">Cancelar</button>
                                                 <button type="button" class="btn btn-success"
                                                     (click)="guardarCursoDiplomado()">Guardar</button>
                                             </div>
+
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Botones inferiores -->
-                                <!-- <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <button type="submit" class="btn btn-danger"
-                                        [disabled]="formDP.invalid || cursosDiplomados.length === 0">Guardar</button>
-                                    <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
-                                </div> -->
                             </form>
+
 
                             <!-- IDIOMAS -->
                             <form *ngIf="item === 'Idiomas'" #formDP="ngForm">
@@ -875,12 +884,13 @@
                                 <!-- Botones -->
                                 <div class="d-flex justify-content-end gap-2 mt-3">
                                     <button type="submit" class="btn btn-danger"
-                                        [disabled]="formDP.invalid">Guardar</button>
+                                        [disabled]="formDP.invalid || datos['Ofimática'].nivelIntermedio === '0'">
+                                        Guardar
+                                    </button>
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
-
-
+ 
                             <!-- BONIFICACIONES ADICIONALES -->
                             <form *ngIf="item === 'Bonificaciones adicionales (FF. AA., Discapacidad)'"
                                 (ngSubmit)="guardarBonificacionesAdicionales(item)" #formDP="ngForm">

@@ -1,16 +1,17 @@
 // src/app/services/api.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  public baseUrl = 'https://localhost:7106/api';
-  public baseUrlConvocatoriaDoc = 'https://localhost:7106';
-  private apiUbigeoDpto = 'https://localhost:7068';
+  public baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
+  public baseUrlConvocatoriaDoc = 'https://intranet.agrorural.gob.pe/convocatoriasAPI';
+  private apiUbigeoDpto = 'https://intranet.agrorural.gob.pe/apiubigeo';
+
 
   constructor(private http: HttpClient) { }
 
@@ -159,47 +160,108 @@ export class ApiService {
   // COLEGIATURA
   // *******************************************************************
 
+  getColegiaturaPorUsuario(idUsuario: number) {
+    return this.http.get(`${this.baseUrl}/Colegiatura/usuario/${idUsuario}`);
+  }
+
   insertarColegiatura(data: any) {
     return this.http.post(`${this.baseUrl}/Colegiatura`, data);
   }
 
+  actualizarColegiatura(id: number, data: any) {
+    return this.http.put(`${this.baseUrl}/Colegiatura/${id}`, data);
+  }
 
+  eliminarColegiatura(id: number) {
+    return this.http.delete(`${this.baseUrl}/Colegiatura/${id}`);
+  }
+  // *******************************************************************
+  // EXPERIENCIA LABORAL
+  // *******************************************************************  
+
+
+  // *******************************************************************
+  //  CURSOS, DIPLOMADOS Y/O ESPECIALIZACIÓN
+  // *******************************************************************
+  getCursoDiplomadoPorUsuario(iCodUsuario: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/CursoDiplomado/listar/${iCodUsuario}`);
+  }
+
+  insertarCursosDiplomado(data: any, options?: any) {
+    return this.http.post(`${this.baseUrl}/CursoDiplomado/insertar`, data, { ...options, responseType: 'text' });
+  }
+
+  actualizarCursoDiplomado(data: any, options?: any) {
+    return this.http.put(`${this.baseUrl}/CursoDiplomado/actualizar`, data, { ...options, responseType: 'text' });
+  }
+
+  eliminarCursoDiplomado(iCodCursoDiplomado: number) {
+    return this.http.delete(`${this.baseUrl}/CursoDiplomado/eliminar/${iCodCursoDiplomado}`, { responseType: 'text' });
+  }
 
   // *******************************************************************
   // IDIOMAS
   // *******************************************************************
-  insertarIdioma(data: any) {
-    return this.http.post(`${this.baseUrl}/Idioma/insert`, data);
+
+  getListarIdiomas(iCodUsuario: number) {
+    return this.http.get<any>(`${this.baseUrl}/Idioma/listar/${iCodUsuario}`);
   }
 
-  getListarIdiomas(idPostulante: number) {
-    return this.http.get<any>(`${this.baseUrl}/Idioma/getbypostulante/${idPostulante}`);
+  insertarIdioma(data: any, options?: any) {
+    return this.http.post(`${this.baseUrl}/Idioma/insertar`, data, options);
   }
 
-  actualizarIdioma(data: any) {
-    return this.http.put(`${this.baseUrl}/Idioma/update`, data);
+  actualizarIdioma(data: any, options?: any) {
+    return this.http.put(`${this.baseUrl}/Idioma/actualizar`, data, options);
   }
 
-  eliminarIdioma(id: number) {
-    return this.http.delete(`${this.baseUrl}/Idioma/delete/${id}`);
+  eliminarIdioma(iCodIdioma: number) {
+    return this.http.delete(`${this.baseUrl}/Idioma/eliminar/${iCodIdioma}`);
   }
 
   // *******************************************************************
   // OFIMATICA
   // *******************************************************************
-  getOfimaticaByPostulante(iCodPostulante: number) {
-    return this.http.get<any>(`${this.baseUrl}/OfimaticaNivelIntermedio/getByPostulante/${iCodPostulante}`);
+  getOfimaticaByPostulante(iCodUsuario: number) {
+    const params = new HttpParams().set('iCodUsuario', iCodUsuario.toString());
+    return this.http.get<any>(`${this.baseUrl}/OfimaticaNivelIntermedio/listar`, { params });
   }
 
   insertarOfimatica(data: any) {
-    return this.http.post(`${this.baseUrl}/OfimaticaNivelIntermedio/insert`, data);
+    return this.http.post(`${this.baseUrl}/OfimaticaNivelIntermedio/insertar`, data);
   }
 
-  actualizarOfimatica(id: number, estado: boolean) {
-    return this.http.put(`${this.baseUrl}/OfimaticaNivelIntermedio/update/${id}`, estado);
+  actualizarOfimatica(data: any) {
+    return this.http.put(`${this.baseUrl}/OfimaticaNivelIntermedio/actualizar`, data);
+  }
+
+  // *******************************************************************
+  // BONIFICACIONES ADICIONALES
+  // *******************************************************************
+  getBonificacionesAdicionales(iCodUsuario: number) {
+    const params = new HttpParams().set('iCodUsuario', iCodUsuario.toString());
+    return this.http.get<any>(`${this.baseUrl}/BonificacionesAdicionales/listar`, { params });
+  }
+
+  insertarBonificacionesAdicionales(data: any) {
+    return this.http.post(`${this.baseUrl}/BonificacionesAdicionales/insertar`, data);
+  }
+
+  actualizarBonificacionesAdicionales(data: any) {
+    return this.http.put(`${this.baseUrl}/BonificacionesAdicionales/actualizar`, data);
+  }
+
+  // *******************************************************************
+  // DECLARACIÓN JURADA
+  // *******************************************************************
+  getDeclaracionJuradaPostulante() {
+    return this.http.get<any>(`${this.baseUrl}/DeclaracionJuradaPostulante/listar`);
   }
 
 
+  insertarDeclaracionJurada(data: any) {
+    return this.http.post(`${this.baseUrl}/DeclaracionJuradaPostulante/insertar`, data);
+  }
 
 
 

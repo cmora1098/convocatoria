@@ -26,7 +26,6 @@ interface Formacion {
   fechaInicio: string;
 }
 
-
 interface Colegiatura {
   colegio: string;    // id como string, porque viene del <select>
   numero: string;
@@ -34,10 +33,15 @@ interface Colegiatura {
 }
 
 interface CursoDiplomado {
+  iCodCursoDiplomado?: number;
   denominacion: string;
   institucion: string;
-  horas: number | null;
+  horas: number;
 }
+// **************************************************
+
+
+
 
 interface Idioma {
   iCodIdioma?: number;
@@ -136,8 +140,7 @@ export class MiPerfilComponent {
       licenciadoFuerzasArmadas: '',
       codigoLicenciado: '',
       tieneDiscapacidad: '',
-      codigoDiscapacidad: '',
-      ajustesSeleccionados: []
+      codigoDiscapacidad: ''
     }
   };
 
@@ -171,8 +174,7 @@ export class MiPerfilComponent {
 
     this.apiService.getUbigeoDpto().subscribe({
       next: (data) => {
-        this.departamentos = data; // Asignamos los datos obtenidos a la propiedad
-        console.log('Departamentos cargados:', data); // 🧪
+        this.departamentos = data; // Asignamos los datos obtenidos a la propiedad 
         // 👇 Si ya hay datos previos, precarga provincias y distritos
         const dpto = this.datos['Datos Personales'].departamentoNacimiento;
         const prov = this.datos['Datos Personales'].provinciaNacimiento;
@@ -193,25 +195,16 @@ export class MiPerfilComponent {
       }
     });
 
-    // if (this.codUsuario) {
-    //   this.apiService.getListarIdiomas(this.codUsuario).subscribe({
-    //     next: (data) => {
-    //       this.idiomas = data;
-    //       console.log(data);
-    //     },
-    //     error: (err) => {
-    //       console.error('Error al cargar idiomas', err);
-    //     }
-    //   });
-    // }
-
     this.cargarDatosPersonales();
     this.cargarFormaciones();
+    this.cargarColegiatura();
 
-
-
+    this.cargarCursosDiplomados();
+    this.cargarIdiomas();
     this.cargarOfimatica();
+    this.cargarDatosBonificacionesAdicionales();
 
+    this.cargarDeclaracionJurada();
 
   }
 
@@ -287,7 +280,7 @@ export class MiPerfilComponent {
       this.apiService.getDatosPersonales(this.codUsuario).subscribe({
         next: (data) => {
           if (data) {
-            console.log('Datos personales recibidos:', data);
+            // console.log('Datos personales recibidos:', data);
 
             // Guardar el id para saber si existe registro y hacer PUT o POST
             this.idDatosPersonales = data.iCodDatosPersonales || 0;
@@ -373,7 +366,7 @@ export class MiPerfilComponent {
       return;
     }
 
-    const payload = {
+    const payload_DatosPersonales = {
       iCodDatosPersonales: this.idDatosPersonales || 0,  // 👉 usar ID si existe
       iCodUsuario: this.codUsuario,
       vCodigoPostulacion: datosPersonales.codigoPostulacion || '',
@@ -391,13 +384,13 @@ export class MiPerfilComponent {
       bActivo: true
     };
 
-    const esNuevoRegistro = payload.iCodDatosPersonales === 0;
+    const esNuevoRegistro = payload_DatosPersonales.iCodDatosPersonales === 0;
 
-    const request$ = esNuevoRegistro
-      ? this.apiService.insertarDatosPersonales(payload) // POST
-      : this.apiService.actualizarDatosPersonales(payload); // PUT
+    const dp_request$ = esNuevoRegistro
+      ? this.apiService.insertarDatosPersonales(payload_DatosPersonales) // POST
+      : this.apiService.actualizarDatosPersonales(payload_DatosPersonales); // PUT
 
-    request$.subscribe({
+    dp_request$.subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
@@ -419,6 +412,8 @@ export class MiPerfilComponent {
       }
     });
   }
+
+  // ********************************************************************************************************************* //
   // ***************************************** //
   // ******  FORMACION ACADEMICA ******* //  
   // *************************************** //
@@ -579,14 +574,13 @@ export class MiPerfilComponent {
     });
   }
 
-
   // Editar formación
   editarFormacion(index: number) {
     this.formacion = { ...this.formaciones[index] };
     this.editIndexFormacion = index;
     this.mostrarModalFormacion = true;
   }
- 
+
   // Eliminar formación (solo frontend aquí)
   eliminarFormacion(index: number) {
     const formacion = this.formaciones[index];
@@ -638,21 +632,61 @@ export class MiPerfilComponent {
     });
   }
 
-
- 
+  // ********************************************************************************************************************* //
   // ******************************* //
   // *******  COLEGIATURA  ******** //  
   // ***************************** //
-  colegiatura: Colegiatura = {
-    colegio: '0',
+  idColegiaturaSeleccionada: number | null = null;
+  modoEdicionColegiatura: boolean = false;
+  colegiaturas: any[] = []; // array para mostrar en tabla
+
+  colegiatura = {
+    id: null,
+    colegio: 0,
     numero: '',
     habilitado: null
   };
 
+  cargarColegiatura() {
+    if (this.codUsuario != null) {
+      this.apiService.getColegiaturaPorUsuario(this.codUsuario).subscribe({
+        next: (data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            const item = data[0]; // Si solo hay una colegiatura por usuario
+
+            this.colegiatura = {
+              id: item.iCodColegiatura,
+              colegio: item.iCodColegioProfesional,
+              numero: item.vNroColegiatura,
+              habilitado: item.bHabilitado
+            };
+
+            // 🔹 Activa modo edición
+            this.idColegiaturaSeleccionada = item.iCodColegiatura;
+            this.modoEdicionColegiatura = true;
+          } else {
+            // Si no hay datos, limpiar formulario
+            this.colegiatura = {
+              id: null,
+              colegio: 0,
+              numero: '',
+              habilitado: null
+            };
+            this.idColegiaturaSeleccionada = null;
+            this.modoEdicionColegiatura = false;
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar colegiatura', err);
+        }
+      });
+    }
+  }
+
   guardarColegiatura(seccion: string) {
     const { colegio, numero, habilitado } = this.colegiatura;
 
-    if (!colegio || colegio === '0' || !numero || this.colegiatura.habilitado === null) {
+    if (!colegio || colegio === 0 || !numero || habilitado === null) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos obligatorios',
@@ -675,48 +709,70 @@ export class MiPerfilComponent {
       return;
     }
 
-
-    const payload = {
-      iCodColegiatura: 0,
-      iCodPostulante: this.codUsuario,
+    const payload_colegiatura = {
+      iCodColegiatura: this.idColegiaturaSeleccionada ?? 0,
+      iCodUsuario: this.codUsuario,
       iCodColegioProfesional: Number(colegio),
       vNroColegiatura: numero,
-      bHabilitado: this.colegiatura.habilitado,
+      bHabilitado: habilitado,
       iCodUsuarioRegistra: this.codUsuario,
       dtFechaRegistro: new Date().toISOString(),
       bActivo: true
     };
 
-    this.apiService.insertarColegiatura(payload).subscribe({
-      next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Guardado',
-          text: `Los datos de colegiatura han sido guardados correctamente.`,
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'
-        });
-      },
-      error: (error) => {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al guardar la colegiatura.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#d33'
-        });
-        console.error('Error al guardar colegiatura', error);
-      }
-    });
+    if (this.modoEdicionColegiatura && this.idColegiaturaSeleccionada) {
+
+      // 🔁 Actualizar (PUT)
+      this.apiService.actualizarColegiatura(this.idColegiaturaSeleccionada, payload_colegiatura).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Actualizado',
+            text: 'Los datos de colegiatura han sido actualizados correctamente.',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#2e7d32'
+          });
+          this.modoEdicionColegiatura = false;
+          this.idColegiaturaSeleccionada = null;
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar la colegiatura.',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#d33'
+          });
+          console.error('Error al actualizar colegiatura', error);
+        }
+      });
+    } else {
+      // 🆕 Insertar (POST)
+      this.apiService.insertarColegiatura(payload_colegiatura).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Guardado',
+            text: 'Los datos de colegiatura han sido guardados correctamente.',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#2e7d32'
+          });
+        },
+        error: (error) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al guardar la colegiatura.',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#d33'
+          });
+          console.error('Error al guardar colegiatura', error);
+        }
+      });
+    }
   }
 
-
-
-
-
-
-
-
+  // ********************************************************************************************************************* //
   // ***************************************** //
   // ******  EXPERIENCIA LABORAL ******* //  
   // *************************************** //
@@ -865,21 +921,43 @@ export class MiPerfilComponent {
   // ***************************************** //
   // ******  CURSOS / DIPLOMADOS / ES ******* //  
   // *************************************** //
+
   cursosDiplomados: CursoDiplomado[] = [];
   cursoDiplomado: CursoDiplomado = this.nuevoCursoDiplomado();
   mostrarModalCursoDiplomado = false;
   editIndexCursoDiplomado: number | null = null;
 
-  // Crear nueva estructura vacía
+  // Cargar cursos/diplomados desde backend
+  cargarCursosDiplomados() {
+    if (this.codUsuario != null) {
+      this.apiService.getCursoDiplomadoPorUsuario(this.codUsuario).subscribe({
+        next: (data) => {
+          if (Array.isArray(data)) {
+            this.cursosDiplomados = data.map(c => ({
+              iCodCursoDiplomado: c.iCodCursoDiplomado,
+              denominacion: c.vCurso,
+              institucion: c.vNombreInstitucion,
+              horas: Number(c.iHoras)
+            }));
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar cursos/diplomados', err);
+        }
+      });
+    }
+  }
+
+  // Crear un nuevo curso/diplomado vacío
   nuevoCursoDiplomado(): CursoDiplomado {
     return {
       denominacion: '',
       institucion: '',
-      horas: null
+      horas: 0
     };
   }
 
-  // Abrir modal
+  // Abrir modal para agregar nuevo curso/diplomado
   abrirModalCursoDiplomado() {
     this.cursoDiplomado = this.nuevoCursoDiplomado();
     this.editIndexCursoDiplomado = null;
@@ -891,77 +969,123 @@ export class MiPerfilComponent {
     this.mostrarModalCursoDiplomado = false;
   }
 
-  // Guardar registro (modal)
+  // Método actualizado guardarCursoDiplomado
   guardarCursoDiplomado() {
-    const { denominacion, institucion, horas } = this.cursoDiplomado;
-
-    if (!denominacion || !institucion || horas === null) {
+    // Validaciones (sin cambios)
+    if (
+      !this.cursoDiplomado.denominacion.trim() ||
+      !this.cursoDiplomado.institucion.trim() ||
+      !this.cursoDiplomado.horas ||
+      this.cursoDiplomado.horas <= 0
+    ) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos obligatorios',
-        text: 'Debe completar todos los campos obligatorios (*)',
-        confirmButtonText: 'Aceptar',
+        text: 'Debe completar todos los campos y las horas deben ser mayores a 0.',
         confirmButtonColor: '#2e7d32'
       });
       return;
     }
 
-    if (horas <= 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Horas inválidas',
-        text: 'La duración debe ser mayor a cero.',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'
-      });
-      return;
-    }
-
-    const existeDuplicado = this.cursosDiplomados.some((curso, index) =>
-      index !== this.editIndexCursoDiplomado &&
-      curso.denominacion.trim().toLowerCase() === denominacion.trim().toLowerCase() &&
-      curso.institucion.trim().toLowerCase() === institucion.trim().toLowerCase()
+    // Validar duplicados (sin cambios)
+    const existeDuplicado = this.cursosDiplomados.some((c, i) =>
+      i !== this.editIndexCursoDiplomado &&
+      c.denominacion.trim().toLowerCase() === this.cursoDiplomado.denominacion.trim().toLowerCase() &&
+      c.institucion.trim().toLowerCase() === this.cursoDiplomado.institucion.trim().toLowerCase() &&
+      c.horas === this.cursoDiplomado.horas
     );
 
     if (existeDuplicado) {
       Swal.fire({
-        icon: 'info',
-        title: 'Curso duplicado',
-        text: 'Este curso o diplomado ya ha sido registrado.',
-        confirmButtonText: 'Aceptar',
+        icon: 'warning',
+        title: 'Registro duplicado',
+        text: 'Ya existe un registro con los mismos datos.',
         confirmButtonColor: '#2e7d32'
       });
       return;
     }
 
-    if (this.editIndexCursoDiplomado !== null) {
-      this.cursosDiplomados[this.editIndexCursoDiplomado] = { ...this.cursoDiplomado };
-    } else {
-      this.cursosDiplomados.push({ ...this.cursoDiplomado });
-    }
+    // Payload para backend
+    const payload_CursoDiplomado = {
+      iCodCursoDiplomado: this.cursoDiplomado.iCodCursoDiplomado || 0,
+      iCodUsuario: this.codUsuario,
+      vCurso: this.cursoDiplomado.denominacion.trim(),
+      vNombreInstitucion: this.cursoDiplomado.institucion.trim(),
+      dtFechaRegistro: new Date().toISOString(),
+      iHoras: this.cursoDiplomado.horas,
+      iCodUsuarioRegistra: this.codUsuario,
+      bActivo: true
+    };
 
-    this.cerrarModalCursoDiplomado();
-    Swal.fire({
-      icon: 'success',
-      title: 'Guardado',
-      text: 'El registro se ha guardado correctamente.',
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#2e7d32'
+    const esEdicioncp = this.editIndexCursoDiplomado !== null && this.cursoDiplomado.iCodCursoDiplomado && this.cursoDiplomado.iCodCursoDiplomado > 0;
+
+    // Aquí llamamos al servicio con responseType: 'text'
+    const peticioncp = esEdicioncp
+      ? this.apiService.actualizarCursoDiplomado(payload_CursoDiplomado, { responseType: 'text' })
+      : this.apiService.insertarCursosDiplomado(payload_CursoDiplomado, { responseType: 'text' });
+
+    peticioncp.subscribe({
+      next: (response: any) => {
+        // En este caso response es texto, ej: "Curso diplomado registrado correctamente."
+
+        if (esEdicioncp && this.editIndexCursoDiplomado !== null) {
+          // Actualizar arreglo local
+          this.cursosDiplomados[this.editIndexCursoDiplomado] = {
+            iCodCursoDiplomado: payload_CursoDiplomado.iCodCursoDiplomado,
+            denominacion: payload_CursoDiplomado.vCurso,
+            institucion: payload_CursoDiplomado.vNombreInstitucion,
+            horas: payload_CursoDiplomado.iHoras
+          };
+        } else {
+          // Insertar nuevo registro, como backend no envía id, usamos 0 o un id temporal
+          this.cursosDiplomados.push({
+            iCodCursoDiplomado: 0, // o -1 si prefieres identificarlo como temporal
+            denominacion: payload_CursoDiplomado.vCurso,
+            institucion: payload_CursoDiplomado.vNombreInstitucion,
+            horas: payload_CursoDiplomado.iHoras
+          });
+        }
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Éxito',
+          text: response,  // mostrar el texto que envía el backend
+          confirmButtonColor: '#2e7d32'
+        });
+
+        this.cargarCursosDiplomados();
+
+
+        this.cursoDiplomado = this.nuevoCursoDiplomado();
+        this.editIndexCursoDiplomado = null;
+        this.cerrarModalCursoDiplomado();
+      },
+      error: (err) => {
+        console.error('Error al guardar curso/diplomado', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo guardar la información.',
+          confirmButtonColor: '#d33'
+        });
+      }
     });
   }
 
-  // Editar registro
+  // Editar curso/diplomado
   editarCursoDiplomado(index: number) {
     this.cursoDiplomado = { ...this.cursosDiplomados[index] };
     this.editIndexCursoDiplomado = index;
     this.mostrarModalCursoDiplomado = true;
   }
 
-  // Eliminar registro
+  // Eliminar curso/diplomado
   eliminarCursoDiplomado(index: number) {
+    const curso = this.cursosDiplomados[index];
+
     Swal.fire({
       title: '¿Está seguro?',
-      text: 'Esta acción eliminará el curso, diplomado o especialización.',
+      text: 'Esta acción eliminará el registro del curso/diplomado.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Sí, eliminar',
@@ -970,40 +1094,39 @@ export class MiPerfilComponent {
       cancelButtonColor: '#6c757d'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.cursosDiplomados.splice(index, 1);
-        Swal.fire({
-          icon: 'success',
-          title: 'Eliminado',
-          text: 'El registro fue eliminado correctamente.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'
-        });
+        if (curso.iCodCursoDiplomado) {
+          this.apiService.eliminarCursoDiplomado(curso.iCodCursoDiplomado).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: 'Eliminado',
+                text: 'El registro fue eliminado correctamente.',
+                confirmButtonColor: '#2e7d32'
+              });
+              this.cargarCursosDiplomados();
+            },
+            error: (err) => {
+              console.error('Error al eliminar curso/diplomado', err);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo eliminar el registro.',
+                confirmButtonColor: '#d33'
+              });
+            }
+          });
+        } else {
+          // Eliminación local si no está guardado en backend
+          this.cursosDiplomados.splice(index, 1);
+          Swal.fire({
+            icon: 'success',
+            title: 'Eliminado',
+            text: 'El registro fue eliminado localmente.',
+            confirmButtonColor: '#2e7d32'
+          });
+        }
       }
     });
-  }
-
-  // Guardar datos finales del formulario
-  guardarCursosDiplomados(seccion: string) {
-    if (this.cursosDiplomados.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Sin registros',
-        text: 'Debe agregar al menos un curso o diplomado.',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#d33'
-      });
-      return;
-    }
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Datos guardados',
-      text: 'Los cursos, diplomados o especializaciones han sido guardados correctamente.',
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#2e7d32'
-    });
-
-    console.log('Datos guardados para', seccion, this.cursosDiplomados);
   }
 
   // ********************************************************************************************************** //
@@ -1023,6 +1146,27 @@ export class MiPerfilComponent {
       vNivelAlcanzado: ''
     };
   }
+
+  cargarIdiomas() {
+    if (this.codUsuario != null) {
+      this.apiService.getListarIdiomas(this.codUsuario).subscribe({
+        next: (data) => {
+          if (Array.isArray(data)) {
+            this.idiomas = data.map(i => ({
+              iCodIdioma: i.iCodIdioma,
+              vIdioma: i.vIdioma,
+              vInstitucion: i.vInstitucion,
+              vNivelAlcanzado: i.vNivelAlcanzado
+            }));
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar idiomas', err);
+        }
+      });
+    }
+  }
+
 
   // Abrir modal de idioma
   abrirModalIdioma() {
@@ -1071,14 +1215,14 @@ export class MiPerfilComponent {
       if (result.isConfirmed) {
         this.apiService.eliminarIdioma(id).subscribe({
           next: () => {
-            // this.apiService.getListarIdiomas(this.codUsuario!).subscribe({
-            //   next: (data) => {
-            //     this.idiomas = data;
-            //   },
-            //   error: (err) => {
-            //     console.error('Error al actualizar lista después de eliminar:', err);
-            //   }
-            // });
+            this.apiService.getListarIdiomas(this.codUsuario!).subscribe({
+              next: (data) => {
+                this.idiomas = data;
+              },
+              error: (err) => {
+                console.error('Error al actualizar lista después de eliminar:', err);
+              }
+            });
 
             Swal.fire({
               icon: 'success',
@@ -1104,9 +1248,9 @@ export class MiPerfilComponent {
 
   guardarIdioma() {
     if (
-      !this.idioma.vIdioma ||
-      !this.idioma.vInstitucion ||
-      !this.idioma.vNivelAlcanzado
+      !this.idioma.vIdioma.trim() ||
+      !this.idioma.vInstitucion.trim() ||
+      !this.idioma.vNivelAlcanzado.trim()
     ) {
       Swal.fire({
         icon: 'warning',
@@ -1124,41 +1268,46 @@ export class MiPerfilComponent {
 
     const payload = {
       iCodIdioma,
-      iCodPostulante: this.codUsuario,
-      vIdioma: this.idioma.vIdioma,
-      vInstitucion: this.idioma.vInstitucion,
-      vNivelAlcanzado: this.idioma.vNivelAlcanzado,
+      iCodUsuario: this.codUsuario,
+      vIdioma: this.idioma.vIdioma.trim(),
+      vInstitucion: this.idioma.vInstitucion.trim(),
+      vNivelAlcanzado: this.idioma.vNivelAlcanzado.trim(),
       dtFechaRegistro: new Date().toISOString(),
       iCodUsuarioRegistra: this.codUsuario,
-      bActivo: true
+      bActivo: true,
+      mensaje: ''
     };
 
-    // ✅ Elegir entre insertar o actualizar según si es edición
     const request = isEditando
-      ? this.apiService.actualizarIdioma(payload)
-      : this.apiService.insertarIdioma(payload);
+      ? this.apiService.actualizarIdioma(payload, { responseType: 'text' as 'json' })
+      : this.apiService.insertarIdioma(payload, { responseType: 'text' as 'json' });
 
     request.subscribe({
-      next: () => {
-        // this.apiService.getListarIdiomas(this.codUsuario!).subscribe({
-        //   next: (data) => {
-        //     this.idiomas = data;
-        //   },
-        //   error: (err) => {
-        //     console.error('Error al actualizar lista de idiomas', err);
-        //   }
-        // });
+      next: (response: any) => {
+        // Si la respuesta es un string JSON, parseamos para obtener el mensaje
+        let mensaje = response;
+        try {
+          if (typeof response === 'string') {
+            const jsonResp = JSON.parse(response);
+            if (jsonResp.mensaje) {
+              mensaje = jsonResp.mensaje;
+            }
+          } else if (response.mensaje) {
+            mensaje = response.mensaje;
+          }
+        } catch (e) {
+          // Si no se puede parsear, dejamos el mensaje original
+        }
 
-        this.cerrarModalIdioma();
         Swal.fire({
           icon: 'success',
           title: isEditando ? 'Idioma actualizado' : 'Idioma registrado',
-          text: isEditando
-            ? 'El idioma ha sido actualizado correctamente.'
-            : 'El idioma ha sido registrado correctamente.',
+          text: mensaje,
           confirmButtonColor: '#2e7d32'
         });
 
+        this.cargarIdiomas();  // recarga lista actualizada
+        this.cerrarModalIdioma();
         this.idioma = this.nuevoIdioma();
         this.editIndexIdioma = null;
       },
@@ -1172,38 +1321,51 @@ export class MiPerfilComponent {
         });
       }
     });
+
   }
+
 
   // ********************************************************************************************************** //
   // ************************* //  
   // ******  OFIMATICA ******* //  
   // ************************* //  
   cargarOfimatica() {
+    // Asegurar estructura del objeto
+    this.datos = this.datos || {};
+    this.datos['Ofimática'] = this.datos['Ofimática'] || {};
+
     if (this.codUsuario != null) {
-      // this.apiService.getOfimaticaByPostulante(this.codUsuario).subscribe({
-      //   next: (data) => {
-      //     if (data) {
-      //       this.ofimaticaActual = data;
-      //       console.log(data);
-      //       // Asignar 'true' o 'false' como string para que el select lo reconozca bien
-      //       this.datos['Ofimática'].nivelIntermedio = data.bTieneConocimiento ? 'true' : 'false';
-      //     } else {
-      //       // No hay datos: asignar '0' para que se seleccione "-- SELECCIONE --"
-      //       this.datos['Ofimática'].nivelIntermedio = '0';
-      //     }
-      //   },
-      //   error: (err) => {
-      //     console.error('Error al cargar datos de Ofimática:', err);
-      //     this.datos['Ofimática'].nivelIntermedio = '0';  // valor por defecto para "-- SELECCIONE --"
-      //   }
-      // });
+      this.apiService.getOfimaticaByPostulante(this.codUsuario).subscribe({
+        next: (data) => {
+          if (data && data.lista && data.lista.length > 0) {
+            const registro = data.lista[0]; // tomar el primer elemento de la lista
+            this.ofimaticaActual = registro;
+
+            // Convertir booleano a string para el select
+            this.datos['Ofimática'].nivelIntermedio = registro.bTieneConocimiento ? 'true' : 'false';
+          } else {
+            // No hay datos -> mostrar "-- SELECCIONE --"
+            this.ofimaticaActual = null;
+            this.datos['Ofimática'].nivelIntermedio = '0';
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar Ofimática:', err);
+          this.ofimaticaActual = null;
+          this.datos['Ofimática'].nivelIntermedio = '0';
+        }
+      });
+    } else {
+      this.ofimaticaActual = null;
+      this.datos['Ofimática'].nivelIntermedio = '0';
     }
   }
 
   guardarOfimatica(seccion: string) {
     const datosOfimatica = this.datos[seccion];
 
-    if (!datosOfimatica.nivelIntermedio) {
+    // Validar que no esté vacío ni sea "0"
+    if (!datosOfimatica.nivelIntermedio || datosOfimatica.nivelIntermedio === '0') {
       Swal.fire({
         icon: 'warning',
         title: 'Campo obligatorio',
@@ -1213,32 +1375,29 @@ export class MiPerfilComponent {
       return;
     }
 
-    // Convertimos string "true"/"false" a boolean
+    // Convertir string "true"/"false" a boolean
     const tieneConocimientoBoolean = datosOfimatica.nivelIntermedio === 'true';
 
+    // Armar el payload según el formato actualizado
     const payload = {
       iCodOfimaticaNivelIntermedio: this.ofimaticaActual ? this.ofimaticaActual.iCodOfimaticaNivelIntermedio : 0,
-      iCodPostulante: this.codUsuario,
+      iCodUsuario: this.codUsuario,
       bTieneConocimiento: tieneConocimientoBoolean,
       dtFechaRegistro: new Date().toISOString(),
       iCodUsuarioRegistra: this.codUsuario,
       bActivo: true
     };
 
+    // Si existe registro previo -> actualizar
     if (payload.iCodOfimaticaNivelIntermedio && payload.iCodOfimaticaNivelIntermedio > 0) {
-      // Actualizar solo enviando el payload completo con booleano
-      const estado = datosOfimatica.nivelIntermedio === 'true';      // convierte a booleano
-
-      this.apiService.actualizarOfimatica(payload.iCodOfimaticaNivelIntermedio, estado).subscribe({
+      this.apiService.actualizarOfimatica(payload).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',
-            title: 'Guardado exitoso',
+            title: 'Actualización exitosa',
             text: `La sección "${seccion}" ha sido actualizada correctamente.`,
             confirmButtonColor: '#1e8e3e'
-          }).then(() =>
-            window.location.reload()
-          );
+          }).then(() => window.location.reload());
         },
         error: (err) => {
           console.error('Error al actualizar ofimática:', err);
@@ -1251,7 +1410,7 @@ export class MiPerfilComponent {
         }
       });
     } else {
-      // Insertar nuevo
+      // No existe registro previo -> insertar
       this.apiService.insertarOfimatica(payload).subscribe({
         next: () => {
           Swal.fire({
@@ -1259,9 +1418,7 @@ export class MiPerfilComponent {
             title: 'Guardado exitoso',
             text: `La sección "${seccion}" ha sido guardada correctamente.`,
             confirmButtonColor: '#1e8e3e'
-          }).then(() =>
-            window.location.reload()
-          );
+          }).then(() => window.location.reload());
         },
         error: (err) => {
           console.error('Error al guardar ofimática:', err);
@@ -1279,17 +1436,81 @@ export class MiPerfilComponent {
   // ********************************************************************************************************** //
   // ******************************************* //
   // ******  Bonificaciones Adicionales ******* //  
-  // ***************************************** //  
-  personasdiscapacidad: string[] = [
-    'Que las evaluaciones del proceso de selección se efectúen en el primer piso',
-    'Ubicarse en las primeras filas donde se realizan las evaluaciones ',
-    'Apoyo visual, gestual y oral para mejorar la comprensión de las instrucciones ',
-    'Intérprete de señas durante la evaluación o entrevista personal',
-    'Autorizar que el postulante con discapacidad responda o realice preguntas escritas durante la entrevista '
-  ];
-  ajustesSeleccionados: boolean[] = new Array(this.personasdiscapacidad.length).fill(false);
+  // ***************************************** //   
+  // personasdiscapacidad: string[] = [
+  //   'Que las evaluaciones del proceso de selección se efectúen en el primer piso',
+  //   'Ubicarse en las primeras filas donde se realizan las evaluaciones ',
+  //   'Apoyo visual, gestual y oral para mejorar la comprensión de las instrucciones ',
+  //   'Intérprete de señas durante la evaluación o entrevista personal',
+  //   'Autorizar que el postulante con discapacidad responda o realice preguntas escritas durante la entrevista '
+  // ];
+
+  // ajustesSeleccionados: boolean[] = new Array(this.personasdiscapacidad.length).fill(false);
+
+  bonificacionesAdicionalesActual: any = null;
+
+  cargarDatosBonificacionesAdicionales() {
+    if (this.codUsuario != null) {
+      this.apiService.getBonificacionesAdicionales(this.codUsuario).subscribe({
+        next: (data) => {
+          if (data && data.lista && data.lista.length > 0) {
+            const registro = data.lista[0];
+            this.bonificacionesAdicionalesActual = registro;
+            console.log("Datos cargados:", registro);
+
+            // Mapear booleanos a string para los selects ("si"/"no")
+            this.datos['Bonificaciones adicionales (FF. AA., Discapacidad)'] = {
+              licenciadoFuerzasArmadas: registro.bLicenciaFFAA ? 'si' : 'no',
+              codigoLicenciado: registro.vNroCarnetFFAA || '',
+              tieneDiscapacidad: registro.bDiscapacidad ? 'si' : 'no',
+              codigoDiscapacidad: registro.vNroCarnetDiscapacidad || '',
+              // Si luego agregas ajustes, aquí puedes inicializar ese array también
+            };
+          } else {
+            // Sin datos, valores por defecto
+            this.bonificacionesAdicionalesActual = null;
+            this.datos['Bonificaciones adicionales (FF. AA., Discapacidad)'] = {
+              licenciadoFuerzasArmadas: '',
+              codigoLicenciado: '',
+              tieneDiscapacidad: '',
+              codigoDiscapacidad: '',
+            };
+          }
+        },
+        error: (err) => {
+          console.error('Error al cargar Bonificaciones adicionales:', err);
+          this.bonificacionesAdicionalesActual = null;
+          this.datos['Bonificaciones adicionales (FF. AA., Discapacidad)'] = {
+            licenciadoFuerzasArmadas: '',
+            codigoLicenciado: '',
+            tieneDiscapacidad: '',
+            codigoDiscapacidad: '',
+          };
+        }
+      });
+    } else {
+      this.bonificacionesAdicionalesActual = null;
+      this.datos['Bonificaciones adicionales (FF. AA., Discapacidad)'] = {
+        licenciadoFuerzasArmadas: '',
+        codigoLicenciado: '',
+        tieneDiscapacidad: '',
+        codigoDiscapacidad: '',
+      };
+    }
+  }
+
   guardarBonificacionesAdicionales(seccion: string) {
     const datos = this.datos[seccion];
+
+    // Si el usuario dice NO a licenciado, limpiar el código
+    if (datos.licenciadoFuerzasArmadas === 'no') {
+      datos.codigoLicenciado = '';
+    }
+
+    // Si el usuario dice NO a discapacidad, limpiar el código
+    if (datos.tieneDiscapacidad === 'no') {
+      datos.codigoDiscapacidad = '';
+    }
 
     // Validaciones simples
     if (!datos.licenciadoFuerzasArmadas || !datos.tieneDiscapacidad) {
@@ -1323,30 +1544,62 @@ export class MiPerfilComponent {
       return;
     }
 
-    // Validar al menos un ajuste razonable
-    const ajustesMarcados = this.ajustesSeleccionados
-      .map((checked, i) => (checked ? this.personasdiscapacidad[i] : null))
-      .filter(v => v !== null);
+    // Preparar payload con los valores correctos
+    const payload = {
+      iCodBonificaciones: this.bonificacionesAdicionalesActual ? this.bonificacionesAdicionalesActual.iCodBonificaciones : 0,
+      iCodUsuario: this.codUsuario,
+      bLicenciaFFAA: datos.licenciadoFuerzasArmadas === 'si',
+      vNroCarnetFFAA: datos.codigoLicenciado || '',
+      bDiscapacidad: datos.tieneDiscapacidad === 'si',
+      vNroCarnetDiscapacidad: datos.codigoDiscapacidad || '',
+      iCodUsuarioRegistra: this.codUsuario,
+      dtFechaRegistro: new Date().toISOString(),
+      bActivo: true
+    };
 
-    if (ajustesMarcados.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Ajustes razonables',
-        text: 'Debe seleccionar al menos un ajuste razonable.',
-        confirmButtonColor: '#d33'
+    if (payload.iCodBonificaciones && payload.iCodBonificaciones > 0) {
+      // Actualizar
+      this.apiService.actualizarBonificacionesAdicionales(payload).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Actualización exitosa',
+            text: `La sección "${seccion}" ha sido actualizada correctamente.`,
+            confirmButtonColor: '#1e8e3e'
+          }).then(() => window.location.reload());
+        },
+        error: (err) => {
+          console.error('Error al actualizar Bonificaciones adicionales:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar la sección.',
+            confirmButtonColor: '#d33'
+          });
+        }
       });
-      return;
+    } else {
+      // Insertar
+      this.apiService.insertarBonificacionesAdicionales(payload).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Guardado exitoso',
+            text: `La sección "${seccion}" ha sido guardada correctamente.`,
+            confirmButtonColor: '#1e8e3e'
+          }).then(() => window.location.reload());
+        },
+        error: (err) => {
+          console.error('Error al guardar Bonificaciones adicionales:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al guardar la sección.',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
     }
-
-    // Guardar ajustes seleccionados
-    this.datos[seccion].ajustesSeleccionados = ajustesMarcados;
-
-    Swal.fire({
-      icon: 'success',
-      title: 'Guardado exitoso',
-      text: `La sección "${seccion}" ha sido guardada correctamente.`,
-      confirmButtonColor: '#1e8e3e'
-    });
   }
 
   // ********************************************************************************************************** //
@@ -1363,7 +1616,42 @@ export class MiPerfilComponent {
     'Gozar de buen estado de salud física y mental'
   ];
   declaracionesSeleccionadas: boolean[] = new Array(this.declaracionesJurada.length).fill(false);
+
+  declaracionJuradaActual: any = null; // Guarda el registro actual si existe
+
+  cargarDeclaracionJurada() {
+    this.apiService.getDeclaracionJuradaPostulante().subscribe({
+      next: (data) => {
+        if (data && data.lista && data.lista.length > 0) {
+          const registro = data.lista[0];
+          this.declaracionJuradaActual = registro;
+
+          // Mapear los valores booleanos a los checkboxes
+          this.declaracionesSeleccionadas = [
+            registro.bSinAntecedentesPenales || false,
+            registro.bSinProcesosJudiciales || false,
+            registro.bSinSancionesAdministrativas || false,
+            registro.bSinVinculoLaboralEstado || false,
+            registro.bAceptaBasesConcurso || false,
+            true // último: "Gozar de buen estado de salud física y mental" (no está en API)
+          ];
+        } else {
+          // Si no hay registros, inicializar todo en false
+          this.declaracionJuradaActual = null;
+          this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar la Declaración Jurada:', err);
+        this.declaracionJuradaActual = null;
+        this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
+      }
+    });
+  }
+
+
   guardarDeclaracionJurada(seccion: string) {
+    // Verificar que todas las declaraciones estén marcadas
     const todasMarcadas = this.declaracionesSeleccionadas.every(seleccionada => seleccionada);
 
     if (!todasMarcadas) {
@@ -1376,15 +1664,40 @@ export class MiPerfilComponent {
       return;
     }
 
-    // Guardar lógicamente si se necesita
-    const declaracionesAceptadas = this.declaracionesJurada.filter((_, i) => this.declaracionesSeleccionadas[i]);
-    console.log('Declaraciones aceptadas:', declaracionesAceptadas);
+    // Mapear las declaraciones marcadas a los campos booleanos requeridos por el backend
+    const payload = {
+      iCodDeclaracionJuradaPostulante: 0,
+      iCodUsuario: this.codUsuario,
+      bSinAntecedentesPenales: this.declaracionesSeleccionadas[0] ?? false,
+      bSinProcesosJudiciales: this.declaracionesSeleccionadas[1] ?? false,
+      bSinSancionesAdministrativas: this.declaracionesSeleccionadas[2] ?? false,
+      bSinVinculoLaboralEstado: this.declaracionesSeleccionadas[3] ?? false,
+      bAceptaBasesConcurso: this.declaracionesSeleccionadas[4] ?? false,
+      iCodUsuarioRegistra: this.codUsuario,
+      dtFechaRegistro: new Date().toISOString(),
+      bActivo: true,
+      mensaje: ''
+    };
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Guardado exitoso',
-      text: `La sección "${seccion}" ha sido guardada correctamente.`,
-      confirmButtonColor: '#1e8e3e'
+    // Llamar al servicio para insertar la declaración jurada
+    this.apiService.insertarDeclaracionJurada(payload).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado exitoso',
+          text: `La sección "${seccion}" ha sido guardada correctamente.`,
+          confirmButtonColor: '#1e8e3e'
+        }).then(() => window.location.reload());
+      },
+      error: (err) => {
+        console.error('Error al guardar Declaración Jurada:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al guardar la sección.',
+          confirmButtonColor: '#d33'
+        });
+      }
     });
   }
 
