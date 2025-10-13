@@ -254,15 +254,18 @@ export class ApiService {
   // *******************************************************************
   // DECLARACIÓN JURADA
   // *******************************************************************
-  getDeclaracionJuradaPostulante() {
-    return this.http.get<any>(`${this.baseUrl}/DeclaracionJuradaPostulante/listar`);
+  getDeclaracionJuradaPostulante(iCodUsuario: number) {
+    const params = new HttpParams().set('iCodUsuario', iCodUsuario.toString());
+    return this.http.get<any>(`${this.baseUrl}/DeclaracionJuradaPostulante/listar`, { params });
   }
-
 
   insertarDeclaracionJurada(data: any) {
     return this.http.post(`${this.baseUrl}/DeclaracionJuradaPostulante/insertar`, data);
   }
 
+  actualizarDeclaracionJuradaPostulante(data: any) {
+    return this.http.put(`${this.baseUrl}/DeclaracionJuradaPostulante/actualizar`, data);
+  }
 
 
 }

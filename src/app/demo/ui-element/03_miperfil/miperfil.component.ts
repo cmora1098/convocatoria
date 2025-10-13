@@ -1606,6 +1606,7 @@ export class MiPerfilComponent {
   // ***************************************** //
   // *********  DECLARACION JURADA ********** //  
   // *************************************** //
+  declaracionJuradaActual: any = null;
 
   declaracionesJurada: string[] = [
     'No tener condena por delito doloso, con sentencia firme',
@@ -1615,92 +1616,108 @@ export class MiPerfilComponent {
     'No estar inscrito en el Registro Único de Condenados Inhabilitados por Delitos contra la Administración Pública, creado por Decreto Legislativo N° 1243',
     'Gozar de buen estado de salud física y mental'
   ];
+
   declaracionesSeleccionadas: boolean[] = new Array(this.declaracionesJurada.length).fill(false);
 
-  declaracionJuradaActual: any = null; // Guarda el registro actual si existe
-
+  // =============================================================
+  // CARGAR DECLARACIÓN JURADA
+  // =============================================================
   cargarDeclaracionJurada() {
-    this.apiService.getDeclaracionJuradaPostulante().subscribe({
+    if (!this.codUsuario) return;
+
+    this.apiService.getDeclaracionJuradaPostulante(this.codUsuario).subscribe({
       next: (data) => {
-        if (data && data.lista && data.lista.length > 0) {
-          const registro = data.lista[0];
+        // Como el API devuelve directamente un array, verificamos así:
+        if (Array.isArray(data) && data.length > 0) {
+          const registro = data[0];
           this.declaracionJuradaActual = registro;
 
-          // Mapear los valores booleanos a los checkboxes
+          // Mapeamos cada campo booleano a los checkbox
           this.declaracionesSeleccionadas = [
             registro.bSinAntecedentesPenales || false,
             registro.bSinProcesosJudiciales || false,
             registro.bSinSancionesAdministrativas || false,
             registro.bSinVinculoLaboralEstado || false,
             registro.bAceptaBasesConcurso || false,
-            true // último: "Gozar de buen estado de salud física y mental" (no está en API)
+            true // “Buen estado de salud” — si el API lo maneja, reemplázalo
           ];
         } else {
-          // Si no hay registros, inicializar todo en false
+          // No hay registro
           this.declaracionJuradaActual = null;
           this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
         }
       },
       error: (err) => {
-        console.error('Error al cargar la Declaración Jurada:', err);
+        console.error('Error al cargar Declaración Jurada:', err);
         this.declaracionJuradaActual = null;
         this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
       }
     });
   }
 
-
+  // =============================================================
+  // GUARDAR / ACTUALIZAR DECLARACIÓN JURADA
+  // =============================================================
   guardarDeclaracionJurada(seccion: string) {
-    // Verificar que todas las declaraciones estén marcadas
-    const todasMarcadas = this.declaracionesSeleccionadas.every(seleccionada => seleccionada);
+    const todasMarcadas = this.declaracionesSeleccionadas.every(v => v);
 
     if (!todasMarcadas) {
       Swal.fire({
         icon: 'warning',
         title: 'Declaración incompleta',
-        html: 'Debes aceptar todas las declaraciones juradas para continuar.',
+        text: 'Debes aceptar todas las declaraciones juradas para continuar.',
         confirmButtonColor: '#d33'
       });
       return;
     }
 
-    // Mapear las declaraciones marcadas a los campos booleanos requeridos por el backend
     const payload = {
-      iCodDeclaracionJuradaPostulante: 0,
+      iCodDeclaracionJuradaPostulante: this.declaracionJuradaActual
+        ? this.declaracionJuradaActual.iCodDeclaracionJuradaPostulante
+        : 0,
       iCodUsuario: this.codUsuario,
-      bSinAntecedentesPenales: this.declaracionesSeleccionadas[0] ?? false,
-      bSinProcesosJudiciales: this.declaracionesSeleccionadas[1] ?? false,
-      bSinSancionesAdministrativas: this.declaracionesSeleccionadas[2] ?? false,
-      bSinVinculoLaboralEstado: this.declaracionesSeleccionadas[3] ?? false,
-      bAceptaBasesConcurso: this.declaracionesSeleccionadas[4] ?? false,
+      bSinAntecedentesPenales: this.declaracionesSeleccionadas[0],
+      bSinProcesosJudiciales: this.declaracionesSeleccionadas[1],
+      bSinSancionesAdministrativas: this.declaracionesSeleccionadas[2],
+      bSinVinculoLaboralEstado: this.declaracionesSeleccionadas[3],
+      bAceptaBasesConcurso: this.declaracionesSeleccionadas[4],
       iCodUsuarioRegistra: this.codUsuario,
       dtFechaRegistro: new Date().toISOString(),
       bActivo: true,
       mensaje: ''
     };
 
-    // Llamar al servicio para insertar la declaración jurada
-    this.apiService.insertarDeclaracionJurada(payload).subscribe({
+    const esActualizacion =
+      payload.iCodDeclaracionJuradaPostulante &&
+      payload.iCodDeclaracionJuradaPostulante > 0;
+
+    const apiCall = esActualizacion
+      ? this.apiService.actualizarDeclaracionJuradaPostulante(payload)
+      : this.apiService.insertarDeclaracionJurada(payload);
+
+    const mensaje = esActualizacion ? 'actualizada' : 'guardada';
+
+    apiCall.subscribe({
       next: () => {
         Swal.fire({
           icon: 'success',
-          title: 'Guardado exitoso',
-          text: `La sección "${seccion}" ha sido guardada correctamente.`,
+          title: 'Operación exitosa',
+          text: `La sección "${seccion}" ha sido ${mensaje} correctamente.`,
           confirmButtonColor: '#1e8e3e'
         }).then(() => window.location.reload());
       },
       error: (err) => {
-        console.error('Error al guardar Declaración Jurada:', err);
+        console.error(`Error al ${mensaje} Declaración Jurada:`, err);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Ocurrió un error al guardar la sección.',
+          text: `Ocurrió un error al ${mensaje} la sección.`,
           confirmButtonColor: '#d33'
         });
       }
     });
   }
-
+ 
   // ********************************************************************************************************** //
 
 

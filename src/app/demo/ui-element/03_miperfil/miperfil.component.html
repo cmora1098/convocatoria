@@ -890,7 +890,7 @@
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
- 
+
                             <!-- BONIFICACIONES ADICIONALES -->
                             <form *ngIf="item === 'Bonificaciones adicionales (FF. AA., Discapacidad)'"
                                 (ngSubmit)="guardarBonificacionesAdicionales(item)" #formDP="ngForm">
@@ -963,9 +963,7 @@
                             <form *ngIf="item === 'Declaración Jurada'" (ngSubmit)="guardarDeclaracionJurada(item)"
                                 #formDJ="ngForm">
 
-                                <small class="text-muted d-block mb-2">
-                                    Otros requisitos
-                                </small>
+                                <small class="text-muted d-block mb-2">Otros requisitos</small>
                                 <hr />
 
                                 <div class="form-check mb-2"
@@ -983,6 +981,7 @@
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
+
 
                         </div>
                     </div>
