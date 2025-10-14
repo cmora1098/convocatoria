@@ -178,6 +178,11 @@ export class ApiService {
   // *******************************************************************
   // EXPERIENCIA LABORAL
   // *******************************************************************  
+  insertarExperienciaLaboral(data: any) {
+    return this.http.post(`${this.baseUrl}/ExperienciaLaboral`, data);
+  }
+
+
 
 
   // *******************************************************************

@@ -604,48 +604,7 @@ export const NavigationItems: NavigationItem[] = [
         target: true,
         breadcrumbs: false,
         roles: [1, 2, 3] // visible para todos
-      },
-
-
-      {
-        id: 'button',
-        title: 'Button',
-        type: 'item',
-        url: '/component/button'
-      },
-      {
-        id: 'badges',
-        title: 'Badges',
-        type: 'item',
-        url: '/component/badges'
-      },
-      {
-        id: 'breadcrumb-pagination',
-        title: 'Breadcrumb & Pagination',
-        type: 'item',
-        url: '/component/breadcrumb-paging'
-      },
-      {
-        id: 'collapse',
-        title: 'Collapse',
-        type: 'item',
-        url: '/component/collapse'
-      },
-      {
-        id: 'tabs-pills',
-        title: 'Tabs & Pills',
-        type: 'item',
-        url: '/component/tabs-pills'
-      },
-      {
-        id: 'typography',
-        title: 'Typography',
-        type: 'item',
-        url: '/component/typography'
-      }
-
-
-
+      }, 
     ]
   }
 ];

@@ -38,6 +38,22 @@ interface CursoDiplomado {
   institucion: string;
   horas: number;
 }
+
+interface ExperienciaLaboral {
+  tipo: 'GENERAL' | 'ESPECIFICA';
+  entidad: string;
+  unidad: string;
+  cargo: string;
+  sector: string;
+  fechaInicio: string;
+  fechaFin: string;
+  total: string;
+  funciones: string[];
+  temas: any;
+  duracion?: Duracion;
+}
+
+
 // **************************************************
 
 
@@ -56,19 +72,7 @@ interface Duracion {
   días: number;
 }
 
-interface ExperienciaLaboral {
-  tipo: 'GENERAL' | 'ESPECIFICA';
-  entidad: string;
-  unidad: string;
-  cargo: string;
-  sector: 'PÚBLICO' | 'PRIVADO' | '';
-  fechaInicio: string;
-  fechaFin: string;
-  total: string;
-  duracion?: Duracion;
-  funciones: string[];
-  temas?: { [key: string]: boolean };
-}
+
 
 @Component({
   selector: 'app-miperfil',
@@ -846,24 +850,55 @@ export class MiPerfilComponent {
   }
 
   guardarExperienciaLaboral() {
-    if (this.indiceExperienciaLaboralEditando !== null) {
-      this.experienciasLaborales[this.indiceExperienciaLaboralEditando] = { ...this.experienciaLaboralActual };
-      this.indiceExperienciaLaboralEditando = null;
-    } else {
-      this.experienciasLaborales.push({ ...this.experienciaLaboralActual });
-    }
+    const experiencia = { ...this.experienciaLaboralActual };
 
-    const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExperiencia'));
-    modal.hide();
-    this.calcularTotalesExperienciaLaboral();
+    const payload = {
+      iCodExperienciaLaboral: 0,
+      iCodUsuario: this.codUsuario,
+      vEntidad: experiencia.entidad,
+      vUnidadOrganica: experiencia.unidad,
+      vCargo: experiencia.cargo,
+      cSector: experiencia.sector,
+      dFechaInicio: new Date(experiencia.fechaInicio).toISOString(),
+      dFechaFin: new Date(experiencia.fechaFin).toISOString(),
+      vFunciones: experiencia.funciones.join(', '),
+      iCodUsuarioRegistra: this.codUsuario,
+      dtFechaRegistro: new Date().toISOString(),
+      bActivo: true
+    };
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Guardado',
-      text: 'La experiencia laboral ha sido registrada correctamente.',
-      confirmButtonColor: '#1e8e3e'
+    this.apiService.insertarExperienciaLaboral(payload).subscribe({
+      next: () => {
+        if (this.indiceExperienciaLaboralEditando !== null) {
+          this.experienciasLaborales[this.indiceExperienciaLaboralEditando] = experiencia;
+          this.indiceExperienciaLaboralEditando = null;
+        } else {
+          this.experienciasLaborales.push(experiencia);
+        }
+
+        const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExperiencia'));
+        modal.hide();
+        this.calcularTotalesExperienciaLaboral();
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Guardado',
+          text: 'La experiencia laboral ha sido registrada correctamente.',
+          confirmButtonColor: '#1e8e3e'
+        });
+      },
+      error: (error) => {
+        console.error('Error al guardar experiencia laboral:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo guardar la experiencia laboral.',
+          confirmButtonColor: '#d33'
+        });
+      }
     });
   }
+
 
   eliminarExperienciaLaboral(exp: ExperienciaLaboral) {
     this.experienciasLaborales = this.experienciasLaborales.filter(e => e !== exp);
@@ -1166,7 +1201,6 @@ export class MiPerfilComponent {
       });
     }
   }
-
 
   // Abrir modal de idioma
   abrirModalIdioma() {
@@ -1619,9 +1653,6 @@ export class MiPerfilComponent {
 
   declaracionesSeleccionadas: boolean[] = new Array(this.declaracionesJurada.length).fill(false);
 
-  // =============================================================
-  // CARGAR DECLARACIÓN JURADA
-  // =============================================================
   cargarDeclaracionJurada() {
     if (!this.codUsuario) return;
 
@@ -1655,9 +1686,6 @@ export class MiPerfilComponent {
     });
   }
 
-  // =============================================================
-  // GUARDAR / ACTUALIZAR DECLARACIÓN JURADA
-  // =============================================================
   guardarDeclaracionJurada(seccion: string) {
     const todasMarcadas = this.declaracionesSeleccionadas.every(v => v);
 
@@ -1717,7 +1745,7 @@ export class MiPerfilComponent {
       }
     });
   }
- 
+
   // ********************************************************************************************************** //
 
 

@@ -59,13 +59,14 @@ import { ApiService } from 'src/app/services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
+import { RouterModule, Router } from '@angular/router';
 
 declare var bootstrap: any;
 
 @Component({
   selector: 'app-inicio',
   templateUrl: './inicio.component.html',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   styleUrls: ['./inicio.component.scss']
 })
 export class InicioComponent implements OnInit {

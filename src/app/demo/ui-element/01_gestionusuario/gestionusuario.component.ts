@@ -305,7 +305,7 @@ export class GestionUsuarioComponent {
   }
 
   eliminarusuario(id: number) {
- 
+
     Swal.fire({
       title: '¿Estás seguro?',
       text: 'Esta acción no se puede deshacer.',
@@ -332,7 +332,41 @@ export class GestionUsuarioComponent {
     });
   }
 
+  // ******************************* //
+  // ******  VALIDACIONES   ******* //  
+  // ***************************** //
+  permitirSoloNumeros(event: KeyboardEvent): boolean {
+    const tecla = event.key;
 
+    // Permitir solo dígitos (0 al 9)
+    if (!/^\d$/.test(tecla)) {
+      event.preventDefault(); // Bloquea cualquier cosa que no sea número
+      return false;
+    }
+
+    // También puedes limitar la longitud aquí si usas ngModel
+    const valorActual = this.usuarioSeleccionada?.NumDocumento || '';
+    if (valorActual.length >= 15) {
+      event.preventDefault(); // Evita que se ingresen más de 15 dígitos
+      return false;
+    }
+
+    return true;
+  }
+
+  soloLetras(event: KeyboardEvent): boolean {
+    const tecla = event.key;
+
+    // Permitir letras (mayúsculas/minúsculas), acentos, ñ y espacios
+    const regex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/;
+
+    if (!regex.test(tecla)) {
+      event.preventDefault(); // Bloquea la tecla si no coincide con el patrón
+      return false;
+    }
+
+    return true;
+  }
 
 
 }
