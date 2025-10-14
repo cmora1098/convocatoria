@@ -39,7 +39,8 @@
             "scripts": [
               "node_modules/apexcharts/dist/apexcharts.min.js",
               "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
-            ]
+            ],
+            "baseHref": "/convocatoria2/"
           },
           "configurations": {
             "production": {
@@ -61,7 +62,8 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/convocatoria2/"
             },
             "development": {
               "buildOptimizer": false,
@@ -69,7 +71,8 @@
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
-              "namedChunks": true
+              "namedChunks": true,
+              "baseHref": "/convocatoria2/"
             }
           },
           "defaultConfiguration": "production"
