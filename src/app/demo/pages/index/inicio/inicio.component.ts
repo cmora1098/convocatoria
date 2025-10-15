@@ -1,65 +1,9 @@
-// import { Component } from '@angular/core';
-// import { RouterModule } from '@angular/router';
-// import { SharedModule } from 'src/app/theme/shared/shared.module';
-// import { FormsModule } from '@angular/forms';
-
-// @Component({
-//   selector: 'app-inicio',
-//   standalone: true,
-//   imports: [SharedModule, RouterModule, FormsModule],
-//   templateUrl: './inicio.component.html',
-//   styleUrls: ['./inicio.component.scss']
-// })
-// export class InicioComponent {
-
-//   tipoConvocatoria: string = ''; // TODOS por defecto
-//   textoBusqueda: string = '';
-
-//   convocatorias: any[] = [];
-
-//   ngOnInit(): void {
-//     this.buscarConvocatorias();
-//   }
-
-//   buscarConvocatorias(): void {
-//     // Datos en duro (mock)
-//     this.convocatorias = [
-//       {
-//         proceso: '129-OGRH-2025',
-//         detalle: 'POR SUPLENCIA DE UN (01) ANALISTA I EN SELECCIÓN DE PERSONAL PARA LA OFICINA DE DESARROLLO DE RECURSOS HUMANOS',
-//         sede: 'Av. Plaza 30 de Agosto S/N, San Isidro - Lima',
-//         estado: 'NUEVA',
-//         bases: true,
-//         comunicado: false,
-//         resultados: false
-//       },
-//       {
-//         proceso: '128-OGRH-2025',
-//         detalle: 'ANALISTA I DE GESTIÓN ADMINISTRATIVA PARA LA OFICINA GENERAL DE ASESORÍA JURÍDICA DEL MININTER',
-//         sede: 'Av. Plaza 30 de Agosto S/N, San Isidro - Lima',
-//         estado: 'NUEVA',
-//         bases: true,
-//         comunicado: false,
-//         resultados: false
-//       },
-//       {
-//         proceso: '127-OGRH-2025',
-//         detalle: 'ESPECIALISTA II EN COMUNICACIÓN, DIFUSIÓN Y PROTOCOLO PARA EL DESPACHO VICEMINISTERIAL DE SEGURIDAD PÚBLICA',
-//         sede: 'Av. Plaza 30 de Agosto S/N, San Isidro - Lima',
-//         estado: 'NUEVA',
-//         bases: true,
-//         comunicado: false,
-//         resultados: false
-//       }
-//     ];
-//   }
-// }
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import Swal from 'sweetalert2';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 declare var bootstrap: any;
 
@@ -84,7 +28,7 @@ export class InicioComponent implements OnInit {
 
   convocatorias: any[] = [];
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService) {}
 
   ngOnInit(): void {
     this.buscarConvocatorias();
@@ -92,25 +36,39 @@ export class InicioComponent implements OnInit {
 
   buscarConvocatorias(): void {
     const params: any = {
-      pageNumber: this.paginaActual,
-      pageSize: this.pageSize
+      PageNumber: this.paginaActual,
+      PageSize: this.pageSize
     };
 
     if (this.tipoConvocatoria) {
-      params.codTipoConvocatoria = this.tipoConvocatoria;
+      params.iCodTipoConvocatoria = this.tipoConvocatoria;
     }
 
     if (this.textoBusqueda) {
-      params.buscar = this.textoBusqueda;
+      params.FiltroGeneral = this.textoBusqueda;
     }
 
-    this.api.getConvocatoriasPaginado(params).subscribe({
-      next: (resp) => {
-        this.convocatorias = resp.items;
-        this.totalPaginas = Math.ceil(resp.totalRecords / this.pageSize);
+    this.api.getConvocatoriasPaginadoconFase(params).subscribe({
+      next: (resp: any[]) => {
+        if (Array.isArray(resp)) {
+          this.convocatorias = resp;
+
+          // Total de registros viene en cada elemento (ej. totalRegistros)
+          const totalRegistros = resp.length > 0 ? resp[0].totalRegistros || resp.length : 0;
+          this.totalPaginas = Math.ceil(totalRegistros / this.pageSize);
+        } else {
+          this.convocatorias = [];
+          this.totalPaginas = 1;
+        }
       },
       error: (err) => {
         console.error('Error al cargar convocatorias', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar las convocatorias.',
+          confirmButtonColor: '#d33'
+        });
       }
     });
   }
@@ -205,6 +163,5 @@ export class InicioComponent implements OnInit {
     const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
     window.open(url, '_blank');
   }
-
 
 }

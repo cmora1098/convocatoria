@@ -1,194 +1,187 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark shadow-lg" style="background-color: #1e8e3e;">
-    <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="#">
-            <img src="assets/images/logoagrorural.png" alt="Logo" width="80" class="me-3" />
-            <div>
-                <div class="fw-bold">Convocatorias AGRO RURAL</div>
-                <small class="text-muted">Ministerio de Desarrollo Agrario y Riego</small>
-            </div>
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGov">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse justify-content-end" id="navbarGov">
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="btn btn-outline-light btn-sm ms-3" [routerLink]="['/login']">Iniciar sesión</a> <!-- routerLink="/login" routerLinkActive="active" -->
-                </li>
-            </ul>
-        </div>
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="assets/images/logoagrorural.png" alt="Logo" width="80" class="me-3" />
+      <div>
+        <div class="fw-bold">Convocatorias AGRO RURAL</div>
+        <small class="text-muted">Ministerio de Desarrollo Agrario y Riego</small>
+      </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarGov">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarGov">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="btn btn-outline-light btn-sm ms-3" [routerLink]="['/login']">Iniciar sesión</a>
+        </li>
+      </ul>
     </div>
+  </div>
 </nav>
 
 <!-- CONTENIDO -->
 <div class="auth-wrapper">
-    <div class="auth-content">
+  <div class="auth-content">
 
-        <!-- Encabezado -->
-        <div class="top-content mb-4 text-center">
-            <h1 class="title">¡Tu próximo desafío profesional te espera!</h1>
-            <p class="lead">Explorá nuestras vacantes y hacé crecer tu carrera con nosotros.</p>
-        </div>
-
-        <!-- Card -->
-        <div class="card shadow-lg border-0">
-            <div class="card-body">
-
-                <!-- Formulario de búsqueda -->
-                <form (ngSubmit)="buscarConvocatorias()" class="row g-2 align-items-end">
-                    <div class="col-md-4">
-                        <label><strong>Tipo Convocatoria:</strong></label>
-                        <select class="form-control" name="tipoConvocatoria" [(ngModel)]="tipoConvocatoria">
-                            <option value="">TODOS</option>
-                            <option value="1">PRACTICANTES</option>
-                            <option value="2">CAS</option>
-                            <option value="3">CONVOCATORIA D.LEG. 728 / 276</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label><strong>Búsqueda:</strong></label>
-                        <input type="text" class="form-control" placeholder="Ingrese texto a buscar..."
-                            name="textoBusqueda" [(ngModel)]="textoBusqueda" />
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-success w-100">
-                            <i class="fa fa-search"></i> Buscar
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Tabla de resultados -->
-                <div class="table-responsive mt-4">
-                    <table class="table table-bordered table-hover text-center" *ngIf="convocatorias.length > 0">
-                        <thead class="table-header text-white">
-                            <tr>
-                                <th>Proceso</th>
-                                <th>Detalle del Puesto</th>
-                                <th>Estado</th>
-                                <th>Bases</th>
-                                <th>Perfil de Puesto</th>
-                                <th>Cronograma</th>
-                                <th>Comunicado</th>
-                                <th>Resultados</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let c of convocatorias">
-                                <td class="align-middle">{{ c.vTitulo }}</td>
-                                <td class="align-middle text-start">
-                                    <strong [innerHTML]="c.vRequisitos"></strong><br />
-                                    <small class="text-muted"><b>SEDE:</b> {{ c.vUnidadZonal }}</small>
-                                </td>
-                                <td class="align-middle">
-                                    <span class="badge bg-success" *ngIf="c.bActivo">Activo</span>
-                                    <span class="badge bg-danger" *ngIf="!c.bActivo">Inactivo</span>
-                                </td>
-                                <td class="align-middle">
-                                    <button class="btn btn-outline-danger btn-sm" (click)="abrirModal(c, 'bases')">
-                                        <i class="fa fa-file-pdf"></i>
-                                    </button>
-                                </td>
-                                <td class="align-middle">
-                                    <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'perfil')">
-                                        <i class="fa fa-briefcase"></i>
-                                    </button>
-                                </td>
-                                <td class="align-middle">
-                                    <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'cronograma')">
-                                        <i class="fa fa-calendar"></i>
-                                    </button>
-                                </td>
-                                <td class="align-middle">
-                                    <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'comunicado')">
-                                        <i class="fa fa-bullhorn"></i>
-                                    </button>
-                                </td>
-                                <td class="align-middle">
-                                    <button class="btn btn-outline-primary btn-sm"
-                                        (click)="abrirModal(c, 'resultados')">
-                                        <i class="fa fa-list"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <!-- Sin resultados -->
-                    <div *ngIf="convocatorias.length === 0" class="text-center text-muted my-4">
-                        <p>No se encontraron convocatorias.</p>
-                    </div>
-                </div>
-
-                <!-- Paginación pública -->
-                <nav *ngIf="totalPaginas > 1" class="mt-3">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item" [class.disabled]="paginaActual === 1">
-                            <a class="page-link" (click)="anteriorPagina()">Anterior</a>
-                        </li>
-                        <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let index = index"
-                            [class.active]="paginaActual === (index + 1)">
-                            <a class="page-link" (click)="irPagina(index + 1)">{{ index + 1 }}</a>
-                        </li>
-                        <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
-                            <a class="page-link" (click)="siguientePagina()">Siguiente</a>
-                        </li>
-                    </ul>
-                </nav>
-
-            </div>
-        </div>
+    <!-- Encabezado -->
+    <div class="top-content mb-4 text-center">
+      <h1 class="title">¡Tu próximo desafío profesional te espera!</h1>
+      <p class="lead">Explorá nuestras vacantes y hacé crecer tu carrera con nosotros.</p>
     </div>
+
+    <!-- Card -->
+    <div class="card shadow-lg border-0">
+      <div class="card-body">
+
+        <!-- Formulario de búsqueda -->
+        <form (ngSubmit)="buscarConvocatorias()" class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label><strong>Tipo Convocatoria:</strong></label>
+            <select class="form-control" name="tipoConvocatoria" [(ngModel)]="tipoConvocatoria">
+              <option value="">TODOS</option>
+              <option value="1">PRACTICANTES</option>
+              <option value="2">CAS</option>
+              <option value="3">CONVOCATORIA D.LEG. 728 / 276</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label><strong>Búsqueda:</strong></label>
+            <input type="text" class="form-control" placeholder="Ingrese texto a buscar..."
+              name="textoBusqueda" [(ngModel)]="textoBusqueda" />
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-success w-100">
+              <i class="fa fa-search"></i> Buscar
+            </button>
+          </div>
+        </form>
+
+        <!-- Tabla de resultados -->
+        <div class="table-responsive mt-4">
+          <table class="table table-bordered table-hover text-center" *ngIf="convocatorias.length > 0">
+            <thead class="table-header text-white" style="background-color: #1e8e3e;">
+              <tr>
+                <th>Proceso</th>
+                <th>Detalle del Puesto</th>
+                <!-- <th>Estado</th> -->
+                <th>Fase</th>
+                <th>Bases</th>
+                <th>Perfil de Puesto</th>
+                <th>Cronograma</th>
+                <th>Comunicado</th>
+                <th>Resultados</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let c of convocatorias">
+                <td class="align-middle">{{ c.vTitulo }}</td>
+                <td class="align-middle text-start">
+                  <strong [innerHTML]="c.vRequisitos"></strong><br />
+                  <small class="text-muted"><b>SEDE:</b> {{ c.vUnidadZonal }}</small>
+                </td>
+                <!-- <td class="align-middle">
+                  <span class="badge bg-success" *ngIf="c.bActivo">Activo</span>
+                  <span class="badge bg-danger" *ngIf="!c.bActivo">Inactivo</span>
+                </td> -->
+                <td class="align-middle">
+                  <span class="badge bg-info text-dark">{{ c.vEstadoConvocatoria }}</span>
+                </td>
+                <td class="align-middle">
+                  <button class="btn btn-outline-danger btn-sm" (click)="abrirModal(c, 'bases')">
+                    <i class="fa fa-file-pdf"></i>
+                  </button>
+                </td>
+                <td class="align-middle">
+                  <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'perfil')">
+                    <i class="fa fa-briefcase"></i>
+                  </button>
+                </td>
+                <td class="align-middle">
+                  <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'cronograma')">
+                    <i class="fa fa-calendar"></i>
+                  </button>
+                </td>
+                <td class="align-middle">
+                  <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'comunicado')">
+                    <i class="fa fa-bullhorn"></i>
+                  </button>
+                </td>
+                <td class="align-middle">
+                  <button class="btn btn-outline-primary btn-sm" (click)="abrirModal(c, 'resultados')">
+                    <i class="fa fa-list"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Sin resultados -->
+          <div *ngIf="convocatorias.length === 0" class="text-center text-muted my-4">
+            <p>No se encontraron convocatorias.</p>
+          </div>
+        </div>
+
+        <!-- Paginación pública -->
+        <nav *ngIf="totalPaginas > 1" class="mt-3">
+          <ul class="pagination justify-content-center">
+            <li class="page-item" [class.disabled]="paginaActual === 1">
+              <a class="page-link" (click)="anteriorPagina()">Anterior</a>
+            </li>
+            <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let index = index"
+              [class.active]="paginaActual === (index + 1)">
+              <a class="page-link" (click)="irPagina(index + 1)">{{ index + 1 }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+              <a class="page-link" (click)="siguientePagina()">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+
+      </div>
+    </div>
+  </div>
 </div>
 
-
-
-<!-- Modal para subir archivos masivos -->
+<!-- Modal para archivos -->
 <div class="modal fade" id="modalInfoMasiva" tabindex="-1" aria-labelledby="modalInfoMasivaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow">
-
-            <!-- Modal Header -->
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalInfoMasivaLabel">
-                    <i class="feather icon-download-cloud me-2"></i>
-                    Archivos de {{ faseActual | titlecase }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-
-                <!-- Archivos ya subidos -->
-                <div *ngIf="archivosExistentes.length > 0" class="mb-4">
-                    <h6 class="text-success mb-3">
-                        <i class="feather icon-folder"></i> Archivos ya subidos:
-                    </h6>
-                    <div class="row g-2">
-                        <div *ngFor="let archivo of archivosExistentes" class="col-md-6">
-                            <div class="card border-success shadow-sm h-100">
-                                <div class="card-body d-flex justify-content-between align-items-center">
-                                    <div class="text-truncate w-75">
-                                        <i class="feather icon-file-text text-success me-1"></i>
-                                        {{ archivo.nombreArchivo || archivo.vNombreArchivo }}
-                                    </div>
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)"
-                                            title="Ver archivo">
-                                            <i class="feather icon-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalInfoMasivaLabel">
+          <i class="feather icon-download-cloud me-2"></i>
+          Archivos de {{ faseActual | titlecase }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="archivosExistentes.length > 0" class="mb-4">
+          <h6 class="text-success mb-3">
+            <i class="feather icon-folder"></i> Archivos ya subidos:
+          </h6>
+          <div class="row g-2">
+            <div *ngFor="let archivo of archivosExistentes" class="col-md-6">
+              <div class="card border-success shadow-sm h-100">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                  <div class="text-truncate w-75">
+                    <i class="feather icon-file-text text-success me-1"></i>
+                    {{ archivo.nombreArchivo || archivo.vNombreArchivo }}
+                  </div>
+                  <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)" title="Ver archivo">
+                      <i class="feather icon-eye"></i>
+                    </button>
+                  </div>
                 </div>
-
-
+              </div>
             </div>
-
-
+          </div>
         </div>
+        <div *ngIf="archivosExistentes.length === 0" class="text-center text-muted">
+          <p>No hay archivos disponibles.</p>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

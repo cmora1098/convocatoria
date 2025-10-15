@@ -12,6 +12,7 @@ export class ApiService {
   public baseUrlConvocatoriaDoc = 'https://intranet.agrorural.gob.pe/convocatoriasAPI';
   private apiUbigeoDpto = 'https://intranet.agrorural.gob.pe/apiubigeo';
 
+  // public baseUrl = 'https://localhost:7106/api';
 
   constructor(private http: HttpClient) { }
 
@@ -94,10 +95,16 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/ConvocatoriaFase/${iCodFase}`);
   }
 
-
   listarFasesConvocatoria(iCodConvocatoria: any) {
     return this.http.get<any>(`${this.baseUrl}/ConvocatoriaFase/listar/${iCodConvocatoria}`);
   }
+
+  // Listado con Paginado con Fase
+  getConvocatoriasPaginadoconFase(params: any) {  // Listar  
+    return this.http.get<any>(`${this.baseUrl}/Convocatorias/listar-paginado-conFase`, { params });
+  }
+
+
 
   // ======================
   // Usuario
@@ -114,6 +121,21 @@ export class ApiService {
   eliminarUsuario(idConvocatoria: any) {
     return this.http.delete(`${this.baseUrl}/Usuarios/eliminar/${idConvocatoria}`);
   }
+
+
+  // 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -178,11 +200,25 @@ export class ApiService {
   // *******************************************************************
   // EXPERIENCIA LABORAL
   // *******************************************************************  
-  insertarExperienciaLaboral(data: any) {
-    return this.http.post(`${this.baseUrl}/ExperienciaLaboral`, data);
+  getExperienciaLaboral(iCodUsuario: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/ExperienciaLaboral/usuario/${iCodUsuario}`);
   }
 
+  actualizarExperienciaLaboral(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/ExperienciaLaboral/${id}`, data, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
+  insertarExperienciaLaboral(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/ExperienciaLaboral`, data, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  eliminarExperienciaLaboral(id: number) {
+    return this.http.delete(`${this.baseUrl}/ExperienciaLaboral/${id}`);
+  }
 
 
   // *******************************************************************

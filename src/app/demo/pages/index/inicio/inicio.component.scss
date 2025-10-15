@@ -2,45 +2,49 @@
 .auth-wrapper {
   display: flex;
   justify-content: center;
-  padding: 20px;
+  padding: 24px;
+  background-color: #f7f9f8;
 }
 
 .auth-content {
   width: 100%;
-  max-width: 95%; /* expansivo */
+  max-width: 95%;
 }
 
 /* === CARD === */
 .card {
   width: 100%;
-  border-radius: 14px;
+  border-radius: 16px;
   border: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
   overflow: hidden;
   transition: all 0.3s ease;
+  background-color: #fff;
 }
 
 .card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* === FORMULARIO DE BÚSQUEDA === */
 form label {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: #2e2e2e;
 }
 
 form .form-control {
   border-radius: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
   transition: all 0.2s ease;
+  padding: 0.5rem 0.75rem;
+  font-size: 14px;
 }
 
 form .form-control:focus {
   border-color: #1e8e3e;
-  box-shadow: 0 0 6px rgba(30, 142, 62, 0.25);
+  box-shadow: 0 0 8px rgba(30, 142, 62, 0.25);
 }
 
 form button {
@@ -51,19 +55,22 @@ form button {
 
 form button:hover {
   background-color: #16692d;
-  transform: scale(1.02);
+  transform: scale(1.03);
+  box-shadow: 0 3px 8px rgba(30, 142, 62, 0.25);
 }
 
 /* === TABLA === */
 .table-responsive {
   max-height: 70vh;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #1e8e3e #e8f5e9;
 }
 
 .table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 8px;
+  border-spacing: 0 10px;
   font-size: 15px;
 }
 
@@ -71,7 +78,8 @@ form button:hover {
   background: linear-gradient(90deg, #1e8e3e, #34a853);
   font-weight: 600;
   font-size: 14px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
 }
 
 .table th {
@@ -86,17 +94,20 @@ form button:hover {
   padding: 14px;
   vertical-align: middle;
   background-color: #fff;
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+  color: #333;
 }
 
 /* hover filas */
 .table tbody tr {
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .table tbody tr:hover td {
   background-color: #f1fdf4;
+  transform: scale(1.005);
 }
 
 /* === BADGES === */
@@ -104,14 +115,22 @@ form button:hover {
   font-size: 13px;
   padding: 6px 10px;
   border-radius: 8px;
+  font-weight: 600;
 }
 
 .badge.bg-success {
   background-color: #1e8e3e !important;
+  color: #fff;
 }
 
 .badge.bg-danger {
   background-color: #d93025 !important;
+  color: #fff;
+}
+
+.badge.bg-info {
+  background-color: #c8e6c9 !important;
+  color: #ffffff !important;
 }
 
 /* === BOTONES TABLA === */
@@ -122,15 +141,22 @@ form button:hover {
 
 .table button:hover {
   transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
 }
 
 /* === PAGINACIÓN === */
+.pagination {
+  margin-top: 16px;
+  justify-content: center;
+}
+
 .pagination .page-link {
   color: #1e8e3e;
   border-radius: 8px;
   font-weight: 500;
   margin: 0 3px;
   transition: all 0.2s ease;
+  border: 1px solid #1e8e3e;
 }
 
 .pagination .page-link:hover {
@@ -143,4 +169,41 @@ form button:hover {
   color: #fff;
   font-weight: 600;
   box-shadow: 0 2px 6px rgba(30, 142, 62, 0.4);
+}
+
+/* === MODAL === */
+.modal-content {
+  border-radius: 14px;
+  border: none;
+}
+
+.modal-header {
+  background: linear-gradient(90deg, #1e8e3e, #34a853);
+  color: #fff;
+  border-bottom: none;
+}
+
+.modal-body {
+  background-color: #fafafa;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  form label {
+    font-size: 13px;
+  }
+
+  .card {
+    border-radius: 10px;
+  }
+
+  .auth-content {
+    max-width: 100%;
+  }
 }

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { QuillModule } from 'ngx-quill';
+import { Router } from '@angular/router';
 
 import { ApiService } from '../../../services/api.service';
 import Swal from 'sweetalert2';  // Importamos SweetAlert2
@@ -11,8 +12,7 @@ import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
-import { NgForm } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import * as dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -26,12 +26,6 @@ interface Formacion {
   fechaInicio: string;
 }
 
-interface Colegiatura {
-  colegio: string;    // id como string, porque viene del <select>
-  numero: string;
-  habilitado: boolean | null; // Permite validar si se ha seleccionado algo
-}
-
 interface CursoDiplomado {
   iCodCursoDiplomado?: number;
   denominacion: string;
@@ -39,26 +33,30 @@ interface CursoDiplomado {
   horas: number;
 }
 
-interface ExperienciaLaboral {
-  tipo: 'GENERAL' | 'ESPECIFICA';
+export interface ExperienciaLaboral {
+  iCodExperienciaLaboral?: number;
   entidad: string;
   unidad: string;
   cargo: string;
   sector: string;
+  tipo: 'GENERAL' | 'ESPECIFICA';
   fechaInicio: string;
   fechaFin: string;
-  total: string;
+  total?: string;
   funciones: string[];
-  temas: any;
-  duracion?: Duracion;
+
+  // ✅ permite indexar dinámicamente sin error
+  temas?: {
+    [key: string]: boolean;
+  };
+
+  duracion?: {
+    años: number;
+    meses: number;
+    días: number;
+  };
 }
-
-
-// **************************************************
-
-
-
-
+  
 interface Idioma {
   iCodIdioma?: number;
   vIdioma: string;
@@ -71,9 +69,7 @@ interface Duracion {
   meses: number;
   días: number;
 }
-
-
-
+ 
 @Component({
   selector: 'app-miperfil',
   standalone: true,
@@ -148,7 +144,7 @@ export class MiPerfilComponent {
     }
   };
 
-  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient) {
+  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient, private router: Router) {
     this.codUsuario = this.authService.getUserId();
     this.email = this.authService.getEmail();
     this.tpdoc = this.authService.getTipoDocumento();
@@ -202,7 +198,7 @@ export class MiPerfilComponent {
     this.cargarDatosPersonales();
     this.cargarFormaciones();
     this.cargarColegiatura();
-
+    this.obtenerExperienciasLaborales();
     this.cargarCursosDiplomados();
     this.cargarIdiomas();
     this.cargarOfimatica();
@@ -271,7 +267,9 @@ export class MiPerfilComponent {
   }
 
   volver() {
-    alert('Volviendo...');
+    //alert('Volviendo...');
+    this.router.navigate(['/pinicio']);
+
   }
 
   // ********************************* //
@@ -780,6 +778,10 @@ export class MiPerfilComponent {
   // ***************************************** //
   // ******  EXPERIENCIA LABORAL ******* //  
   // *************************************** //
+  trackByIndex(index: number): number {
+    return index;
+  }
+
   indiceExperienciaLaboralEditando: number | null = null;
   experienciasLaborales: ExperienciaLaboral[] = [];
   experienciaLaboralActual: ExperienciaLaboral = this.nuevaExperienciaLaboral('GENERAL');
@@ -793,6 +795,8 @@ export class MiPerfilComponent {
     'Temas Sanitarios',
     'Acceso a Mercados Externos'
   ];
+
+  modoEdicionExperienciaLaboral: boolean = false;
 
   nuevaExperienciaLaboral(tipo: 'GENERAL' | 'ESPECIFICA'): ExperienciaLaboral {
     return {
@@ -810,6 +814,7 @@ export class MiPerfilComponent {
   }
 
   abrirModalExperienciaLaboral(tipo: 'GENERAL' | 'ESPECIFICA') {
+    this.modoEdicionExperienciaLaboral = false; // siempre nuevo registro
     this.indiceExperienciaLaboralEditando = null;
     this.experienciaLaboralActual = this.nuevaExperienciaLaboral(tipo);
     this.mostrarModalExperienciaLaboral();
@@ -820,12 +825,15 @@ export class MiPerfilComponent {
     modal.show();
   }
 
-  agregarFuncionLaboral() {
+  agregarFuncionLaboral(): void {
+    if (!this.experienciaLaboralActual.funciones) {
+      this.experienciaLaboralActual.funciones = [];
+    }
     this.experienciaLaboralActual.funciones.push('');
   }
 
-  eliminarFuncionLaboral(i: number) {
-    this.experienciaLaboralActual.funciones.splice(i, 1);
+  eliminarFuncionLaboral(index: number): void {
+    this.experienciaLaboralActual.funciones.splice(index, 1);
   }
 
   calcularDuracionExperienciaLaboral() {
@@ -850,68 +858,295 @@ export class MiPerfilComponent {
   }
 
   guardarExperienciaLaboral() {
-    const experiencia = { ...this.experienciaLaboralActual };
+    if (!this.experienciaLaboralActual) return;
 
-    const payload = {
-      iCodExperienciaLaboral: 0,
-      iCodUsuario: this.codUsuario,
-      vEntidad: experiencia.entidad,
-      vUnidadOrganica: experiencia.unidad,
-      vCargo: experiencia.cargo,
-      cSector: experiencia.sector,
-      dFechaInicio: new Date(experiencia.fechaInicio).toISOString(),
-      dFechaFin: new Date(experiencia.fechaFin).toISOString(),
-      vFunciones: experiencia.funciones.join(', '),
-      iCodUsuarioRegistra: this.codUsuario,
-      dtFechaRegistro: new Date().toISOString(),
-      bActivo: true
+    // 🔹 Validación de campos obligatorios
+    if (
+      !this.experienciaLaboralActual.entidad ||
+      !this.experienciaLaboralActual.cargo ||
+      !this.experienciaLaboralActual.fechaInicio ||
+      !this.experienciaLaboralActual.fechaFin
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor completa los campos obligatorios antes de continuar.',
+        confirmButtonColor: '#f57c00',
+      });
+      return;
+    }
+
+    // 🔹 Confirmación
+    Swal.fire({
+      title: this.modoEdicionExperienciaLaboral
+        ? '¿Deseas actualizar la experiencia laboral?'
+        : '¿Deseas registrar esta experiencia laboral?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#2e7d32',
+      cancelButtonColor: '#9e9e9e',
+      confirmButtonText: this.modoEdicionExperienciaLaboral ? 'Sí, actualizar' : 'Sí, guardar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      const data = {
+        iCodExperienciaLaboral: this.modoEdicionExperienciaLaboral
+          ? Number(this.experienciaLaboralActual.iCodExperienciaLaboral) || 0
+          : 0,
+        iCodUsuario: this.codUsuario,
+        vEntidad: this.experienciaLaboralActual.entidad?.trim() || '',
+        vUnidadOrganica: this.experienciaLaboralActual.unidad?.trim() || '',
+        vCargo: this.experienciaLaboralActual.cargo?.trim() || '',
+        cSector:
+          this.experienciaLaboralActual.sector === 'PÚBLICO'
+            ? 'P'
+            : this.experienciaLaboralActual.sector === 'PRIVADO'
+              ? 'R'
+              : 'P',
+        cTipoExperienciaLaboral:
+          this.experienciaLaboralActual.tipo === 'ESPECIFICA' ? 'E' : 'G',
+        bActAgricolas:
+          this.experienciaLaboralActual.temas?.['Actividades Agrícolas'] || false,
+        bActAgropecuarias:
+          this.experienciaLaboralActual.temas?.['Actividades Agropecuarias'] ||
+          false,
+        bTemasSanitarios:
+          this.experienciaLaboralActual.temas?.['Temas Sanitarios'] || false,
+        bAccesoMercadosExternos:
+          this.experienciaLaboralActual.temas?.['Acceso a Mercados Externos'] ||
+          false,
+        dFechaInicio: new Date(this.experienciaLaboralActual.fechaInicio).toISOString(),
+        dFechaFin: new Date(this.experienciaLaboralActual.fechaFin).toISOString(),
+        vFunciones:
+          this.experienciaLaboralActual.funciones
+            ?.filter((f) => f.trim() !== '')
+            .join('; ') || '',
+        iCodUsuarioRegistra: this.codUsuario,
+        dtFechaRegistro: new Date().toISOString(),
+        bActivo: true,
+      };
+
+      console.log(
+        this.modoEdicionExperienciaLaboral
+          ? '🟢 Enviando PUT actualización:'
+          : '🟢 Enviando POST nuevo registro:',
+        data
+      );
+
+      // 🔹 Elegimos el método correcto según el modo
+      let request$: Observable<any>;
+      if (this.modoEdicionExperienciaLaboral) {
+        request$ = this.apiService.actualizarExperienciaLaboral(
+          Number(data.iCodExperienciaLaboral),
+          data
+        );
+      } else {
+        request$ = this.apiService.insertarExperienciaLaboral(data);
+      }
+
+      // 🔹 Ejecutar la solicitud
+      request$.subscribe({
+        next: (res: any) => {
+          Swal.fire({
+            icon: 'success',
+            title: this.modoEdicionExperienciaLaboral
+              ? '¡Actualización exitosa!'
+              : '¡Registro exitoso!',
+            text: this.modoEdicionExperienciaLaboral
+              ? 'La experiencia laboral ha sido actualizada correctamente.'
+              : 'La experiencia laboral ha sido registrada correctamente.',
+            confirmButtonColor: '#2e7d32',
+          }).then(() => {
+            this.cerrarModalExperienciaLaboral('modalExperiencia');
+            this.obtenerExperienciasLaborales();
+          });
+        },
+        error: (err: any) => {
+          console.error('❌ Error al guardar experiencia laboral:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text:
+              err.error?.message ||
+              'Ocurrió un error al guardar la experiencia laboral.',
+            confirmButtonColor: '#d32f2f',
+          });
+        },
+      });
+    });
+  }
+
+  editarExperienciaLaboral(exp: ExperienciaLaboral) {
+    this.modoEdicionExperienciaLaboral = true;
+
+    this.experienciaLaboralActual = {
+      iCodExperienciaLaboral: exp.iCodExperienciaLaboral || 0,
+      entidad: exp.entidad || '',
+      unidad: exp.unidad || '',
+      cargo: exp.cargo || '',
+      sector: exp.sector || '',
+      tipo: exp.tipo || 'GENERAL',
+      temas: {
+        'Actividades Agrícolas': exp.temas?.['Actividades Agrícolas'] || false,
+        'Actividades Agropecuarias': exp.temas?.['Actividades Agropecuarias'] || false,
+        'Temas Sanitarios': exp.temas?.['Temas Sanitarios'] || false,
+        'Acceso a Mercados Externos': exp.temas?.['Acceso a Mercados Externos'] || false,
+      },
+      fechaInicio: exp.fechaInicio ? exp.fechaInicio.toString().substring(0, 10) : '',
+      fechaFin: exp.fechaFin ? exp.fechaFin.toString().substring(0, 10) : '',
+      funciones: exp.funciones ? exp.funciones.map((f: string) => f.trim()).filter((f: string) => f) : [],
+      total: '', // se actualizará abajo
     };
 
-    this.apiService.insertarExperienciaLaboral(payload).subscribe({
-      next: () => {
-        if (this.indiceExperienciaLaboralEditando !== null) {
-          this.experienciasLaborales[this.indiceExperienciaLaboralEditando] = experiencia;
-          this.indiceExperienciaLaboralEditando = null;
-        } else {
-          this.experienciasLaborales.push(experiencia);
-        }
+    // 🔹 Calcular duración automáticamente
+    this.calcularDuracionExperienciaLaboral();
 
-        const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('modalExperiencia'));
-        modal.hide();
-        this.calcularTotalesExperienciaLaboral();
+    // 🔹 Mostrar el modal (sin limpiar datos)
+    this.mostrarModalExperienciaLaboral();
+  }
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Guardado',
-          text: 'La experiencia laboral ha sido registrada correctamente.',
-          confirmButtonColor: '#1e8e3e'
-        });
+  cerrarModalExperienciaLaboral(modalId: string) {
+    const modal = document.getElementById(modalId);
+
+    if (modal) {
+      // 🔹 Cierra correctamente el modal (soporta Bootstrap y estilo manual)
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove(); // elimina fondo oscuro si existe
+      }
+    }
+
+    // 🔹 Restablecer flags de control
+    this.modoEdicionExperienciaLaboral = false;
+
+    // 🔹 Reiniciar el modelo con valores por defecto válidos
+    this.experienciaLaboralActual = {
+      iCodExperienciaLaboral: 0,
+      entidad: '',
+      unidad: '',
+      cargo: '',
+      sector: '', // vacío al inicio (debes seleccionarlo en el formulario)
+      tipo: 'GENERAL', // valor por defecto permitido
+      temas: {
+        'Actividades Agrícolas': false,
+        'Actividades Agropecuarias': false,
+        'Temas Sanitarios': false,
+        'Acceso a Mercados Externos': false,
       },
-      error: (error) => {
-        console.error('Error al guardar experiencia laboral:', error);
+      fechaInicio: '',
+      fechaFin: '',
+      funciones: [],
+      total: '', // duración (se recalcula después)
+    };
+  }
+
+  obtenerExperienciasLaborales() {
+    const iCodUsuario = this.codUsuario; // reemplaza con tu variable real
+
+    if (!iCodUsuario) {
+      console.warn('⚠️ No se encontró iCodUsuario. No se puede obtener la experiencia laboral.');
+      return;
+    }
+
+    this.apiService.getExperienciaLaboral(iCodUsuario).subscribe({
+      next: (response) => {
+        // Mapeamos la respuesta del backend al modelo usado en el frontend
+        this.experienciasLaborales = response.map((exp: any) => {
+          const fechaInicio = dayjs(exp.dFechaInicio).format('YYYY-MM-DD');
+          const fechaFin = dayjs(exp.dFechaFin).format('YYYY-MM-DD');
+
+          // Calculamos duración y texto total
+          const diff = dayjs.duration(dayjs(fechaFin).diff(dayjs(fechaInicio)));
+          const años = Math.floor(diff.asYears());
+          const meses = Math.floor(diff.asMonths() % 12);
+          const días = Math.floor(diff.asDays() % 30);
+          const total = `${años} Años ${meses} Meses ${días} Días`;
+
+          // Sector: traducimos el código CHAR(1)
+          let sector = '';
+          if (exp.cSector === 'P') sector = 'PÚBLICO';
+          else if (exp.cSector === 'R') sector = 'PRIVADO';
+          else sector = 'NO ESPECIFICADO';
+
+          // Tipo experiencia: traducimos si existe
+          let tipo: 'GENERAL' | 'ESPECIFICA' = exp.cTipoExperienciaLaboral === 'E' ? 'ESPECIFICA' : 'GENERAL';
+
+          return {
+            iCodExperienciaLaboral: exp.iCodExperienciaLaboral,
+            entidad: exp.vEntidad,
+            unidad: exp.vUnidadOrganica,
+            cargo: exp.vCargo,
+            sector,
+            tipo,
+            fechaInicio,
+            fechaFin,
+            total,
+            funciones: exp.vFunciones ? exp.vFunciones.split(/[,;]\s*/) : [''],
+            temas: {
+              'Actividades Agrícolas': exp.bActAgricolas,
+              'Actividades Agropecuarias': exp.bActAgropecuarias,
+              'Temas Sanitarios': exp.bTemasSanitarios,
+              'Acceso a Mercados Externos': exp.bAccesoMercadosExternos
+            },
+            duracion: { años, meses, días }
+          } as ExperienciaLaboral;
+        });
+
+        this.calcularTotalesExperienciaLaboral();
+        console.log('✅ Experiencias laborales cargadas:', this.experienciasLaborales);
+      },
+      error: (err) => {
+        console.error('❌ Error al obtener experiencias laborales:', err);
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'No se pudo guardar la experiencia laboral.',
-          confirmButtonColor: '#d33'
+          text: 'No se pudo cargar la experiencia laboral del usuario.',
+          confirmButtonColor: '#d32f2f',
         });
       }
     });
   }
 
-
   eliminarExperienciaLaboral(exp: ExperienciaLaboral) {
-    this.experienciasLaborales = this.experienciasLaborales.filter(e => e !== exp);
-    this.calcularTotalesExperienciaLaboral();
-  }
+    Swal.fire({
+      title: '¿Deseas eliminar esta experiencia laboral?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d32f2f',
+      cancelButtonColor: '#9e9e9e',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
 
-  editarExperienciaLaboral(exp: ExperienciaLaboral) {
-    const index = this.experienciasLaborales.indexOf(exp);
-    if (index !== -1) {
-      this.indiceExperienciaLaboralEditando = index;
-      this.experienciaLaboralActual = JSON.parse(JSON.stringify(exp));
-      this.mostrarModalExperienciaLaboral();
-    }
+      this.apiService.eliminarExperienciaLaboral(exp.iCodExperienciaLaboral ?? 0).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Eliminado correctamente',
+            text: 'La experiencia laboral ha sido eliminada.',
+            confirmButtonColor: '#2e7d32',
+          }).then(() => {
+            this.obtenerExperienciasLaborales(); // 🔁 recarga lista actualizada
+          });
+        },
+        error: (err) => {
+          console.error('❌ Error al eliminar experiencia laboral:', err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.error?.message || 'No se pudo eliminar la experiencia laboral.',
+            confirmButtonColor: '#d32f2f',
+          });
+        },
+      });
+    });
   }
 
   calcularTotalesExperienciaLaboral() {

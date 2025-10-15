@@ -398,8 +398,7 @@
                                             <div class="fs-5">{{ experienciaLaboralPublica }}</div>
                                         </div>
                                     </div>
-                                </div>
-
+                                </div> 
 
                                 <!-- Botones -->
                                 <div class="d-flex justify-content-end gap-2 mb-3">
@@ -465,186 +464,142 @@
                                         </tbody>
                                     </table>
                                 </div>
-
-                                <!-- <div class="card mt-3">
-                                    <div class="card-header bg-dark text-white d-flex align-items-center">
-                                        <i class="fa fa-briefcase me-2"></i>
-                                        <strong>Experiencia Laboral</strong>
-                                    </div>
-
-                                    <div class="card-body">
-                                        <p class="text-muted">
-                                            Registre cada una de sus experiencias laborales. Puede agregar experiencia
-                                            general o específica y se calcularán
-                                            automáticamente los años, meses y días totales.
-                                        </p>
-
-                                         <div class="row text-center mb-4">
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-primary text-white rounded-3 shadow-sm">
-                                                    <strong>Experiencia General</strong>
-                                                    <div>{{ experienciaLaboralGeneral }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-success text-white rounded-3 shadow-sm">
-                                                    <strong>Experiencia Específica</strong>
-                                                    <div>{{ experienciaLaboralEspecifica }}</div>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="p-3 bg-warning text-white rounded-3 shadow-sm">
-                                                    <strong>Sector Público</strong>
-                                                    <div>{{ experienciaLaboralPublica }}</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                         <div class="d-flex justify-content-end gap-2 mb-3">
-                                            <button type="button" class="btn btn-primary"
-                                                (click)="abrirModalExperienciaLaboral('GENERAL')">
-                                                + Agregar Experiencia General
-                                            </button>
-                                            <button type="button" class="btn btn-success"
-                                                (click)="abrirModalExperienciaLaboral('ESPECIFICA')">
-                                                + Agregar Experiencia Específica
-                                            </button>
-                                        </div>
-
-                                         <table class="table table-bordered table-striped text-center align-middle">
-                                            <thead class="table-danger">
-                                                <tr>
-                                                    <th>Tipo</th>
-                                                    <th>Entidad / Empresa</th>
-                                                    <th>Cargo</th>
-                                                    <th>Sector</th>
-                                                    <th>Fechas</th>
-                                                    <th>Total</th>
-                                                    <th>Opciones</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr *ngFor="let exp of experienciasLaborales">
-                                                    <td>{{ exp.tipo }}</td>
-                                                    <td>{{ exp.entidad }}</td>
-                                                    <td>{{ exp.cargo }}</td>
-                                                    <td>{{ exp.sector }}</td>
-                                                    <td>{{ exp.fechaInicio | date:'dd/MM/yyyy' }} - {{ exp.fechaFin |
-                                                        date:'dd/MM/yyyy' }}</td>
-                                                    <td>{{ exp.total }}</td>
-                                                    <td>
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-primary me-1"
-                                                            (click)="editarExperienciaLaboral(exp)"
-                                                            title="Editar experiencia">
-                                                            <i class="fa fa-edit"></i>
-                                                        </button>
-                                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                            (click)="eliminarExperienciaLaboral(exp)"
-                                                            title="Eliminar experiencia">
-                                                            <i class="fa fa-trash"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr *ngIf="experienciasLaborales.length === 0">
-                                                    <td colspan="7" class="text-muted text-center">No hay experiencias
-                                                        registradas.</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div> -->
-
-                                <!-- Modal -->
+ 
+                                <!-- Modal Experiencia Laboral -->
                                 <div class="modal fade" id="modalExperiencia" tabindex="-1">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
-                                            <form #formModal="ngForm" (ngSubmit)="guardarExperienciaLaboral()">
+                                            <form #formModal="ngForm" (ngSubmit)="guardarExperienciaLaboral()"
+                                                novalidate>
                                                 <div class="modal-header bg-primary text-white">
-                                                    <h5 class="modal-title">Registrar Experiencia {{
-                                                        experienciaLaboralActual.tipo }}</h5>
+                                                    <h5 class="modal-title">
+                                                        Registrar Experiencia {{ experienciaLaboralActual.tipo }}
+                                                    </h5>
                                                     <button type="button" class="btn-close"
                                                         data-bs-dismiss="modal"></button>
                                                 </div>
 
                                                 <div class="modal-body">
+                                                    <!-- ENTIDAD / UNIDAD -->
                                                     <div class="row mb-3">
                                                         <div class="col-md-6">
                                                             <label>Entidad / Empresa *</label>
                                                             <input type="text" class="form-control"
                                                                 [(ngModel)]="experienciaLaboralActual.entidad"
-                                                                name="entidad" required>
+                                                                name="entidad" required minlength="2" maxlength="150"
+                                                                #entidad="ngModel" />
+                                                            <div class="text-danger small"
+                                                                *ngIf="entidad.invalid && (entidad.dirty || entidad.touched)">
+                                                                <div *ngIf="entidad.errors?.['required']">Campo
+                                                                    obligatorio.</div>
+                                                                <div *ngIf="entidad.errors?.['minlength']">
+                                                                    Debe tener al menos 2 caracteres.
+                                                                </div>
+                                                            </div>
                                                         </div>
+
                                                         <div class="col-md-6">
                                                             <label>Órgano / Unidad Orgánica</label>
                                                             <input type="text" class="form-control"
                                                                 [(ngModel)]="experienciaLaboralActual.unidad"
-                                                                name="unidad">
+                                                                name="unidad" maxlength="150" />
                                                         </div>
                                                     </div>
 
+                                                    <!-- CARGO / SECTOR -->
                                                     <div class="row mb-3">
                                                         <div class="col-md-6">
                                                             <label>Cargo / Puesto *</label>
                                                             <input type="text" class="form-control"
                                                                 [(ngModel)]="experienciaLaboralActual.cargo"
-                                                                name="cargo" required>
+                                                                name="cargo" required minlength="2" maxlength="150"
+                                                                #cargo="ngModel" />
+                                                            <div class="text-danger small"
+                                                                *ngIf="cargo.invalid && (cargo.dirty || cargo.touched)">
+                                                                <div *ngIf="cargo.errors?.['required']">Campo
+                                                                    obligatorio.</div>
+                                                                <div *ngIf="cargo.errors?.['minlength']">
+                                                                    Debe tener al menos 2 caracteres.
+                                                                </div>
+                                                            </div>
                                                         </div>
+
                                                         <div class="col-md-6">
-                                                            <label>Sector</label><br>
+                                                            <label>Sector *</label><br />
                                                             <div class="form-check form-check-inline">
                                                                 <input class="form-check-input" type="radio"
                                                                     [(ngModel)]="experienciaLaboralActual.sector"
-                                                                    name="sector" value="PÚBLICO" required> Público
+                                                                    name="sector" value="PÚBLICO" required />
+                                                                <label class="form-check-label">Público</label>
                                                             </div>
                                                             <div class="form-check form-check-inline">
                                                                 <input class="form-check-input" type="radio"
                                                                     [(ngModel)]="experienciaLaboralActual.sector"
-                                                                    name="sector" value="PRIVADO" required> Privado
+                                                                    name="sector" value="PRIVADO" required />
+                                                                <label class="form-check-label">Privado</label>
+                                                            </div>
+                                                            <div class="text-danger small" *ngIf="formModal.submitted && !experienciaLaboralActual.sector">
+                                                                Debe seleccionar un sector.
                                                             </div>
                                                         </div>
                                                     </div>
 
+                                                    <!-- FECHAS -->
                                                     <div class="row mb-3">
                                                         <div class="col-md-6">
                                                             <label>Fecha Inicio *</label>
                                                             <input type="date" class="form-control"
                                                                 [(ngModel)]="experienciaLaboralActual.fechaInicio"
                                                                 name="fechaInicio"
-                                                                (change)="calcularDuracionExperienciaLaboral()"
-                                                                required>
+                                                                (change)="calcularDuracionExperienciaLaboral()" required
+                                                                #fechaInicio="ngModel" />
+                                                            <div class="text-danger small"
+                                                                *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)">
+                                                                <div *ngIf="fechaInicio.errors?.['required']">
+                                                                    Campo obligatorio.
+                                                                </div>
+                                                            </div>
                                                         </div>
+
                                                         <div class="col-md-6">
                                                             <label>Fecha Fin *</label>
                                                             <input type="date" class="form-control"
                                                                 [(ngModel)]="experienciaLaboralActual.fechaFin"
                                                                 name="fechaFin"
-                                                                (change)="calcularDuracionExperienciaLaboral()"
-                                                                required>
+                                                                (change)="calcularDuracionExperienciaLaboral()" required
+                                                                #fechaFin="ngModel" />
+                                                            <div class="text-danger small"
+                                                                *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)">
+                                                                <div *ngIf="fechaFin.errors?.['required']">
+                                                                    Campo obligatorio.
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
 
-                                                    <!-- Temas Específicos -->
+                                                    <!-- TEMAS ESPECÍFICOS -->
                                                     <div *ngIf="experienciaLaboralActual.tipo === 'ESPECIFICA'"
                                                         class="mb-3 border rounded p-2 bg-light">
-                                                        <label><strong>Temas Relacionados:</strong></label><br>
+                                                        <label><strong>Temas Relacionados:</strong></label><br />
                                                         <div class="form-check form-check-inline"
                                                             *ngFor="let tema of temasEspecificos">
                                                             <input type="checkbox" class="form-check-input"
                                                                 [(ngModel)]="experienciaLaboralActual.temas![tema]"
-                                                                [name]="tema">
+                                                                [name]="tema" [ngModelOptions]="{ standalone: true }" />
                                                             <label class="form-check-label">{{ tema }}</label>
                                                         </div>
                                                     </div>
 
-                                                    <!-- Funciones -->
+                                                    <!-- FUNCIONES -->
                                                     <div class="mb-3">
-                                                        <label>Funciones</label>
-                                                        <div *ngFor="let f of experienciaLaboralActual.funciones; let i = index"
+                                                        <label>Funciones *</label>
+                                                        <div *ngFor="let f of experienciaLaboralActual.funciones; let i = index; trackBy: trackByIndex"
                                                             class="d-flex align-items-center mb-1">
                                                             <input type="text" class="form-control me-2"
                                                                 [(ngModel)]="experienciaLaboralActual.funciones[i]"
-                                                                [name]="'funcion'+i">
+                                                                name="funcion{{ i }}" autocomplete="off" required
+                                                                minlength="3" maxlength="200"
+                                                                [ngModelOptions]="{ standalone: true }" />
                                                             <button type="button" class="btn btn-sm btn-outline-danger"
                                                                 (click)="eliminarFuncionLaboral(i)">
                                                                 <i class="fa fa-minus"></i>
@@ -654,30 +609,34 @@
                                                             (click)="agregarFuncionLaboral()">
                                                             <i class="fa fa-plus"></i> Agregar función
                                                         </button>
+
+                                                        <div class="text-danger small mt-1"
+                                                            *ngIf="experienciaLaboralActual.funciones.length === 0">
+                                                            Debe ingresar al menos una función.
+                                                        </div>
                                                     </div>
 
+                                                    <!-- DURACIÓN -->
                                                     <div class="alert alert-secondary text-center mt-3">
-                                                        <strong>Duración:</strong> {{ experienciaLaboralActual.total ||
-                                                        'Sin calcular' }}
+                                                        <strong>Duración:</strong>
+                                                        {{ experienciaLaboralActual.total || 'Sin calcular' }}
                                                     </div>
                                                 </div>
 
                                                 <div class="modal-footer">
                                                     <button type="submit" class="btn btn-danger"
-                                                        [disabled]="!formModal.form.valid">Guardar</button>
+                                                        [disabled]="!formModal.form.valid || experienciaLaboralActual.funciones.length === 0">
+                                                        Guardar
+                                                    </button>
                                                     <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Cerrar</button>
+                                                        data-bs-dismiss="modal">
+                                                        Cerrar
+                                                    </button>
                                                 </div>
                                             </form>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!--  
-                                    <button type="submit" class="btn btn-danger"
-                                        [disabled]="formExp.invalid">Guardar</button>
-                                    <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
-                                </div> -->
+                                </div> 
                             </form>
 
                             <!-- CURSOS, DIPLOMADOS Y/O ESPECIALIZACIÓN -->
@@ -779,8 +738,7 @@
                                     </div>
                                 </div>
                             </form>
-
-
+ 
                             <!-- IDIOMAS -->
                             <form *ngIf="item === 'Idiomas'" #formDP="ngForm">
                                 <small class="text-muted d-block mb-2">
