@@ -48,8 +48,8 @@
           </div>
           <div class="col-md-6">
             <label><strong>Búsqueda:</strong></label>
-            <input type="text" class="form-control" placeholder="Ingrese texto a buscar..."
-              name="textoBusqueda" [(ngModel)]="textoBusqueda" />
+            <input type="text" class="form-control" placeholder="Ingrese texto a buscar..." name="textoBusqueda"
+              [(ngModel)]="textoBusqueda" />
           </div>
           <div class="col-md-2">
             <button type="submit" class="btn btn-success w-100">
@@ -85,9 +85,14 @@
                   <span class="badge bg-success" *ngIf="c.bActivo">Activo</span>
                   <span class="badge bg-danger" *ngIf="!c.bActivo">Inactivo</span>
                 </td> -->
+
                 <td class="align-middle">
-                  <span class="badge bg-info text-dark">{{ c.vEstadoConvocatoria }}</span>
+                  <span class="badge rounded-pill px-3 py-1"
+                    style="border: 2px solid #1e8e3e; color: #1e8e3e; background-color: transparent; font-weight: 600;">
+                    {{ c.vEstadoConvocatoria }}
+                  </span>
                 </td>
+ 
                 <td class="align-middle">
                   <button class="btn btn-outline-danger btn-sm" (click)="abrirModal(c, 'bases')">
                     <i class="fa fa-file-pdf"></i>
@@ -99,8 +104,8 @@
                   </button>
                 </td>
                 <td class="align-middle">
-                  <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'cronograma')">
-                    <i class="fa fa-calendar"></i>
+                  <button class="btn btn-outline-warning btn-sm" (click)="abrirModal(c, 'cronograma')">
+                    <i class="fa fa-calendar" aria-hidden="true"></i>
                   </button>
                 </td>
                 <td class="align-middle">
@@ -169,7 +174,8 @@
                     {{ archivo.nombreArchivo || archivo.vNombreArchivo }}
                   </div>
                   <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)" title="Ver archivo">
+                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)"
+                      title="Ver archivo">
                       <i class="feather icon-eye"></i>
                     </button>
                   </div>

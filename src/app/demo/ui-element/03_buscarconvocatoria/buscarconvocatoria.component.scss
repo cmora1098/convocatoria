@@ -1,0 +1,120 @@
+/* === TABLA === */
+.table-responsive {
+  max-height: 70vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #1e8e3e #e8f5e9;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+  font-size: 15px;
+}
+
+.table-header {
+  background: linear-gradient(90deg, #1e8e3e, #34a853);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.table th {
+  padding: 14px;
+  text-align: center;
+  vertical-align: middle;
+  color: #fff;
+  border: none;
+}
+
+.table td {
+  padding: 14px;
+  vertical-align: middle;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  text-align: center;
+  color: #333;
+}
+
+/* hover filas */
+.table tbody tr {
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.table tbody tr:hover td {
+  background-color: #f1fdf4;
+  transform: scale(1.005);
+}
+
+/* === BADGES === */
+.badge {
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.badge.bg-success {
+  background-color: #1e8e3e !important;
+  color: #fff;
+}
+
+.badge.bg-danger {
+  background-color: #d93025 !important;
+  color: #fff;
+}
+
+.badge.bg-info {
+  background-color: #c8e6c9 !important;
+  color: #ffffff !important;
+}
+
+/* === BOTONES TABLA === */
+.table button {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.table button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* === PAGINACIÓN === */
+.pagination {
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.pagination .page-link {
+  color: #1e8e3e;
+  border-radius: 8px;
+  font-weight: 500;
+  margin: 0 3px;
+  transition: all 0.2s ease;
+  border: 1px solid #1e8e3e;
+}
+
+.pagination .page-link:hover {
+  background-color: rgba(30, 142, 62, 0.1);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #1e8e3e;
+  border-color: #1e8e3e;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(30, 142, 62, 0.4);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 13px;
+    padding: 10px;
+  }
+}

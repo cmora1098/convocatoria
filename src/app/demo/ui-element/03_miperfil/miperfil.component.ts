@@ -56,7 +56,7 @@ export interface ExperienciaLaboral {
     días: number;
   };
 }
-  
+
 interface Idioma {
   iCodIdioma?: number;
   vIdioma: string;
@@ -69,7 +69,7 @@ interface Duracion {
   meses: number;
   días: number;
 }
- 
+
 @Component({
   selector: 'app-miperfil',
   standalone: true,
@@ -203,7 +203,6 @@ export class MiPerfilComponent {
     this.cargarIdiomas();
     this.cargarOfimatica();
     this.cargarDatosBonificacionesAdicionales();
-
     this.cargarDeclaracionJurada();
 
   }
@@ -536,6 +535,19 @@ export class MiPerfilComponent {
       return;
     }
 
+    const fechaMinima = new Date('1910-01-01').toISOString().split('T')[0];
+    if (this.formacion.fechaInicio < fechaMinima) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Fecha inválida',
+        text: 'La fecha no puede ser menor al año 1910.',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+
     // Armar payload
     const payload = {
       iCodFormacionAcademica: this.formacion.iCodFormacionAcademica || 0,
@@ -543,7 +555,7 @@ export class MiPerfilComponent {
       iCodNivelAcademico: this.formacion.nivel,
       vInstitucion: this.formacion.institucion,
       vProfesion: this.formacion.cespecializacion || '',
-      dFechaEgreso: new Date(this.formacion.fechaInicio).toISOString(),
+      dFechaEgreso: fechaMinima,//new Date(this.formacion.fechaInicio).toISOString(),
       dtFechaRegistro: new Date().toISOString(),
       bActivo: true
     };

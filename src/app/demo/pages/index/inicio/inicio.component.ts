@@ -28,7 +28,7 @@ export class InicioComponent implements OnInit {
 
   convocatorias: any[] = [];
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) { }
 
   ngOnInit(): void {
     this.buscarConvocatorias();
@@ -51,7 +51,8 @@ export class InicioComponent implements OnInit {
     this.api.getConvocatoriasPaginadoconFase(params).subscribe({
       next: (resp: any[]) => {
         if (Array.isArray(resp)) {
-          this.convocatorias = resp;
+          // Filtramos solo aquellas convocatorias que tengan vEstadoConvocatoria
+          this.convocatorias = resp.filter(c => c.vEstadoConvocatoria && c.vEstadoConvocatoria.trim() !== '');
 
           // Total de registros viene en cada elemento (ej. totalRegistros)
           const totalRegistros = resp.length > 0 ? resp[0].totalRegistros || resp.length : 0;
@@ -72,7 +73,7 @@ export class InicioComponent implements OnInit {
       }
     });
   }
-
+ 
   irPagina(n: number): void {
     this.paginaActual = n;
     this.buscarConvocatorias();
@@ -150,10 +151,11 @@ export class InicioComponent implements OnInit {
       error: (err: any) => {
         console.error('Error al obtener archivos:', err);
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo cargar la información de los archivos.',
-          confirmButtonColor: '#d33'
+          icon: 'warning',
+          title: '¡Atención!',
+          // text: 'No se pudo cargar la información de los archivos.',
+          text: 'No existen archivos subidos.',
+          confirmButtonColor: '#f8bb86'
         });
       }
     });

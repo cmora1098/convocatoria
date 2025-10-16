@@ -271,10 +271,19 @@
                                                         <div class="col-md-6 mb-3">
                                                             <label class="form-label fw-bold">Fecha Egreso / Bachiller /
                                                                 Título *</label>
-                                                            <input type="date" class="form-control"
+                                                            <!-- <input type="date" class="form-control"
                                                                 [(ngModel)]="formacion.fechaInicio" name="fechaInicio"
                                                                 required
-                                                                [ngClass]="{'is-invalid': modalForm.submitted && !formacion.fechaInicio}" />
+                                                                [ngClass]="{'is-invalid': modalForm.submitted && !formacion.fechaInicio}" /> -->
+                                                            <input type="date" class="form-control"
+                                                                [(ngModel)]="formacion.fechaInicio" name="fechaInicio"
+                                                                required min="1910-01-01"
+                                                                [ngClass]="{'is-invalid': modalForm.submitted && (!formacion.fechaInicio || formacion.fechaInicio < '1910-01-01')}" />
+                                                            <div class="invalid-feedback">
+                                                                Este campo es obligatorio y no puede ser anterior al año
+                                                                1910.
+                                                            </div>
+
                                                             <div class="invalid-feedback">Este campo es obligatorio.
                                                             </div>
                                                         </div>
@@ -398,7 +407,7 @@
                                             <div class="fs-5">{{ experienciaLaboralPublica }}</div>
                                         </div>
                                     </div>
-                                </div> 
+                                </div>
 
                                 <!-- Botones -->
                                 <div class="d-flex justify-content-end gap-2 mb-3">
@@ -464,7 +473,7 @@
                                         </tbody>
                                     </table>
                                 </div>
- 
+
                                 <!-- Modal Experiencia Laboral -->
                                 <div class="modal fade" id="modalExperiencia" tabindex="-1">
                                     <div class="modal-dialog modal-lg">
@@ -538,7 +547,8 @@
                                                                     name="sector" value="PRIVADO" required />
                                                                 <label class="form-check-label">Privado</label>
                                                             </div>
-                                                            <div class="text-danger small" *ngIf="formModal.submitted && !experienciaLaboralActual.sector">
+                                                            <div class="text-danger small"
+                                                                *ngIf="formModal.submitted && !experienciaLaboralActual.sector">
                                                                 Debe seleccionar un sector.
                                                             </div>
                                                         </div>
@@ -636,7 +646,7 @@
                                             </form>
                                         </div>
                                     </div>
-                                </div> 
+                                </div>
                             </form>
 
                             <!-- CURSOS, DIPLOMADOS Y/O ESPECIALIZACIÓN -->
@@ -738,7 +748,7 @@
                                     </div>
                                 </div>
                             </form>
- 
+
                             <!-- IDIOMAS -->
                             <form *ngIf="item === 'Idiomas'" #formDP="ngForm">
                                 <small class="text-muted d-block mb-2">
