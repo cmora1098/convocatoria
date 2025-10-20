@@ -84,16 +84,13 @@ export class MiPerfilComponent {
   distritos: any[] = [];
 
   codUsuario: number | null;
-
   email: string | null;
   tpdoc: string | null;
   ndocumento: string | null;
   apepat: string | null;
   apemat: string | null;
   nomcompleto: string | null;
-
   ofimaticaActual: any = null;
-
 
   items = [
     'Datos Personales',
@@ -105,7 +102,18 @@ export class MiPerfilComponent {
     'Ofimática',
     'Bonificaciones adicionales (FF. AA., Discapacidad)',
     'Declaración Jurada',
+    'Ficha Curricular'
   ];
+
+  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient, private router: Router) {
+    this.codUsuario = this.authService.getUserId();
+    this.email = this.authService.getEmail();
+    this.tpdoc = this.authService.getTipoDocumento();
+    this.ndocumento = this.authService.getNroDocumento();
+    this.apepat = this.authService.getApellidoPaterno();
+    this.apemat = this.authService.getApellidoMaterno();
+    this.nomcompleto = this.authService.getNombreCompleto();
+  }
 
   datos: { [key: string]: any } = {
     'Datos Personales': {
@@ -144,67 +152,90 @@ export class MiPerfilComponent {
     }
   };
 
-  constructor(private apiService: ApiService, private authService: AuthService, private http: HttpClient, private router: Router) {
-    this.codUsuario = this.authService.getUserId();
-    this.email = this.authService.getEmail();
-    this.tpdoc = this.authService.getTipoDocumento();
-    this.ndocumento = this.authService.getNroDocumento();
-    this.apepat = this.authService.getApellidoPaterno();
-    this.apemat = this.authService.getApellidoMaterno();
-    this.nomcompleto = this.authService.getNombreCompleto();
-  }
-
   ngOnInit(): void {
-    this.apiService.getTipoDocumentos().subscribe({
-      next: (data) => {
-        this.tiposDocumentos = data; // Asignamos los datos obtenidos a la propiedad
-        this.datos['Datos Personales'].tipoDocumento = this.tpdoc; //valor de Tipo de Documento asignado
-      },
-      error: (err) => {
-        console.error('Error al cargar tipos de documentos', err);
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Ocurrió un error al cargar los tipos de documentos.',
-          confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
-        });
-      }
-    });
+    this.datos['Datos Personales'].tipoDocumento = this.tpdoc;  
+
+
+    // this.apiService.getTipoDocumentos().subscribe({
+    //   next: (tipos) => {
+    //     this.tiposDocumentos = tipos;
+    //     this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
+
+    //     this.apiService.getUbigeoDpto().subscribe({
+    //       next: (departamentos) => {
+    //         this.departamentos = departamentos;
+    //         const dpto = this.datos['Datos Personales'].departamentoNacimiento;
+    //         const prov = this.datos['Datos Personales'].provinciaNacimiento;
+    //         if (dpto) {
+    //           this.onDepartamentoChange(dpto, true, prov);
+    //         }
+
+    //         // 🔽 Llamamos al resto
+    //         this.cargarDatosPersonales();
+    //         this.cargarFormaciones();
+    //         this.cargarColegiatura();
+    //         this.obtenerExperienciasLaborales();
+    //         this.cargarCursosDiplomados();
+    //         this.cargarIdiomas();
+    //         this.cargarOfimatica();
+    //         this.cargarDatosBonificacionesAdicionales();
+    //         this.cargarDeclaracionJurada();
+    //       },
+    //       error: (err) => {
+    //         console.error('Error al cargar departamentos', err);
+    //         Swal.fire({
+    //           icon: 'error',
+    //           title: '¡Error!',
+    //           text: 'Ocurrió un error al cargar los Departamentos.',
+    //           confirmButtonText: 'Aceptar',
+    //           confirmButtonColor: '#2e7d32'
+    //         });
+    //       }
+    //     });
+    //   },
+    //   error: (err) => {
+    //     console.error('Error al cargar tipos de documentos', err);
+    //     Swal.fire({
+    //       icon: 'error',
+    //       title: '¡Error!',
+    //       text: 'Ocurrió un error al cargar los tipos de documentos.',
+    //       confirmButtonText: 'Aceptar',
+    //       confirmButtonColor: '#2e7d32'
+    //     });
+    //   }
+    // });
 
     this.apiService.getUbigeoDpto().subscribe({
-      next: (data) => {
-        this.departamentos = data; // Asignamos los datos obtenidos a la propiedad 
-        // 👇 Si ya hay datos previos, precarga provincias y distritos
+      next: (departamentos) => {
+        this.departamentos = departamentos;
         const dpto = this.datos['Datos Personales'].departamentoNacimiento;
         const prov = this.datos['Datos Personales'].provinciaNacimiento;
         if (dpto) {
           this.onDepartamentoChange(dpto, true, prov);
         }
 
+        // 🔽 Llamamos al resto
+        this.cargarDatosPersonales();
+        this.cargarFormaciones();
+        this.cargarColegiatura();
+        this.obtenerExperienciasLaborales();
+        this.cargarCursosDiplomados();
+        this.cargarIdiomas();
+        this.cargarOfimatica();
+        this.cargarDatosBonificacionesAdicionales();
+        this.cargarDeclaracionJurada();
       },
       error: (err) => {
-        console.error('Error al cargar los Departamentos', err);
+        console.error('Error al cargar departamentos', err);
         Swal.fire({
           icon: 'error',
           title: '¡Error!',
           text: 'Ocurrió un error al cargar los Departamentos.',
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+          confirmButtonColor: '#2e7d32'
         });
       }
     });
-
-    this.cargarDatosPersonales();
-    this.cargarFormaciones();
-    this.cargarColegiatura();
-    this.obtenerExperienciasLaborales();
-    this.cargarCursosDiplomados();
-    this.cargarIdiomas();
-    this.cargarOfimatica();
-    this.cargarDatosBonificacionesAdicionales();
-    this.cargarDeclaracionJurada();
-
   }
 
   // ✅ Evento al cambiar el departamento
@@ -278,6 +309,7 @@ export class MiPerfilComponent {
 
   cargarDatosPersonales() {
     if (this.codUsuario != null) {
+      this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
       this.apiService.getDatosPersonales(this.codUsuario).subscribe({
         next: (data) => {
           if (data) {
@@ -547,7 +579,6 @@ export class MiPerfilComponent {
       return;
     }
 
-
     // Armar payload
     const payload = {
       iCodFormacionAcademica: this.formacion.iCodFormacionAcademica || 0,
@@ -555,7 +586,7 @@ export class MiPerfilComponent {
       iCodNivelAcademico: this.formacion.nivel,
       vInstitucion: this.formacion.institucion,
       vProfesion: this.formacion.cespecializacion || '',
-      dFechaEgreso: fechaMinima,//new Date(this.formacion.fechaInicio).toISOString(),
+      dFechaEgreso: new Date(this.formacion.fechaInicio).toISOString(), // la fecha correcta
       dtFechaRegistro: new Date().toISOString(),
       bActivo: true
     };
@@ -735,7 +766,6 @@ export class MiPerfilComponent {
     };
 
     if (this.modoEdicionColegiatura && this.idColegiaturaSeleccionada) {
-
       // 🔁 Actualizar (PUT)
       this.apiService.actualizarColegiatura(this.idColegiaturaSeleccionada, payload_colegiatura).subscribe({
         next: () => {
@@ -746,6 +776,10 @@ export class MiPerfilComponent {
             confirmButtonText: 'Aceptar',
             confirmButtonColor: '#2e7d32'
           });
+          // Recargar datos para actualizar UI
+          this.cargarColegiatura();
+
+          // Reset flags edición
           this.modoEdicionColegiatura = false;
           this.idColegiaturaSeleccionada = null;
         },
@@ -771,6 +805,10 @@ export class MiPerfilComponent {
             confirmButtonText: 'Aceptar',
             confirmButtonColor: '#2e7d32'
           });
+          // Recargar datos para actualizar UI
+          this.cargarColegiatura();
+
+          // No hay flags de edición para limpiar al insertar
         },
         error: (error) => {
           Swal.fire({
@@ -1203,7 +1241,6 @@ export class MiPerfilComponent {
   // ***************************************** //
   // ******  CURSOS / DIPLOMADOS / ES ******* //  
   // *************************************** //
-
   cursosDiplomados: CursoDiplomado[] = [];
   cursoDiplomado: CursoDiplomado = this.nuevoCursoDiplomado();
   mostrarModalCursoDiplomado = false;
@@ -1257,17 +1294,17 @@ export class MiPerfilComponent {
     if (
       !this.cursoDiplomado.denominacion.trim() ||
       !this.cursoDiplomado.institucion.trim() ||
-      !this.cursoDiplomado.horas ||
-      this.cursoDiplomado.horas <= 0
+      !this.isInteger(this.cursoDiplomado.horas)
     ) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos obligatorios',
-        text: 'Debe completar todos los campos y las horas deben ser mayores a 0.',
+        text: 'Debe completar todos los campos y las horas deben ser un número entero mayor a 0.',
         confirmButtonColor: '#2e7d32'
       });
       return;
     }
+
 
     // Validar duplicados (sin cambios)
     const existeDuplicado = this.cursosDiplomados.some((c, i) =>
@@ -1409,6 +1446,16 @@ export class MiPerfilComponent {
         }
       }
     });
+  }
+
+  isInteger(value: any): boolean {
+    const num = Number(value);
+    return (
+      typeof num === 'number' &&
+      isFinite(num) &&
+      Math.floor(num) === num &&
+      num > 0
+    );
   }
 
   // ********************************************************************************************************** //
@@ -1883,6 +1930,18 @@ export class MiPerfilComponent {
     }
   }
 
+  onLicenciadoChange(item: string) {
+    if (this.datos[item].licenciadoFuerzasArmadas !== 'si') {
+      this.datos[item].codigoLicenciado = ''; // limpia el input
+    }
+  }
+
+  onDiscapacidadChange(item: string) {
+    if (this.datos[item].tieneDiscapacidad !== 'si') {
+      this.datos[item].codigoDiscapacidad = ''; // limpia el input
+    }
+  }
+
   // ********************************************************************************************************** //
   // ***************************************** //
   // *********  DECLARACION JURADA ********** //  
@@ -1899,28 +1958,33 @@ export class MiPerfilComponent {
   ];
 
   declaracionesSeleccionadas: boolean[] = new Array(this.declaracionesJurada.length).fill(false);
-
   cargarDeclaracionJurada() {
     if (!this.codUsuario) return;
 
     this.apiService.getDeclaracionJuradaPostulante(this.codUsuario).subscribe({
       next: (data) => {
-        // Como el API devuelve directamente un array, verificamos así:
         if (Array.isArray(data) && data.length > 0) {
           const registro = data[0];
-          this.declaracionJuradaActual = registro;
 
-          // Mapeamos cada campo booleano a los checkbox
-          this.declaracionesSeleccionadas = [
-            registro.bSinAntecedentesPenales || false,
-            registro.bSinProcesosJudiciales || false,
-            registro.bSinSancionesAdministrativas || false,
-            registro.bSinVinculoLaboralEstado || false,
-            registro.bAceptaBasesConcurso || false,
-            true // “Buen estado de salud” — si el API lo maneja, reemplázalo
-          ];
+          // Validamos que el usuario del registro coincida con el solicitado
+          if (registro.iCodUsuario === this.codUsuario) {
+            this.declaracionJuradaActual = registro;
+
+            this.declaracionesSeleccionadas = [
+              registro.bSinAntecedentesPenales || false,
+              registro.bSinProcesosJudiciales || false,
+              registro.bSinSancionesAdministrativas || false,
+              registro.bSinVinculoLaboralEstado || false,
+              registro.bAceptaBasesConcurso || false,
+              true // Puedes reemplazar esto si el API envía este valor
+            ];
+          } else {
+            console.warn('El registro recibido no corresponde al usuario solicitado.');
+            this.declaracionJuradaActual = null;
+            this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
+          }
         } else {
-          // No hay registro
+          // No hay registros
           this.declaracionJuradaActual = null;
           this.declaracionesSeleccionadas = new Array(this.declaracionesJurada.length).fill(false);
         }
@@ -1934,9 +1998,12 @@ export class MiPerfilComponent {
   }
 
   guardarDeclaracionJurada(seccion: string) {
-    const todasMarcadas = this.declaracionesSeleccionadas.every(v => v);
-
-    if (!todasMarcadas) {
+    // Verificamos que todas las declaraciones estén marcadas y que la longitud sea correcta
+    if (
+      !this.declaracionesSeleccionadas ||
+      this.declaracionesSeleccionadas.length < 5 || // o la cantidad que tengas de checkboxes
+      !this.declaracionesSeleccionadas.every(v => v === true)
+    ) {
       Swal.fire({
         icon: 'warning',
         title: 'Declaración incompleta',
@@ -1946,28 +2013,14 @@ export class MiPerfilComponent {
       return;
     }
 
-    const payload = {
-      iCodDeclaracionJuradaPostulante: this.declaracionJuradaActual
-        ? this.declaracionJuradaActual.iCodDeclaracionJuradaPostulante
-        : 0,
-      iCodUsuario: this.codUsuario,
-      bSinAntecedentesPenales: this.declaracionesSeleccionadas[0],
-      bSinProcesosJudiciales: this.declaracionesSeleccionadas[1],
-      bSinSancionesAdministrativas: this.declaracionesSeleccionadas[2],
-      bSinVinculoLaboralEstado: this.declaracionesSeleccionadas[3],
-      bAceptaBasesConcurso: this.declaracionesSeleccionadas[4],
-      iCodUsuarioRegistra: this.codUsuario,
-      dtFechaRegistro: new Date().toISOString(),
-      bActivo: true,
-      mensaje: ''
-    };
+    // Construimos el payload
+    const payload = this.construirPayload();
 
-    const esActualizacion =
-      payload.iCodDeclaracionJuradaPostulante &&
-      payload.iCodDeclaracionJuradaPostulante > 0;
+    // Determinamos si es actualización o inserción
+    const esActualizacion = payload.iCodDeclaracionJuradaPostulante && payload.iCodDeclaracionJuradaPostulante > 0;
 
     const apiCall = esActualizacion
-      ? this.apiService.actualizarDeclaracionJuradaPostulante(payload)
+      ? this.apiService.actualizarDeclaracionJurada(payload)
       : this.apiService.insertarDeclaracionJurada(payload);
 
     const mensaje = esActualizacion ? 'actualizada' : 'guardada';
@@ -1979,7 +2032,10 @@ export class MiPerfilComponent {
           title: 'Operación exitosa',
           text: `La sección "${seccion}" ha sido ${mensaje} correctamente.`,
           confirmButtonColor: '#1e8e3e'
-        }).then(() => window.location.reload());
+        }).then(() => {
+          // Aquí puedes decidir si recargas datos o navegas, en vez de recargar toda la página
+          this.cargarDeclaracionJurada(); // Ejemplo: recarga datos
+        });
       },
       error: (err) => {
         console.error(`Error al ${mensaje} Declaración Jurada:`, err);
@@ -1993,10 +2049,60 @@ export class MiPerfilComponent {
     });
   }
 
+  private construirPayload() {
+    return {
+      iCodDeclaracionJuradaPostulante: this.declaracionJuradaActual
+        ? this.declaracionJuradaActual.iCodDeclaracionJuradaPostulante
+        : 0,
+      iCodUsuario: this.codUsuario,
+      bSinAntecedentesPenales: this.declaracionesSeleccionadas[0] || false,
+      bSinProcesosJudiciales: this.declaracionesSeleccionadas[1] || false,
+      bSinSancionesAdministrativas: this.declaracionesSeleccionadas[2] || false,
+      bSinVinculoLaboralEstado: this.declaracionesSeleccionadas[3] || false,
+      bAceptaBasesConcurso: this.declaracionesSeleccionadas[4] || false,
+      iCodUsuarioRegistra: this.codUsuario,
+      dtFechaRegistro: new Date().toISOString(),
+      bActivo: true,
+      mensaje: ''
+    };
+  }
   // ********************************************************************************************************** //
+  // ***************************************** //
+  // **********   FICHA CURRICULAR *********** //  
+  // *************************************** //
+  generarFichaCurricular() {
+    const data = { iCodUsuario: this.codUsuario };
 
+    this.apiService.generarFichaCurricular(data).subscribe({
+      next: (response: Blob) => {
+        // Descargar PDF
+        const blob = new Blob([response], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'anexo_03_2025_ficha_de_resumen_curricular.pdf';
+        a.click();
+        window.URL.revokeObjectURL(url);
 
-
+        Swal.fire({
+          icon: 'success',
+          title: 'Ficha generada correctamente',
+          text: 'La ficha curricular ha sido creada y descargada con éxito.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32',
+        });
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al generar ficha',
+          text: 'No se pudo generar la ficha curricular. Inténtalo nuevamente.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#2e7d32',
+        });
+      },
+    });
+  }
 
 
 

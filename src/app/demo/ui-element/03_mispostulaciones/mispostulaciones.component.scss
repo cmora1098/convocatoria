@@ -1,0 +1,94 @@
+/* Global styling for the table */
+.custom-table th, .custom-table td {
+  vertical-align: middle;
+  padding: 12px 15px;
+}
+
+.custom-table th {
+  font-weight: bold;
+  text-align: center;
+}
+
+.custom-table td {
+  text-align: center;
+}
+
+/* Hover effect on table rows */
+.custom-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Header Styling */
+.table-dark th {
+  background-color: #343a40;
+  color: #fff;
+}
+
+/* Pagination Styling */
+.pagination .page-item {
+  margin: 0 5px;
+}
+
+.pagination .page-link {
+  border-radius: 0.25rem;
+  padding: 8px 15px;
+}
+
+.pagination .page-link:hover {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.pagination .page-item.disabled .page-link {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+/* Button Style for Delete Action */
+.btn-danger {
+  font-size: 0.875rem;
+}
+
+.btn-danger i {
+  margin-right: 5px;
+}
+
+/* Responsiveness */
+@media (max-width: 767px) {
+  .custom-table th, .custom-table td {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
+
+  .row.g-3 {
+    margin-bottom: 15px;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+  }
+
+  .pagination {
+    font-size: 0.8rem;
+  }
+
+  .btn-primary {
+    font-size: 0.875rem;
+  }
+}
+
+/* For Small Devices */
+@media (max-width: 480px) {
+  .col-md-3 {
+    margin-bottom: 15px;
+  }
+
+  .form-control, .form-select {
+    font-size: 0.875rem;
+  }
+
+  .btn-primary {
+    font-size: 0.875rem;
+  }
+}
+

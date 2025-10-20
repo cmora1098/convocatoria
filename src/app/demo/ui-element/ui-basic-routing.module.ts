@@ -98,6 +98,11 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         loadComponent: () => import('./03_buscarconvocatoria/buscarconvocatoria.component').then((c) => c.BuscarConvocatoriaComponent)
       },
+      {
+        path: 'MisPostulaciones',
+        canActivate: [AuthGuard],
+        loadComponent: () => import('./03_mispostulaciones/mispostulaciones.component').then((c) => c.MisPostulacionesComponent)
+      },
       // Para el Rol del Postulante - Fin
 
 

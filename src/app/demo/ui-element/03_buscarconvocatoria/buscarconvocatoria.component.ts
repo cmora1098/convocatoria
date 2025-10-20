@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { QuillModule } from 'ngx-quill';
 import { ApiService } from 'src/app/services/api.service';
+import { AuthService } from '../../../services/auth.service';
 
 declare var bootstrap: any;
 
@@ -27,10 +28,15 @@ export class BuscarConvocatoriaComponent implements OnInit {
   archivosExistentes: any[] = [];
   modalInfoMasiva: any;
 
+  codUsuario: number | null;
+
   // Variable para controlar columna POSTULA AQUÍ
   tieneEnProceso: boolean = false;
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService, private authService: AuthService) {
+    this.codUsuario = this.authService.getUserId();
+
+  }
 
   ngOnInit(): void {
     this.buscarConvocatorias();
@@ -61,6 +67,72 @@ export class BuscarConvocatoriaComponent implements OnInit {
     });
   }
 
+  postular(convocatoria: any) {
+    Swal.fire({
+      title: '¿Deseas postular a la convocatoria?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, postular',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#28a745'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Armar data según schema
+        const data = {
+          iCodPostulacion: 0,
+          iCodUsuario: this.codUsuario,
+          // vNumDocumento: this.usuario.vNumDocumento,
+          // vNombreCompleto: this.usuario.vNombreCompleto,
+          // vCorreoElectronico: this.usuario.vCorreoElectronico,
+          iCodConvocatoria: convocatoria.iCodConvocatoria || 0,
+          // vTituloConvocatoria: convocatoria.vTitulo,
+          // iCodTipoConvocatoria: convocatoria.iCodTipoConvocatoria || 0,
+          // vTipoConvocatoria: convocatoria.vTipoConvocatoria || '',
+          // iCodUnidadZonal: convocatoria.iCodUnidadZonal || 0,
+          // vUnidadZonal: convocatoria.vUnidadZonal || '',
+          // dtFechaInicio: convocatoria.dtFechaInicio || new Date().toISOString(),
+          // dtFechaFin: convocatoria.dtFechaFin || new Date().toISOString(),
+          // vRequisitos: convocatoria.vRequisitos || '',
+          // dtFechaPostulacion: new Date().toISOString(),
+          iCodUsuarioRegistra: this.codUsuario,
+          // bActivo: true
+        };
+
+        // Llamar al servicio API para insertar postulacion
+        this.api.insertarPostulacion(data).subscribe({
+          next: () => {
+            Swal.fire({
+              icon: 'success',
+              title: '¡Postulación exitosa!',
+              text: 'Tu postulación ha sido registrada correctamente.',
+              confirmButtonColor: '#28a745'
+            });
+          },
+          error: (err) => {
+            // Revisamos si el backend nos da el mensaje específico
+            const mensajeError = err?.error?.mensaje || '';
+            if (mensajeError.includes('El usuario ya está postulado')) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Ya te has postulado a esta convocatoria anteriormente.',
+                confirmButtonColor: '#f8bb86'
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo realizar la postulación. Intenta nuevamente.',
+                confirmButtonColor: '#dc3545'
+              });
+            }
+            console.error('Error al postular:', err);
+          }
+        });
+
+      }
+    });
+  }
 
   irPagina(n: number): void {
     this.paginaActual = n;

@@ -576,6 +576,13 @@ export const NavigationItems: NavigationItem[] = [
             type: 'item',
             url: '/component/BuscarConvocatoria',
             roles: [3]
+          },
+          {
+            id: 'MisPostulaciones',
+            title: 'Mis Postulaciones',
+            type: 'item',
+            url: '/component/MisPostulaciones',
+            roles: [3]
           }
         ]
       },

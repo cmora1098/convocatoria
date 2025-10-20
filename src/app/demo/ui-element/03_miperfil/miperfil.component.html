@@ -21,18 +21,29 @@
                                 #formDP="ngForm">
 
                                 <div class="row">
-                                    <div class="col-md-4 mb-3">
+                                    <!-- <div class="col-md-4 mb-3">
                                         <label for="tipo-doc" class="form-label">Tipo Documento</label>
                                         <select id="tipo-doc" required class="form-control" name="tipoDoc"
                                             [(ngModel)]="datos['Datos Personales'].tipoDocumento"
                                             aria-label="Tipo de Documento" disabled>
-                                            <option [value]="null">Seleccione</option>
+                                            <option value="">Seleccione</option>
                                             <option *ngFor="let tipo of tiposDocumentos"
                                                 [value]="tipo.codTipoDocumento">
                                                 {{ tipo.nombreDocumento }}
                                             </option>
                                         </select>
+                                    </div> -->
+                                    <div class="col-md-4 mb-3">
+                                        <label for="tipo-doc" class="form-label">Tipo Documento</label>
+                                        <select id="tipo-doc" required class="form-control" name="tipoDoc"
+                                            [(ngModel)]="datos['Datos Personales'].tipoDocumento"
+                                            aria-label="Tipo de Documento" disabled>
+                                            <option [ngValue]="null">Seleccione</option>
+                                            <option [ngValue]="1">DNI</option>
+                                            <option [ngValue]="3">PASAPORTE</option>
+                                        </select>
                                     </div>
+
 
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Nro. Documento</label>
@@ -292,10 +303,11 @@
                                             </div>
 
                                             <div class="modal-footer">
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="guardarFormacion(modalForm)">Guardar</button>
                                                 <button type="button" class="btn btn-secondary"
                                                     (click)="cerrarModalFormacion()">Cancelar</button>
-                                                <button type="button" class="btn btn-primary"
-                                                    (click)="guardarFormacion(modalForm)">Guardar</button>
+
                                             </div>
 
                                         </div>
@@ -727,21 +739,29 @@
 
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold">Horas *</label>
-                                                        <input type="number" class="form-control" min="1"
+                                                        <input type="number" class="form-control" min="1" step="1"
                                                             [(ngModel)]="cursoDiplomado.horas" name="horas" required
-                                                            [ngClass]="{'is-invalid': modalForm.submitted && (!cursoDiplomado.horas || cursoDiplomado.horas < 1)}">
-                                                        <div class="invalid-feedback">Debe ingresar un número mayor a 0.
+                                                            [ngClass]="{'is-invalid': modalForm.submitted && !isInteger(cursoDiplomado.horas)}" />
+                                                        <div class="invalid-feedback">
+                                                            Debe ingresar un número entero válido mayor a 0.
+                                                        </div>
+
+                                                        <div class="invalid-feedback">
+                                                            Debe ingresar un número entero mayor a 0.
                                                         </div>
                                                     </div>
+
 
                                                 </form>
                                             </div>
 
                                             <div class="modal-footer">
+
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="guardarCursoDiplomado()">Guardar</button>
+
                                                 <button type="button" class="btn btn-secondary"
                                                     (click)="cerrarModalCursoDiplomado()">Cancelar</button>
-                                                <button type="button" class="btn btn-success"
-                                                    (click)="guardarCursoDiplomado()">Guardar</button>
                                             </div>
 
                                         </div>
@@ -825,10 +845,12 @@
                                             </div>
 
                                             <div class="modal-footer">
+
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="guardarIdioma()">Guardar</button>
+
                                                 <button type="button" class="btn btn-secondary"
                                                     (click)="cerrarModalIdioma()">Cancelar</button>
-                                                <button type="button" class="btn btn-success"
-                                                    (click)="guardarIdioma()">Guardar</button>
                                             </div>
 
                                         </div>
@@ -870,7 +892,7 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">¿Es licenciado de las fuerzas armadas?</label>
                                         <select class="form-control" [(ngModel)]="datos[item].licenciadoFuerzasArmadas"
-                                            name="licfuerzasarmadas">
+                                            name="licfuerzasarmadas" (change)="onLicenciadoChange(item)">
                                             <option value="">-- SELECCIONE --</option>
                                             <option value="si">SÍ</option>
                                             <option value="no">NO</option>
@@ -880,7 +902,8 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Nro. Carnet / Código</label>
                                         <input type="text" class="form-control"
-                                            [(ngModel)]="datos[item].codigoLicenciado" name="codlicfuerzasarmadas" />
+                                            [(ngModel)]="datos[item].codigoLicenciado" name="codlicfuerzasarmadas"
+                                            [disabled]="datos[item].licenciadoFuerzasArmadas !== 'si'" />
                                     </div>
                                 </div>
 
@@ -892,7 +915,7 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">¿Tiene alguna discapacidad?</label>
                                         <select class="form-control" [(ngModel)]="datos[item].tieneDiscapacidad"
-                                            name="discapacidad">
+                                            name="discapacidad" (change)="onDiscapacidadChange(item)">
                                             <option value="">-- SELECCIONE --</option>
                                             <option value="si">SÍ</option>
                                             <option value="no">NO</option>
@@ -902,30 +925,17 @@
                                     <div class="col-md-4 mb-3">
                                         <label class="form-label">Nro. Carnet / Código</label>
                                         <input type="text" class="form-control"
-                                            [(ngModel)]="datos[item].codigoDiscapacidad" name="coddiscapacidad" />
+                                            [(ngModel)]="datos[item].codigoDiscapacidad" name="coddiscapacidad"
+                                            [disabled]="datos[item].tieneDiscapacidad !== 'si'" />
                                     </div>
                                 </div>
-
-                                <!--  <br>
-                                <small class="text-muted d-block mb-2">Ajustes Razonables para Personas con
-                                    Discapacidad</small>
-                                <hr />
-
-                                <small class="text-muted d-block mb-2">Marque el ajuste razonable requerido:</small>
-                                <div class="form-check mb-2" *ngFor="let ajuste of personasdiscapacidad; let i = index">
-                                    <input type="checkbox" class="form-check-input"
-                                        [(ngModel)]="ajustesSeleccionados[i]" [name]="'ajuste' + i"
-                                        [id]="'ajuste' + i" />
-                                    <label class="form-check-label" [for]="'ajuste' + i">
-                                        {{ ajuste }}
-                                    </label>
-                                </div> -->
 
                                 <div class="d-flex justify-content-end gap-2 mt-3">
                                     <button type="submit" class="btn btn-danger">Guardar</button>
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>
+
 
                             <!-- DECLARACION UJ -->
                             <form *ngIf="item === 'Declaración Jurada'" (ngSubmit)="guardarDeclaracionJurada(item)"
@@ -945,7 +955,20 @@
                                 </div>
 
                                 <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <button type="submit" class="btn btn-danger">Guardar</button>
+                                    <button type="submit" class="btn btn-danger"
+                                        [disabled]="declaracionJuradaActual">Guardar</button>
+                                    <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
+                                </div>
+                            </form>
+
+                            <!-- FICHA CURRICULAR -->
+                            <form *ngIf="item === 'Ficha Curricular'" (ngSubmit)="generarFichaCurricular()"
+                                #formFicha="ngForm">
+                                <small class="text-muted d-block mb-2">Generar Ficha Curricular</small>
+                                <hr />
+
+                                <div class="d-flex justify-content-end gap-2 mt-3">
+                                    <button type="submit" class="btn btn-primary">Generar</button>
                                     <button type="button" class="btn btn-secondary" (click)="volver()">Volver</button>
                                 </div>
                             </form>

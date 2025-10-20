@@ -77,7 +77,7 @@
             <tbody>
               <tr *ngFor="let c of convocatorias">
                 <td class="align-middle">{{ c.vTitulo }}</td>
-                <td class="align-middle text-start">
+                <td class="align-middle text-start detalle-puesto">
                   <strong [innerHTML]="c.vRequisitos"></strong><br />
                   <small class="text-muted"><b>SEDE:</b> {{ c.vUnidadZonal }}</small>
                 </td>
@@ -86,7 +86,7 @@
                   <span class="badge bg-danger" *ngIf="!c.bActivo">Inactivo</span>
                 </td> -->
 
-                <td class="align-middle">
+                <td class="align-middle " >
                   <span class="badge rounded-pill px-3 py-1"
                     style="border: 2px solid #1e8e3e; color: #1e8e3e; background-color: transparent; font-weight: 600;">
                     {{ c.vEstadoConvocatoria }}

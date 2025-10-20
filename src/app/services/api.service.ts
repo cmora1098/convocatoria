@@ -104,8 +104,6 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/Convocatorias/listar-paginado-conFase`, { params });
   }
 
-
-
   // ======================
   // Usuario
   // ====================== 
@@ -135,6 +133,21 @@ export class ApiService {
 
 
 
+
+  // =================================
+  // Buscar Convocatorias - Postulante
+  // =================================
+  gePostulaciones(params: any) {
+    return this.http.get<any>(`${this.baseUrl}/Postulaciones/listar-paginado`, { params });
+  }
+
+  insertarPostulacion(data: any) {
+    return this.http.post(`${this.baseUrl}/Postulaciones/insertar`, data);
+  }
+
+  eliminarPostulacion(iCodPostulacion: number) {
+    return this.http.delete(`${this.baseUrl}/Postulaciones/eliminar/${iCodPostulacion}`);
+  }
 
 
 
@@ -304,8 +317,17 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/DeclaracionJuradaPostulante/insertar`, data);
   }
 
-  actualizarDeclaracionJuradaPostulante(data: any) {
-    return this.http.put(`${this.baseUrl}/DeclaracionJuradaPostulante/actualizar`, data);
+  actualizarDeclaracionJurada(data: any) {
+    return this.http.post<any>(`${this.baseUrl}/DeclaracionJuradaPostulante/actualizar`, data);
+  }
+
+  // *******************************************************************
+  // GENERAR ANEXO 3
+  // *******************************************************************
+  generarFichaCurricular(data: any) {
+    return this.http.post(`${this.baseUrl}/FichaCurricular/generar`, data, {
+      responseType: 'blob', // <-- Importante, porque devuelve un PDF
+    });
   }
 
 

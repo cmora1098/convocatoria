@@ -1,94 +1,94 @@
 <div class="card shadow-lg border-0">
-    <div class="card-body">
+  <div class="card-body">
 
-        <!-- Tabla de convocatorias -->
-        <div class="table-responsive mt-4" *ngIf="convocatorias.length > 0">
-            <table class="table table-bordered table-hover text-center">
-                <thead class="table-header text-white" style="background-color: #1e8e3e;">
-                    <tr>
-                        <th>Proceso</th>
-                        <th>Detalle del Puesto</th>
-                        <th>Fase</th>
-                        <th>Bases</th>
-                        <th>Perfil de Puesto</th>
-                        <th>Cronograma</th>
-                        <th>Comunicado</th>
-                        <th>Resultados</th>
-                        <th *ngIf="tieneEnProceso">POSTULA AQUÍ</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ng-container *ngFor="let c of convocatorias">
-                        <tr>
-                            <td class="align-middle">{{ c.vTitulo }}</td>
-                            <td class="align-middle text-start">
-                                <strong [innerHTML]="c.vRequisitos"></strong><br />
-                                <small class="text-muted"><b>SEDE:</b> {{ c.vUnidadZonal }}</small>
-                            </td>
-                            <td class="align-middle">
-                                <span class="badge rounded-pill px-3 py-1 bg-warning text-dark">
-                                    {{ c.vEstadoConvocatoria }}
-                                </span>
-                            </td> 
-                            <td class="align-middle">
-                                <button class="btn btn-outline-danger btn-sm" (click)="abrirModal(c, 'bases')">
-                                    <i class="fa fa-file-pdf"></i>
-                                </button>
-                            </td>
-                            <td class="align-middle">
-                                <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'perfil')">
-                                    <i class="fa fa-briefcase"></i>
-                                </button>
-                            </td>
-                            <td class="align-middle">
-                                <button class="btn btn-outline-warning btn-sm" (click)="abrirModal(c, 'cronograma')">
-                                    <i class="fa fa-calendar"></i>
-                                </button>
-                            </td>
-                            <td class="align-middle">
-                                <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'comunicado')">
-                                    <i class="fa fa-bullhorn"></i>
-                                </button>
-                            </td>
-                            <td class="align-middle">
-                                <button class="btn btn-outline-primary btn-sm" (click)="abrirModal(c, 'resultados')">
-                                    <i class="fa fa-list"></i>
-                                </button>
-                            </td>
-                            <!-- Columna extra POSTULA AQUÍ si está en proceso -->
-                            <td class="align-middle" *ngIf="c.vEstadoConvocatoria === 'EN PROCESO'">
-                                <button class="btn btn-success btn-sm">
-                                    <i class="fa fa-paper-plane me-1"></i> Postula
-                                </button>
-                            </td>
-                        </tr>
-                    </ng-container>
-                </tbody>
-            </table>
-        </div>
+    <!-- Tabla de convocatorias -->
+    <div class="table-responsive mt-4" *ngIf="convocatorias.length > 0">
+      <table class="table table-bordered table-hover text-center">
+        <thead class="table-header text-white" style="background-color: #1e8e3e;">
+          <tr>
+            <th>Proceso</th>
+            <th>Detalle del Puesto</th>
+            <th>Fase</th>
+            <th>Bases</th>
+            <th>Perfil de Puesto</th>
+            <th>Cronograma</th>
+            <th>Comunicado</th>
+            <th>Resultados</th>
+            <th *ngIf="tieneEnProceso">POSTULA AQUÍ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let c of convocatorias">
+            <tr>
+              <td class="align-middle">{{ c.vTitulo }}</td>
+              <td class="align-middle text-start detalle-puesto">
+                <strong [innerHTML]="c.vRequisitos"></strong><br />
+                <small class="text-muted"><b>SEDE:</b> {{ c.vUnidadZonal }}</small>
+              </td>
+              <td class="align-middle">
+                <span class="badge rounded-pill px-3 py-1 bg-warning text-dark">
+                  {{ c.vEstadoConvocatoria }}
+                </span>
+              </td>
+              <td class="align-middle">
+                <button class="btn btn-outline-danger btn-sm" (click)="abrirModal(c, 'bases')">
+                  <i class="fa fa-file-pdf"></i>
+                </button>
+              </td>
+              <td class="align-middle">
+                <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'perfil')">
+                  <i class="fa fa-briefcase"></i>
+                </button>
+              </td>
+              <td class="align-middle">
+                <button class="btn btn-outline-warning btn-sm" (click)="abrirModal(c, 'cronograma')">
+                  <i class="fa fa-calendar"></i>
+                </button>
+              </td>
+              <td class="align-middle">
+                <button class="btn btn-outline-info btn-sm" (click)="abrirModal(c, 'comunicado')">
+                  <i class="fa fa-bullhorn"></i>
+                </button>
+              </td>
+              <td class="align-middle">
+                <button class="btn btn-outline-primary btn-sm" (click)="abrirModal(c, 'resultados')">
+                  <i class="fa fa-list"></i>
+                </button>
+              </td>
+              <!-- Columna extra POSTULA AQUÍ si está en proceso -->
+              <td class="align-middle" *ngIf="c.vEstadoConvocatoria === 'EN PROCESO'">
+                <button class="btn btn-success btn-sm" (click)="postular(c)">
+                  <i class="fa fa-paper-plane me-1"></i> Postula
+                </button>
+              </td>
 
-        <!-- Mensaje si no hay convocatorias -->
-        <div *ngIf="convocatorias.length === 0" class="text-center text-muted my-4">
-            <p>No se encontraron convocatorias.</p>
-        </div>
-
-        <!-- Paginación -->
-        <nav *ngIf="totalPaginas > 1" class="mt-3">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" [class.disabled]="paginaActual === 1">
-                    <a class="page-link" (click)="anteriorPagina()">Anterior</a>
-                </li>
-                <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let idx = index"
-                    [class.active]="paginaActual === idx + 1">
-                    <a class="page-link" (click)="irPagina(idx + 1)">{{ idx + 1 }}</a>
-                </li>
-                <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
-                    <a class="page-link" (click)="siguientePagina()">Siguiente</a>
-                </li>
-            </ul>
-        </nav>
-
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
     </div>
+
+    <!-- Mensaje si no hay convocatorias -->
+    <div *ngIf="convocatorias.length === 0" class="text-center text-muted my-4">
+      <p>No se encontraron convocatorias.</p>
+    </div>
+
+    <!-- Paginación -->
+    <nav *ngIf="totalPaginas > 1" class="mt-3">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" [class.disabled]="paginaActual === 1">
+          <a class="page-link" (click)="anteriorPagina()">Anterior</a>
+        </li>
+        <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let idx = index"
+          [class.active]="paginaActual === idx + 1">
+          <a class="page-link" (click)="irPagina(idx + 1)">{{ idx + 1 }}</a>
+        </li>
+        <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
+          <a class="page-link" (click)="siguientePagina()">Siguiente</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>
 
 
