@@ -1,133 +1,64 @@
 <div class="row btn-page">
   <div class="col-12">
     <app-card cardTitle="Asignación de Evaluadores" [options]="false">
-      <!-- Filtros -->
-      <form (ngSubmit)="listarPostulaciones()" class="mb-4">
-        <div class="row g-3">
-          <div class="col-md-3 col-sm-6">
-            <label for="codTipoConvocatoria" class="form-label">Tipo de Convocatoria</label>
-            <input
-              type="text"
-              id="codTipoConvocatoria"
-              class="form-control"
-              [(ngModel)]="filtros.codTipoConvocatoria"
-              name="codTipoConvocatoria"
-              placeholder="Tipo Convocatoria"
-            />
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <label for="unidadZonal" class="form-label">Unidad Zonal</label>
-            <input
-              type="text"
-              id="unidadZonal"
-              class="form-control"
-              [(ngModel)]="filtros.vUnidadZonal"
-              name="vUnidadZonal"
-              placeholder="Unidad Zonal"
-            />
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <label for="fechaPostulacionDesde" class="form-label">Fecha Postulación Desde</label>
-            <input
-              type="date"
-              id="fechaPostulacionDesde"
-              class="form-control"
-              [(ngModel)]="filtros.FechaPostulacionDesde"
-              name="FechaPostulacionDesde"
-            />
-          </div>
-
-          <div class="col-md-3 col-sm-6">
-            <label for="fechaPostulacionHasta" class="form-label">Fecha Postulación Hasta</label>
-            <input
-              type="date"
-              id="fechaPostulacionHasta"
-              class="form-control"
-              [(ngModel)]="filtros.FechaPostulacionHasta"
-              name="FechaPostulacionHasta"
-            />
-          </div>
-        </div>
-
-        <div class="row mt-3 g-3 align-items-end">
-          <div class="col-md-3 col-sm-6">
-            <label for="soloActivos" class="form-label">Solo Activos</label>
-            <select
-              id="soloActivos"
-              class="form-select"
-              [(ngModel)]="filtros.soloActivos"
-              name="soloActivos"
-            >
-              <option value="">Todos</option>
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
-          </div>
-          <div class="col-md-3 col-sm-6">
-            <button type="submit" class="btn btn-primary w-100 mt-md-0 mt-3">
-              Filtrar
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <!-- Tabla de Postulaciones -->
       <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle custom-table">
-          <thead class="table-dark">
+        <table class="table table-hover align-middle modern-table">
+          <thead>
             <tr>
-              <th>Título convocatoria</th>
-              <th>Tipo convocatoria</th>
+              <th>Título</th>
+              <th>Tipo</th>
               <th>Unidad Zonal</th>
-              <th>Fecha Postulación</th>
+              <th>Fecha</th>
               <th class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let postulacion of postulaciones; let i = index">
-              <td>{{ postulacion.vTituloConvocatoria }}</td>
-              <td>{{ postulacion.vTipoConvocatoria }}</td>
+            <tr *ngFor="let postulacion of postulaciones">
+              <td><strong>{{ postulacion.vTituloConvocatoria }}</strong></td>
+              <td>
+                <span class="badge bg-primary">{{ postulacion.vTipoConvocatoria }}</span>
+              </td>
               <td>{{ postulacion.vUnidadZonal }}</td>
               <td>{{ postulacion.dtFechaPostulacion | date: 'mediumDate' }}</td>
               <td class="text-center">
-                <button
-                  class="btn btn-danger btn-sm"
-                  (click)="eliminarPostulacion(postulacion.iCodPostulacion)"
-                  title="Eliminar postulación"
-                >
-                  <i class="bi bi-trash"></i> Eliminar
+                <button class="btn btn-outline-danger btn-sm" (click)="eliminarPostulacion(postulacion.iCodPostulacion)"
+                  [disabled]="postulacion.vEstadoConvocatoria !== 'EN PROCESO'"
+                  title="{{ postulacion.vEstadoConvocatoria !== 'EN PROCESO' ? 'No se puede eliminar en este estado' : '' }}">
+                  <i class="bi bi-trash"></i>
+                  <span class="d-none d-md-inline">Eliminar</span>
                 </button>
+
               </td>
             </tr>
             <tr *ngIf="!postulaciones || postulaciones.length === 0">
-              <td colspan="5" class="text-center py-3">No se encontraron postulaciones.</td>
+              <td colspan="5" class="text-center py-4 text-muted">No se encontraron postulaciones.</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <!-- Paginación -->
-      <nav *ngIf="totalPaginas > 1" aria-label="Page navigation">
-        <ul class="pagination justify-content-center mt-4">
+      <nav *ngIf="totalPaginas > 1" aria-label="Paginación" class="mt-4">
+        <ul class="pagination justify-content-center">
           <li class="page-item" [class.disabled]="paginaActual === 1">
-            <button class="page-link" (click)="anteriorPagina()">Anterior</button>
+            <button class="page-link" (click)="anteriorPagina()" aria-label="Anterior">
+              <i class="bi bi-chevron-left"></i>
+            </button>
           </li>
 
-          <li
-            class="page-item"
-            *ngFor="let _ of [].constructor(totalPaginas); let i = index"
-            [class.active]="paginaActual === i + 1"
-          >
+          <li class="page-item" *ngFor="let _ of [].constructor(totalPaginas); let i = index"
+            [class.active]="paginaActual === i + 1">
             <button class="page-link" (click)="irPagina(i + 1)">{{ i + 1 }}</button>
           </li>
 
           <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
-            <button class="page-link" (click)="siguientePagina()">Siguiente</button>
+            <button class="page-link" (click)="siguientePagina()" aria-label="Siguiente">
+              <i class="bi bi-chevron-right"></i>
+            </button>
           </li>
         </ul>
       </nav>
     </app-card>
+
   </div>
 </div>

@@ -12,7 +12,7 @@ import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 
 import * as dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
@@ -153,77 +153,80 @@ export class MiPerfilComponent {
   };
 
   ngOnInit(): void {
-    this.datos['Datos Personales'].tipoDocumento = this.tpdoc;  
 
 
-    // this.apiService.getTipoDocumentos().subscribe({
-    //   next: (tipos) => {
-    //     this.tiposDocumentos = tipos;
-    //     this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
+    // this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
 
-    //     this.apiService.getUbigeoDpto().subscribe({
-    //       next: (departamentos) => {
-    //         this.departamentos = departamentos;
-    //         const dpto = this.datos['Datos Personales'].departamentoNacimiento;
-    //         const prov = this.datos['Datos Personales'].provinciaNacimiento;
-    //         if (dpto) {
-    //           this.onDepartamentoChange(dpto, true, prov);
-    //         }
+    // this.apiService.getUbigeoDpto().subscribe({
+    //   next: (departamentos) => {
+    //     this.departamentos = departamentos;
+    //     const dpto = this.datos['Datos Personales'].departamentoNacimiento;
+    //     const prov = this.datos['Datos Personales'].provinciaNacimiento;
+    //     if (dpto) {
+    //       this.onDepartamentoChange(dpto, true, prov);
+    //     }
 
-    //         // 🔽 Llamamos al resto
-    //         this.cargarDatosPersonales();
-    //         this.cargarFormaciones();
-    //         this.cargarColegiatura();
-    //         this.obtenerExperienciasLaborales();
-    //         this.cargarCursosDiplomados();
-    //         this.cargarIdiomas();
-    //         this.cargarOfimatica();
-    //         this.cargarDatosBonificacionesAdicionales();
-    //         this.cargarDeclaracionJurada();
-    //       },
-    //       error: (err) => {
-    //         console.error('Error al cargar departamentos', err);
-    //         Swal.fire({
-    //           icon: 'error',
-    //           title: '¡Error!',
-    //           text: 'Ocurrió un error al cargar los Departamentos.',
-    //           confirmButtonText: 'Aceptar',
-    //           confirmButtonColor: '#2e7d32'
-    //         });
-    //       }
-    //     });
+    //     // 🔽 Llamamos al resto
+    //     this.cargarDatosPersonales();
+    //     this.cargarFormaciones();
+    //     this.cargarColegiatura();
+    //     this.obtenerExperienciasLaborales();
+    //     this.cargarCursosDiplomados();
+    //     this.cargarIdiomas();
+    //     this.cargarOfimatica();
+    //     this.cargarDatosBonificacionesAdicionales();
+    //     this.cargarDeclaracionJurada();
+
     //   },
     //   error: (err) => {
-    //     console.error('Error al cargar tipos de documentos', err);
+    //     console.error('Error al cargar departamentos', err);
     //     Swal.fire({
     //       icon: 'error',
     //       title: '¡Error!',
-    //       text: 'Ocurrió un error al cargar los tipos de documentos.',
+    //       text: 'Ocurrió un error al cargar los Departamentos.',
     //       confirmButtonText: 'Aceptar',
     //       confirmButtonColor: '#2e7d32'
     //     });
     //   }
     // });
 
+
     this.apiService.getUbigeoDpto().subscribe({
-      next: (departamentos) => {
+      next: async (departamentos) => {
         this.departamentos = departamentos;
+
         const dpto = this.datos['Datos Personales'].departamentoNacimiento;
         const prov = this.datos['Datos Personales'].provinciaNacimiento;
         if (dpto) {
           this.onDepartamentoChange(dpto, true, prov);
         }
 
-        // 🔽 Llamamos al resto
-        this.cargarDatosPersonales();
-        this.cargarFormaciones();
-        this.cargarColegiatura();
-        this.obtenerExperienciasLaborales();
-        this.cargarCursosDiplomados();
-        this.cargarIdiomas();
-        this.cargarOfimatica();
-        this.cargarDatosBonificacionesAdicionales();
-        this.cargarDeclaracionJurada();
+        try {
+          await Promise.all([
+            this.cargarDatosPersonales(),
+            this.cargarFormaciones(),
+            this.cargarColegiatura(),
+            this.obtenerExperienciasLaborales(),
+            this.cargarCursosDiplomados(),
+            this.cargarIdiomas(),
+            this.cargarOfimatica(),
+            this.cargarDatosBonificacionesAdicionales(),
+            this.cargarDeclaracionJurada()
+          ]);
+
+          // ✅ Después de todas las cargas
+          this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
+
+        } catch (err) {
+          console.error('Error al cargar los datos:', err);
+          Swal.fire({
+            icon: 'error',
+            title: '¡Error!',
+            text: 'Ocurrió un error al cargar los datos personales.',
+            confirmButtonText: 'Aceptar',
+            confirmButtonColor: '#2e7d32'
+          });
+        }
       },
       error: (err) => {
         console.error('Error al cargar departamentos', err);
@@ -236,6 +239,8 @@ export class MiPerfilComponent {
         });
       }
     });
+
+
   }
 
   // ✅ Evento al cambiar el departamento
@@ -306,10 +311,16 @@ export class MiPerfilComponent {
   // ******  DATOS PERSONALES ******* //  
   // ******************************* // 
   private idDatosPersonales: number = 0; // variable para guardar el ID si existe 
+  tipoDocumento: number | null = null;
 
   cargarDatosPersonales() {
     if (this.codUsuario != null) {
-      this.datos['Datos Personales'].tipoDocumento = this.tpdoc;
+
+      this.tipoDocumento = Number(this.tpdoc); 
+      
+      // Cuando guardes, pasas de vuelta:
+      this.datos['Datos Personales'].tipoDocumento = this.tipoDocumento;
+
       this.apiService.getDatosPersonales(this.codUsuario).subscribe({
         next: (data) => {
           if (data) {

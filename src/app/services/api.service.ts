@@ -148,12 +148,7 @@ export class ApiService {
   eliminarPostulacion(iCodPostulacion: number) {
     return this.http.delete(`${this.baseUrl}/Postulaciones/eliminar/${iCodPostulacion}`);
   }
-
-
-
-
-
-
+ 
   // ======================
   // Mi Perfil - Postulante
   // ====================== 

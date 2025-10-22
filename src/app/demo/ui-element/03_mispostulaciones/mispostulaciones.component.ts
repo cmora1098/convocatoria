@@ -25,8 +25,6 @@ export class MisPostulacionesComponent {
     filtros: any;
     postulaciones: any[] = [];
 
-
-
     constructor(private apiService: ApiService, private authService: AuthService) {
         this.codUsuario = this.authService.getUserId();
 
@@ -100,6 +98,8 @@ export class MisPostulacionesComponent {
             text: 'Esta acción eliminará tu postulación. ¿Deseas continuar?',
             icon: 'warning',
             showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#aaa', 
             confirmButtonText: 'Sí, eliminar',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
@@ -118,11 +118,9 @@ export class MisPostulacionesComponent {
         });
     }
 
-
     // ************************************* //
     // ***********   PAGINADO   ************ //
     // ************************************* //
-
     paginaActual: number = 1;
     totalPaginas: number = 0;
     pageSize: number = 10;

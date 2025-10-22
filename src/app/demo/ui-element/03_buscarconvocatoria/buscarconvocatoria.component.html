@@ -56,11 +56,20 @@
                 </button>
               </td>
               <!-- Columna extra POSTULA AQUÍ si está en proceso -->
-              <td class="align-middle" *ngIf="c.vEstadoConvocatoria === 'EN PROCESO'">
+
+              <!-- <td class="align-middle" *ngIf="c.vEstadoConvocatoria === 'EN PROCESO'">
                 <button class="btn btn-success btn-sm" (click)="postular(c)">
                   <i class="fa fa-paper-plane me-1"></i> Postula
                 </button>
+              </td> -->
+
+              <!-- Cambiar esto -->
+              <td class="align-middle" *ngIf="c.vEstadoConvocatoria === 'EN PROCESO'">
+                <button class="btn btn-success btn-sm" (click)="abrirModalSubidaArchivos(c)">
+                  <i class="fa fa-paper-plane me-1"></i> Subir Documentos
+                </button>
               </td>
+
 
             </tr>
           </ng-container>
@@ -134,3 +143,33 @@
     </div>
   </div>
 </div>
+
+
+<div class="modal fade" id="modalSubidaDocumentos" tabindex="-1" aria-labelledby="modalSubidaDocumentosLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content shadow">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalSubidaDocumentosLabel">Subida de Documentos para Postulación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form #formSubida="ngForm">
+          <div class="mb-3">
+            <label for="anexo3" class="form-label">Anexo 3 (PDF)</label>
+            <input type="file" class="form-control" id="anexo3" accept="application/pdf" (change)="onFileSelected($event, 'anexo3')" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="anexosMult" class="form-label">Anexos 11,12,13,14 (PDF)</label>
+            <input type="file" class="form-control" id="anexosMult" accept="application/pdf" (change)="onFileSelected($event, 'anexosMult')" required />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" [disabled]="!archivosValidos()" (click)="enviarPostulacion()">¡Enviar postulación!</button>
+      </div>
+    </div>
+  </div>
+</div>
+

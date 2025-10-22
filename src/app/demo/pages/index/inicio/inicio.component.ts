@@ -51,6 +51,7 @@ export class InicioComponent implements OnInit {
     this.api.getConvocatoriasPaginadoconFase(params).subscribe({
       next: (resp: any[]) => {
         if (Array.isArray(resp)) {
+          console.log(resp);
           // Filtramos solo aquellas convocatorias que tengan vEstadoConvocatoria
           this.convocatorias = resp.filter(c => c.vEstadoConvocatoria && c.vEstadoConvocatoria.trim() !== '');
 
@@ -126,7 +127,7 @@ export class InicioComponent implements OnInit {
       next: (archivos: any[]) => {
         const archivosFiltrados = archivos.map(a => ({
           ...a,
-          urlArchivo: a.vRutaArchivo
+          urlArchivo: a.urlArchivo
         }));
 
         if (archivosFiltrados.length === 0) {
@@ -162,7 +163,8 @@ export class InicioComponent implements OnInit {
   }
 
   verArchivo(rutaArchivo: string) {
-    const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
+    //const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
+    const url = `${rutaArchivo}`;
     window.open(url, '_blank');
   }
 

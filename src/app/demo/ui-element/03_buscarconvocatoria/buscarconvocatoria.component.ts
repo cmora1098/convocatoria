@@ -20,7 +20,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
 
   convocatorias: any[] = [];  // Siempre inicializado como array
   paginaActual: number = 1;
-  pageSize: number = 10;
+  pageSize: number = 5;
   totalPaginas: number = 1;
 
   faseActual: string = '';
@@ -35,29 +35,144 @@ export class BuscarConvocatoriaComponent implements OnInit {
 
   constructor(private api: ApiService, private authService: AuthService) {
     this.codUsuario = this.authService.getUserId();
-
   }
+
+  archivos: { anexo3?: File; anexosMult?: File } = {};
+  convocatoriaSeleccionada: any = null;
+
+  abrirModalSubidaArchivos(convocatoria: any) {
+    this.convocatoriaSeleccionada = convocatoria;
+    this.archivos = {};
+    const modal = new bootstrap.Modal(document.getElementById('modalSubidaDocumentos')!);
+    modal.show();
+  }
+
+  archivosValidos(): boolean {
+    return !!this.archivos.anexo3 && !!this.archivos.anexosMult;
+  }
+
+  // Usarlo con el API actualizado
+
+  // enviarPostulacion() { 
+  //   if (!this.convocatoriaSeleccionada) {
+  //     return;
+  //   }
+
+  //   // Construir FormData para enviar archivos
+  //   const formData = new FormData();
+  //   formData.append('iCodUsuario', String(this.codUsuario));
+  //   formData.append('iCodConvocatoria', this.convocatoriaSeleccionada.iCodConvocatoria.toString());
+  //   formData.append('anexo3', this.archivos.anexo3!);
+  //   formData.append('anexosMult', this.archivos.anexosMult!);
+
+  //   // Llamar servicio API para subir documentos y postular
+  //   this.api.subirDocumentosYPostular(formData).subscribe({
+  //     next: () => {
+  //       Swal.fire({
+  //         icon: 'success',
+  //         title: '¡Postulación exitosa!',
+  //         text: 'Tus documentos han sido subidos y la postulación registrada correctamente.',
+  //         confirmButtonColor: '#28a745'
+  //       });
+
+  //       // Cerrar modal manualmente
+  //       const modalEl = document.getElementById('modalSubidaDocumentos');
+  //       const modalInstance = bootstrap.Modal.getInstance(modalEl!);
+  //       modalInstance?.hide();
+
+  //       // Limpiar variables
+  //       this.archivos = {};
+  //       this.convocatoriaSeleccionada = null;
+  //     },
+  //     error: (err) => {
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Error',
+  //         text: 'No se pudo completar la postulación. Intenta nuevamente.',
+  //         confirmButtonColor: '#dc3545'
+  //       });
+  //       console.error('Error al subir documentos y postular:', err);
+  //     }
+  //   });
+  // }
+
+  enviarPostulacion() {
+    if (!this.convocatoriaSeleccionada) {
+      return;
+    }
+
+    console.log('Simulando subida de documentos y postulación con:', {
+      iCodUsuario: this.codUsuario,
+      iCodConvocatoria: this.convocatoriaSeleccionada.iCodConvocatoria,
+      archivos: this.archivos
+    });
+
+    Swal.fire({
+      icon: 'success',
+      title: '¡Postulación exitosa!',
+      text: 'Tus documentos han sido subidos y la postulación registrada correctamente (simulado).',
+      confirmButtonColor: '#28a745'
+    }).then(() => {
+      // Cerrar modal manualmente
+      const modalEl = document.getElementById('modalSubidaDocumentos');
+      const modalInstance = bootstrap.Modal.getInstance(modalEl!);
+      modalInstance?.hide();
+
+      // Limpiar variables
+      this.archivos = {};
+      this.convocatoriaSeleccionada = null;
+    });
+  } 
+
+  onFileSelected(event: Event, tipo: 'anexo3' | 'anexosMult') {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const archivo = input.files[0];
+      if (archivo.type !== 'application/pdf') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Archivo inválido',
+          text: 'Solo se permiten archivos PDF.',
+        });
+        input.value = ''; // Limpiar input
+        return;
+      }
+      this.archivos[tipo] = archivo;
+    }
+  }
+
+
 
   ngOnInit(): void {
     this.buscarConvocatorias();
   }
 
   buscarConvocatorias(): void {
-    const params: any = { PageNumber: this.paginaActual, PageSize: this.pageSize };
-
-    this.api.getConvocatoriasPaginadoconFase(params).subscribe({
+    this.api.getConvocatoriasPaginadoconFase({}).subscribe({
       next: (resp: any[]) => {
-        const filtradas = Array.isArray(resp)
-          ? resp.filter(c => c.vEstadoConvocatoria && c.vEstadoConvocatoria.trim() !== '')
-          : [];
+        if (!Array.isArray(resp)) {
+          this.convocatorias = [];
+          this.totalPaginas = 1;
+          this.tieneEnProceso = false;
+          return;
+        }
 
-        this.convocatorias = filtradas;
+        // Filtrar solo las convocatorias en estado 'EN PROCESO'
+        const convocatoriasEnProceso = resp.filter(c => c.vEstadoConvocatoria === 'EN PROCESO');
 
-        // Actualizamos la variable para la columna POSTULA AQUÍ
-        this.tieneEnProceso = this.convocatorias.some(c => c.vEstadoConvocatoria === 'EN PROCESO');
+        // Total de registros 'EN PROCESO'
+        const totalRegistros = convocatoriasEnProceso.length;
 
-        const totalRegistros = resp && resp.length > 0 ? resp[0].totalRegistros || resp.length : 0;
+        // Calcular total de páginas
         this.totalPaginas = Math.ceil(totalRegistros / this.pageSize);
+
+        // Aplicar paginación sobre el array filtrado
+        const startIndex = (this.paginaActual - 1) * this.pageSize;
+        const endIndex = startIndex + this.pageSize;
+        this.convocatorias = convocatoriasEnProceso.slice(startIndex, endIndex);
+
+        // Como estamos mostrando solo EN PROCESO, esta variable será true si hay al menos uno
+        this.tieneEnProceso = totalRegistros > 0;
       },
       error: () => {
         this.convocatorias = [];
@@ -173,7 +288,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
 
     this.api.getArchivosConvocatoria(convocatoria.iCodConvocatoria, codFormato).subscribe({
       next: (archivos: any[]) => {
-        this.archivosExistentes = archivos.map(a => ({ ...a, urlArchivo: a.vRutaArchivo }));
+        this.archivosExistentes = archivos.map(a => ({ ...a, urlArchivo: a.urlArchivo }));
 
         if (this.archivosExistentes.length === 0) {
           Swal.fire({
@@ -205,7 +320,8 @@ export class BuscarConvocatoriaComponent implements OnInit {
   }
 
   verArchivo(rutaArchivo: string) {
-    const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
+    //const url = `${this.api.baseUrlConvocatoriaDoc}${rutaArchivo}`;
+    const url = `${rutaArchivo}`;
     window.open(url, '_blank');
   }
 }
