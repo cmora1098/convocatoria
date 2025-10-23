@@ -430,45 +430,45 @@ export const NavigationItems: NavigationItem[] = [
           }
         ]
       },
-      {
-        id: '03_evaluacion',
-        title: 'Evaluación',
-        type: 'collapse',
-        icon: 'feather icon-clock',
-        roles: [1],
-        children: [
-          {
-            id: 'AsignarEvaluadores',
-            title: 'Asignar Evaluadores',
-            type: 'item',
-            url: '/component/AsignarEvaluadores',
-            roles: [1]
-          },
-          {
-            id: 'ResultadosGenerales',
-            title: 'Ver Resultados Generales',
-            type: 'item',
-            url: '/component/ResultadosGenerales',
-            roles: [1]
-          }
-        ]
-      },
-      {
-        id: '04_reportes',
-        title: 'Reportes',
-        type: 'collapse',
-        icon: 'feather icon-inbox',
-        roles: [1],
-        children: [
-          {
-            id: 'ReportesAdministrador',
-            title: 'Generar Reportes',
-            type: 'item',
-            url: '/component/ReportesAdministrador',
-            roles: [1]
-          }
-        ]
-      },
+      // {
+      //   id: '03_evaluacion',
+      //   title: 'Evaluación',
+      //   type: 'collapse',
+      //   icon: 'feather icon-clock',
+      //   roles: [1],
+      //   children: [
+      //     {
+      //       id: 'AsignarEvaluadores',
+      //       title: 'Asignar Evaluadores',
+      //       type: 'item',
+      //       url: '/component/AsignarEvaluadores',
+      //       roles: [1]
+      //     },
+      //     {
+      //       id: 'ResultadosGenerales',
+      //       title: 'Ver Resultados Generales',
+      //       type: 'item',
+      //       url: '/component/ResultadosGenerales',
+      //       roles: [1]
+      //     }
+      //   ]
+      // },
+      // {
+      //   id: '04_reportes',
+      //   title: 'Reportes',
+      //   type: 'collapse',
+      //   icon: 'feather icon-inbox',
+      //   roles: [1],
+      //   children: [
+      //     {
+      //       id: 'ReportesAdministrador',
+      //       title: 'Generar Reportes',
+      //       type: 'item',
+      //       url: '/component/ReportesAdministrador',
+      //       roles: [1]
+      //     }
+      //   ]
+      // },
       {
         id: '05_gestionusuario',
         title: 'Usuarios',
@@ -485,22 +485,22 @@ export const NavigationItems: NavigationItem[] = [
           }
         ]
       },
-      {
-        id: '06_parametrosgenerales',
-        title: 'Configuración',
-        type: 'collapse',
-        icon: 'feather icon-settings',
-        roles: [1],
-        children: [
-          {
-            id: 'ParametrosGenerales',
-            title: 'Parámetros Generales',
-            type: 'item',
-            url: '/component/ParametrosGenerales',
-            roles: [1]
-          }
-        ]
-      },
+      // {
+      //   id: '06_parametrosgenerales',
+      //   title: 'Configuración',
+      //   type: 'collapse',
+      //   icon: 'feather icon-settings',
+      //   roles: [1],
+      //   children: [
+      //     {
+      //       id: 'ParametrosGenerales',
+      //       title: 'Parámetros Generales',
+      //       type: 'item',
+      //       url: '/component/ParametrosGenerales',
+      //       roles: [1]
+      //     }
+      //   ]
+      // },
       {
         id: 'signin',
         title: 'Cerrar Sesión',
