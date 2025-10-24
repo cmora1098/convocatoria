@@ -1,8 +1,96 @@
 <div class="row btn-page">
-    <div class="col-md-12">
-        <app-card cardTitle="Asignación de Evaluadores" [options]="false">
 
-            <!-- Filtros -->
+    <!-- Reporte de Convocatoria -->
+    <div class="col-md-12">
+        <app-card cardTitle="Reporte de Convocatoria con Fases" [options]="false">
+            <div class="row align-items-end g-2">
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select class="form-control" [(ngModel)]="filtrosConvocatoria.bActivo" name="estado">
+                        <option value="">Todos</option>
+                        <option [ngValue]="true">Activo</option>
+                        <option [ngValue]="false">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Tipo Convocatoria</label>
+                    <select class="form-control" [(ngModel)]="filtrosConvocatoria.iCodTipoConvocatoria" name="tipo">
+                        <option value selected>Seleccione</option>
+                        <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+                            {{ tipo.descripcion }}
+                        </option>
+                    </select>
+                </div>
+
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Inicial</label>
+                    <input type="date" class="form-control" [(ngModel)]="filtrosConvocatoria.FechaInicio" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" [(ngModel)]="filtrosConvocatoria.FechaFin" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success w-100" (click)="exportarReporteConvocatoria()">
+                        <i class="feather icon-download me-1"></i> Exportar
+                    </button>
+                </div>
+            </div>
+        </app-card>
+    </div>
+
+    <!-- Reporte de Convocatoria con Fase-->
+    <div class="col-md-12">
+        <app-card cardTitle="Reporte de Convocatoria con Fases" [options]="false">
+            <div class="row align-items-end g-2">
+                <div class="col-md-3">
+                    <label class="form-label">Tipo Convocatoria</label>
+                    <select class="form-control" [(ngModel)]="filtrosConvocatoriaFase.iCodTipoConvocatoria" name="tipo">
+                        <option value selected>Seleccione</option>
+                        <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+                            {{ tipo.descripcion }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Unidad Zonal</label>
+                    <select class="form-control" [(ngModel)]="filtrosConvocatoriaFase.iCodUnidadZonal"
+                        name="unidadzonal">
+                        <option value selected>Seleccione</option>
+                        <option *ngFor="let unidadzonal of tiposUnidadZonal" [value]="unidadzonal.codUnidadZonal">
+                            {{ unidadzonal.nombre }}
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Inicial</label>
+                    <input type="date" class="form-control" [(ngModel)]="filtrosConvocatoriaFase.FechaInicio" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" [(ngModel)]="filtrosConvocatoriaFase.FechaFin" />
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success w-100" (click)="exportarReporteConvocatoriaFase()">
+                        <i class="feather icon-download me-1"></i> Exportar
+                    </button>
+                </div>
+            </div>
+        </app-card>
+    </div>
+
+
+    <!-- Reporte de Usuarios -->
+    <!-- <div class="col-md-12">
+        <app-card cardTitle="Asignación de Evaluadores" [options]="false">
             <div class="row align-items-end g-2">
                 <div class="col-md-2">
                     <label class="form-label">Fecha Inicial</label>
@@ -13,10 +101,38 @@
                     <label class="form-label">Fecha Fin</label>
                     <input type="date" class="form-control" />
                 </div>
-            </div> 
+            </div>
 
-            <hr class="my-4" /> 
-            
+            <hr class="my-4" />
+
+            <div class="col-md-2">
+                <button type="button" class="btn btn-success">
+                    <i class="feather icon-download me-1"></i>
+                    Exportar
+                </button>
+            </div>
+
+        </app-card>
+    </div> -->
+
+    <!-- filtrosConvocatoriaFase -->
+    <div class="col-md-12">
+        <app-card cardTitle="Asignación de Evaluadores" [options]="false">
+
+            <div class="row align-items-end g-2">
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Inicial</label>
+                    <input type="date" class="form-control" />
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" />
+                </div>
+            </div>
+
+            <hr class="my-4" />
+
             <div class="col-md-2">
                 <button type="button" class="btn btn-success">
                     <i class="feather icon-download me-1"></i>

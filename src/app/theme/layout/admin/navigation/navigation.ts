@@ -453,22 +453,22 @@ export const NavigationItems: NavigationItem[] = [
       //     }
       //   ]
       // },
-      // {
-      //   id: '04_reportes',
-      //   title: 'Reportes',
-      //   type: 'collapse',
-      //   icon: 'feather icon-inbox',
-      //   roles: [1],
-      //   children: [
-      //     {
-      //       id: 'ReportesAdministrador',
-      //       title: 'Generar Reportes',
-      //       type: 'item',
-      //       url: '/component/ReportesAdministrador',
-      //       roles: [1]
-      //     }
-      //   ]
-      // },
+      {
+        id: '04_reportes',
+        title: 'Reportes',
+        type: 'collapse',
+        icon: 'feather icon-inbox',
+        roles: [1],
+        children: [
+          {
+            id: 'ReportesAdministrador',
+            title: 'Generar Reportes',
+            type: 'item',
+            url: '/component/ReportesAdministrador',
+            roles: [1]
+          }
+        ]
+      },
       {
         id: '05_gestionusuario',
         title: 'Usuarios',
