@@ -160,12 +160,29 @@
                     <div *ngIf="convocatorias.length === 0" class="text-center mt-3 text-muted">
                         No se encontraron convocatorias.
                     </div>
+  
+                    <!-- 🔹 Paginación -->
+                    <div class="d-flex justify-content-center align-items-center mt-3" *ngIf="totalPaginas > 1">
+                        <button class="btn btn-outline-secondary me-2" (click)="cambiarPagina(paginaActual - 1)"
+                            [disabled]="paginaActual === 1">
+                            Anterior
+                        </button>
+
+                        <span>Página {{ paginaActual }} de {{ totalPaginas }}</span>
+
+                        <button class="btn btn-outline-secondary ms-2" (click)="cambiarPagina(paginaActual + 1)"
+                            [disabled]="paginaActual === totalPaginas">
+                            Siguiente
+                        </button>
+                    </div>
+
                 </div>
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" (click)="modal.dismiss()">Cerrar</button>
                 </div>
             </ng-template>
+
 
 
 

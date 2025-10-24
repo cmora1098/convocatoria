@@ -37,7 +37,9 @@ export class VerPostulantesComponent {
     convocatorias: any[] = [];
     paginaActual: number = 1;
     totalPaginas: number = 0;
-    pageSize: number = 10;
+    pageSize: number = 5;
+
+    modalRef: any;
 
     constructor(private modalService: NgbModal, private authService: AuthService, private apiService: ApiService) {
         this.codUsuario = this.authService.getUserId();
@@ -70,8 +72,8 @@ export class VerPostulantesComponent {
         bActivo: ''
     };
 
-    listarConvocatorias() {
-        // Validar tipo obligatorio
+
+    listarConvocatorias(abrirModal: boolean = true) {
         if (!this.filtros.codTipoConvocatoria) {
             Swal.fire({
                 icon: 'warning',
@@ -84,27 +86,40 @@ export class VerPostulantesComponent {
         }
 
         const params: any = {
-            pageNumber: this.paginaActual,
-            pageSize: this.pageSize,
             codTipoConvocatoria: Number(this.filtros.codTipoConvocatoria)
         };
 
-        // if (this.filtros.fechaInicio) params.fechaInicio = new Date(this.filtros.fechaInicio).toISOString();
-        // if (this.filtros.fechaFin) params.fechaFin = new Date(this.filtros.fechaFin).toISOString();
         if (this.filtros.buscar) params.buscar = this.filtros.buscar;
         if (this.filtros.bActivo !== '' && this.filtros.bActivo !== null) params.bActivo = this.filtros.bActivo;
 
         this.apiService.getConvocatoriasPaginado(params).subscribe({
             next: (data) => {
-                this.convocatorias = data.items || [];
-                this.totalPaginas = Math.ceil(data.totalRecords / this.pageSize);
+                console.log('Datos originales:', data);
 
-                // Abrir modal con resultados
-                this.modalService.open(this.modalConvocatorias, {
-                    size: 'xl',
-                    backdrop: 'static',
-                    centered: true
-                });
+                // 1️⃣ Filtrar solo convocatorias activas
+                const activas = data.items.filter((c: any) => c.bActivo === true);
+
+                // 2️⃣ Calcular total de páginas basadas en activas
+                const totalActivas = activas.length;
+                this.totalPaginas = Math.ceil(totalActivas / this.pageSize);
+
+                // 3️⃣ Cortar el arreglo según la página actual
+                const inicio = (this.paginaActual - 1) * this.pageSize;
+                const fin = inicio + this.pageSize;
+                this.convocatorias = activas.slice(inicio, fin);
+
+                console.log(`Página ${this.paginaActual}:`, this.convocatorias);
+
+                // 4️⃣ Abrir modal solo la primera vez
+                if (abrirModal && !this.modalRef) {
+                    this.modalRef = this.modalService.open(this.modalConvocatorias, {
+                        size: 'xl',
+                        backdrop: 'static',
+                        centered: true
+                    });
+
+                    this.modalRef.result.finally(() => (this.modalRef = null));
+                }
             },
             error: (error) => {
                 console.error('Error al cargar convocatorias:', error);
@@ -119,7 +134,13 @@ export class VerPostulantesComponent {
         });
     }
 
-
+    cambiarPagina(page: number): void {
+        if (page > 0 && page <= this.totalPaginas) {
+            this.paginaActual = page;
+            this.listarConvocatorias(false); // No reabrir el modal
+        }
+    }
+ 
     @ViewChild('modalConvocatorias') modalConvocatorias!: TemplateRef<any>;
 
     @ViewChild('modalPostulantes') modalPostulantes!: TemplateRef<any>;
@@ -245,16 +266,7 @@ export class VerPostulantesComponent {
             },
         });
     }
-
-
-
-
-
-
-
-
-
-
+ 
 
     @ViewChild('modalDocumentos') modalDocumentos!: TemplateRef<any>;
 
