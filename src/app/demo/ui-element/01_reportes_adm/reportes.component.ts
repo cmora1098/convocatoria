@@ -7,13 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { QuillModule } from 'ngx-quill';
 
-
 import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
-
 import * as XLSX from 'xlsx';
-
 
 @Component({
   selector: 'app-reportes_adm',
@@ -65,6 +62,7 @@ export class ReportesComponent {
       }
     });
   }
+  // ***************************************
   // Convocatoria - Inicio
   filtrosConvocatoria = {
     bActivo: '',
@@ -167,7 +165,9 @@ export class ReportesComponent {
     });
   }
   // Convocatoria - Fin
+  // ***************************************
 
+  // ***************************************
   // Convocatoria con Fase - Inicio
   filtrosConvocatoriaFase = {
     iCodTipoConvocatoria: '',
@@ -279,10 +279,100 @@ export class ReportesComponent {
   }
 
   // Convocatoria con Fase - Fin
+  // ***************************************
 
-
+  // ***************************************
   // Usuario - Inicio
-  // Usuario - Fin
+  filtrosUsuario: any = {
+    rol: ''
+  };
 
+  exportarReporteUsuarios() {
+    const params = {
+      codRol: this.filtrosUsuario.rol || ''
+    };
+
+    this.apiService.getUsuarioPaginado(params).subscribe({
+      next: (res) => {
+        console.log(res);
+
+        // 🔹 Extraer correctamente los usuarios desde res.items
+        const data = res?.items || [];
+
+        if (data.length > 0) {
+          this.exportarAExcelUsuarios(data);
+        } else {
+          // Si no hay registros, generar un archivo vacío
+          this.exportarAExcelUsuarios([]);
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        Swal.fire('Error', 'Ocurrió un error al generar el reporte.', 'error');
+      }
+    });
+  }
+
+  exportarAExcelUsuarios(data: any[]) {
+    const dataFormateada = (data && data.length > 0)
+      ? data.map(item => {
+        // 🔹 Mapeo de código de rol a nombre
+        let nombreRol = '';
+        switch (item.codRol) {
+          case 1: nombreRol = 'Administrador'; break;
+          case 2: nombreRol = 'Evaluador'; break;
+          case 3: nombreRol = 'Postulante'; break;
+          default: nombreRol = 'Desconocido'; break;
+        }
+
+        return {
+          'ID Usuario': item.idUsuario ?? '',
+          'Tipo Documento': item.tipoDocumento ?? '',
+          'N° Documento': item.numDocumento ?? '',
+          'Apellido Paterno': item.apePaterno ?? '',
+          'Apellido Materno': item.apeMaterno ?? '',
+          'Nombres': item.nombres ?? '',
+          'Correo Electrónico': item.correoElectronico ?? '',
+          'Rol': nombreRol,
+          'Fecha Registro': item.fechaRegistro
+            ? new Date(item.fechaRegistro).toLocaleString('es-PE')
+            : '',
+          'Activo': item.activo ? 'Sí' : 'No'
+        };
+      })
+      : [
+        {
+          'ID Usuario': '',
+          'Tipo Documento': '',
+          'N° Documento': '',
+          'Apellido Paterno': '',
+          'Apellido Materno': '',
+          'Nombres': '',
+          'Correo Electrónico': '',
+          'Rol': '',
+          'Fecha Registro': '',
+          'Activo': ''
+        }
+      ];
+
+    const worksheet = XLSX.utils.json_to_sheet(dataFormateada);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Reporte de Usuarios');
+
+    const fecha = new Date().toISOString().split('T')[0];
+    XLSX.writeFile(workbook, `Reporte_Usuarios_${fecha}.xlsx`);
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Reporte generado',
+      text: data.length
+        ? `El reporte fue exportado correctamente (${data.length} registros).`
+        : 'No se encontraron usuarios, pero se generó un archivo vacío.',
+      confirmButtonColor: '#2e7d32'
+    });
+  }
+ 
+  // Usuario - Fin
+  // ***************************************
 
 }
