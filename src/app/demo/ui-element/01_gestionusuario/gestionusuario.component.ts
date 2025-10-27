@@ -76,8 +76,8 @@ export class GestionUsuarioComponent {
     };
 
     if (this.filtros.rol) params.rol = Number(this.filtros.rol);
-    if (this.filtros.email) params.email = this.filtros.email.trim();
-    if (this.filtros.nombrecompleto) params.nombrecompleto = this.filtros.nombrecompleto.trim();
+    // if (this.filtros.email) params.email = this.filtros.email.trim();
+    // if (this.filtros.nombrecompleto) params.nombrecompleto = this.filtros.nombrecompleto.trim();
 
     this.apiService.getUsuarioPaginado(params).subscribe({
       next: (data) => {
@@ -111,18 +111,18 @@ export class GestionUsuarioComponent {
 
   Buscar(): void {
     // Validamos si hay filtros vacíos o incorrectos
-    const filtrosVacios = !this.filtros.rol && !this.filtros.email && !this.filtros.nombrecompleto;
+    // const filtrosVacios = !this.filtros.rol && !this.filtros.email && !this.filtros.nombrecompleto;
 
-    if (filtrosVacios) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Atención',
-        text: 'Por favor, ingrese al menos un filtro de búsqueda (Rol, Email o Nombre).',
-        confirmButtonText: 'Aceptar',
-        confirmButtonColor: '#2e7d32'
-      });
-      return;
-    }
+    // if (filtrosVacios) {
+    //   Swal.fire({
+    //     icon: 'info',
+    //     title: 'Atención',
+    //     text: 'Por favor, ingrese al menos un filtro de búsqueda (Rol, Email o Nombre).',
+    //     confirmButtonText: 'Aceptar',
+    //     confirmButtonColor: '#2e7d32'
+    //   });
+    //   return;
+    // }
 
     // 🔁 Reiniciamos la página actual a la primera
     this.paginaActual = 1;
