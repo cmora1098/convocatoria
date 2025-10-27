@@ -430,29 +430,29 @@ export const NavigationItems: NavigationItem[] = [
           }
         ]
       },
-      // {
-      //   id: '03_evaluacion',
-      //   title: 'Evaluación',
-      //   type: 'collapse',
-      //   icon: 'feather icon-clock',
-      //   roles: [1],
-      //   children: [
-      //     {
-      //       id: 'AsignarEvaluadores',
-      //       title: 'Asignar Evaluadores',
-      //       type: 'item',
-      //       url: '/component/AsignarEvaluadores',
-      //       roles: [1]
-      //     },
-      //     {
-      //       id: 'ResultadosGenerales',
-      //       title: 'Ver Resultados Generales',
-      //       type: 'item',
-      //       url: '/component/ResultadosGenerales',
-      //       roles: [1]
-      //     }
-      //   ]
-      // },
+      {
+        id: '03_evaluacion',
+        title: 'Evaluación',
+        type: 'collapse',
+        icon: 'feather icon-clock',
+        roles: [1],
+        children: [
+          {
+            id: 'AsignarEvaluadores',
+            title: 'Asignar Evaluadores',
+            type: 'item',
+            url: '/component/AsignarEvaluadores',
+            roles: [1]
+          },
+          {
+            id: 'ResultadosGenerales',
+            title: 'Ver Resultados Generales',
+            type: 'item',
+            url: '/component/ResultadosGenerales',
+            roles: [1]
+          }
+        ]
+      },
       {
         id: '04_reportes',
         title: 'Reportes',
