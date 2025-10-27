@@ -35,14 +35,15 @@
                 <div class="col-md-2">
                     <label class="form-label">Nombre del Usuario</label>
                     <input type="text" placeholder="Nombre del Usuario" class="form-control"
-                        [(ngModel)]="filtros.nombrecompleto" (keypress)="soloLetras($event)"/>
+                        [(ngModel)]="filtros.nombrecompleto" (keypress)="soloLetras($event)" />
                 </div>
 
                 <div class="col-md-2">
-                    <button type="button" class="btn btn-info" (click)="listarUsuario()">
+                    <button type="button" class="btn btn-info" (click)="Buscar()">
                         <i class="feather icon-search me-1"></i>
                         Buscar
                     </button>
+
                 </div>
             </div>
 
@@ -98,9 +99,9 @@
             </div>
 
             <!-- Resumen -->
-            <div *ngIf="usuarios.length > 0" class="text-end my-2">
+            <!-- <div *ngIf="usuarios.length > 0" class="text-end my-2">
                 Página {{ paginaActual }} de {{ totalPaginas }}
-            </div>
+            </div> -->
 
             <!-- Paginación -->
             <nav *ngIf="totalPaginas > 1">

@@ -34,7 +34,6 @@ export class GestionUsuarioComponent {
     this.listarUsuario();
     this.apiService.getTipoDocumentos().subscribe({
       next: (data) => {
-        console.log(data);
         this.tiposDocumentos = data; // Asignamos los datos obtenidos a la propiedad
       },
       error: (err) => {
@@ -65,36 +64,73 @@ export class GestionUsuarioComponent {
     nombrecompleto: ''
   };
 
-  listarUsuario() {
+  listarUsuario(resetPage: boolean = false) {
+    if (resetPage) this.paginaActual = 1; // 🔁 Reinicia la página al buscar o filtrar
+
     const params: any = {
       pageNumber: this.paginaActual,
-      pageSize: this.pageSize
+      pageSize: this.pageSize,
+      codRol: this.filtros.rol || '',
+      correo: this.filtros.email || '',
+      nombreCompleto: this.filtros.nombrecompleto || ''
     };
 
-    if (this.filtros.rol) {
-      params.rol = Number(this.filtros.rol);
-    }
-
-    if (this.filtros.email) {
-      params.email = this.filtros.email;
-    }
-
-    if (this.filtros.nombrecompleto) {
-      params.nombrecompleto = this.filtros.nombrecompleto;
-    }
+    if (this.filtros.rol) params.rol = Number(this.filtros.rol);
+    if (this.filtros.email) params.email = this.filtros.email.trim();
+    if (this.filtros.nombrecompleto) params.nombrecompleto = this.filtros.nombrecompleto.trim();
 
     this.apiService.getUsuarioPaginado(params).subscribe({
       next: (data) => {
-        console.log(data);
+        // console.log('✅ Datos recibidos:', data);
+
         this.usuarios = data.items || [];
-        this.totalPaginas = Math.ceil(data.totalRecords / this.pageSize);
-        this.paginaActual = this.paginaActual;
+
+        // ✅ Usa la propiedad correcta de la API
+        this.totalRegistros = data.totalRegistros || 0;
+
+        // ✅ Calcula total de páginas
+        this.totalPaginas = Math.ceil(this.totalRegistros / this.pageSize);
+
+        // ⚙️ Si la página actual queda fuera del rango (por ejemplo al eliminar)
+        if (this.paginaActual > this.totalPaginas && this.totalPaginas > 0) {
+          this.paginaActual = this.totalPaginas;
+          this.listarUsuario();
+        }
       },
       error: (error) => {
-        console.error('Error al cargar usuarios:', error);
+        console.error('❌ Error al cargar usuarios:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los usuarios.',
+          confirmButtonColor: '#2e7d32'
+        });
       }
     });
   }
+
+  Buscar(): void {
+    // Validamos si hay filtros vacíos o incorrectos
+    const filtrosVacios = !this.filtros.rol && !this.filtros.email && !this.filtros.nombrecompleto;
+
+    if (filtrosVacios) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Atención',
+        text: 'Por favor, ingrese al menos un filtro de búsqueda (Rol, Email o Nombre).',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: '#2e7d32'
+      });
+      return;
+    }
+
+    // 🔁 Reiniciamos la página actual a la primera
+    this.paginaActual = 1;
+
+    // 📦 Ejecutamos la búsqueda llamando a listarUsuario con resetPage=true
+    this.listarUsuario(true);
+  }
+
 
   // ************************************* //
   // ***********   PAGINADO   ************ //
@@ -103,6 +139,7 @@ export class GestionUsuarioComponent {
   paginaActual: number = 1;
   totalPaginas: number = 0;
   pageSize: number = 10;
+  totalRegistros: number = 0;
 
   anteriorPagina() {
     if (this.paginaActual > 1) {
@@ -110,6 +147,7 @@ export class GestionUsuarioComponent {
       this.listarUsuario();
     }
   }
+
   irPagina(pagina: number) {
     if (pagina < 1 || pagina > this.totalPaginas) return;
     this.paginaActual = pagina;

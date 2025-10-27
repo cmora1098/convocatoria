@@ -11,6 +11,7 @@ import { QuillModule } from 'ngx-quill';
 import Swal from 'sweetalert2';  // Importamos SweetAlert2
 import { AuthService } from '../../../services/auth.service';
 import { ApiService } from '../../../services/api.service';
+import * as XLSX from 'xlsx';
 
 interface Postulante {
     id: number;
@@ -140,7 +141,7 @@ export class VerPostulantesComponent {
             this.listarConvocatorias(false); // No reabrir el modal
         }
     }
- 
+
     @ViewChild('modalConvocatorias') modalConvocatorias!: TemplateRef<any>;
 
     @ViewChild('modalPostulantes') modalPostulantes!: TemplateRef<any>;
@@ -148,8 +149,42 @@ export class VerPostulantesComponent {
     postulantes: Postulante[] = []; // ✅ Ahora el tipo incluye codigousuario
     convocatoriaSeleccionada: any = null;
 
+    // verPostulantes(convocatoria: any, modal: any) {
+    //     this.convocatoriaSeleccionada = convocatoria;
+    //     const params = {
+    //         iCodConvocatoria: convocatoria.iCodConvocatoria,
+    //         pageNumber: 1,
+    //         pageSize: 10
+    //     };
+
+    //     this.apiService.gePostulaciones(params).subscribe({
+    //         next: (data) => {
+    //             console.log(data);
+    //             this.postulantes = (data.items || []).map((p: any) => ({
+    //                 id: p.iCodPostulacion,
+    //                 nombre: p.vNombreCompleto,
+    //                 dni: p.vNumDocumento,
+    //                 correo: p.vCorreoElectronico,
+    //                 fechaPostulacion: p.dtFechaPostulacion,
+    //                 codigousuario: p.iCodUsuario
+    //             }));
+    //             modal.close(); // Cierra el modal al seleccionar
+    //         },
+    //         error: (err) => {
+    //             console.error('Error al cargar postulantes:', err);
+    //             Swal.fire({
+    //                 icon: 'error',
+    //                 title: 'Error',
+    //                 text: 'No se pudieron cargar los postulantes.',
+    //                 confirmButtonColor: '#2e7d32'
+    //             });
+    //         }
+    //     });
+    // }
+
     verPostulantes(convocatoria: any, modal: any) {
         this.convocatoriaSeleccionada = convocatoria;
+
         const params = {
             iCodConvocatoria: convocatoria.iCodConvocatoria,
             pageNumber: 1,
@@ -158,16 +193,23 @@ export class VerPostulantesComponent {
 
         this.apiService.gePostulaciones(params).subscribe({
             next: (data) => {
-                console.log(data);
-                this.postulantes = (data.items || []).map((p: any) => ({
+                console.log('📦 Data completa del backend:', data);
+
+                // 🔹 Guardar versión completa
+                const postulantesCompletos = data.items || [];
+
+                // 🔹 Crear una versión simplificada para mostrar
+                this.postulantes = postulantesCompletos.map((p: any) => ({
                     id: p.iCodPostulacion,
                     nombre: p.vNombreCompleto,
                     dni: p.vNumDocumento,
                     correo: p.vCorreoElectronico,
                     fechaPostulacion: p.dtFechaPostulacion,
-                    codigousuario: p.iCodUsuario
+                    codigousuario: p.iCodUsuario,
+                    dataCompleta: p // ← Aquí guardas todo el registro completo
                 }));
-                modal.close(); // Cierra el modal al seleccionar
+
+                modal.close();
             },
             error: (err) => {
                 console.error('Error al cargar postulantes:', err);
@@ -178,6 +220,30 @@ export class VerPostulantesComponent {
                     confirmButtonColor: '#2e7d32'
                 });
             }
+        });
+    }
+
+    exportarPostulantes() {
+        if (!this.convocatoriaSeleccionada) return;
+
+        const nombreArchivo = `Reporte_${this.convocatoriaSeleccionada.vTitulo}.xlsx`;
+        const data = this.postulantes.map(p => ({
+            'Nombre Completo': p.nombre,
+            'DNI': p.dni,
+            'Correo Electrónico': p.correo,
+            'Fecha Postulación': new Date(p.fechaPostulacion).toLocaleString('es-PE')
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Postulantes');
+        XLSX.writeFile(workbook, nombreArchivo);
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Reporte generado',
+            text: `Se generó correctamente el ${nombreArchivo}`,
+            confirmButtonColor: '#2e7d32'
         });
     }
 
@@ -266,7 +332,7 @@ export class VerPostulantesComponent {
             },
         });
     }
- 
+
 
     @ViewChild('modalDocumentos') modalDocumentos!: TemplateRef<any>;
 
@@ -348,6 +414,5 @@ export class VerPostulantesComponent {
             this.actualizarDocumentosPaginados();
         }
     }
-
 
 }

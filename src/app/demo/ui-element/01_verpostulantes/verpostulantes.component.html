@@ -59,6 +59,13 @@
                     </div>
 
                     <div class="card-body">
+                        <div class="text-end my-3">
+                            <button class="btn btn-success" (click)="exportarPostulantes()"
+                                [disabled]="!postulantes.length">
+                                <i class="feather icon-download"></i> Exportar Reporte
+                            </button>
+                        </div>
+
                         <div class="table-responsive" *ngIf="postulantes.length > 0; else noPostulantes">
                             <table class="table table-bordered table-striped align-middle">
                                 <thead class="table-light">
@@ -111,7 +118,6 @@
             </div>
 
 
-
             <!-- Modal: Lista de Convocatorias -->
             <ng-template #modalConvocatorias let-modal>
                 <div class="modal-header">
@@ -160,7 +166,7 @@
                     <div *ngIf="convocatorias.length === 0" class="text-center mt-3 text-muted">
                         No se encontraron convocatorias.
                     </div>
-  
+
                     <!-- 🔹 Paginación -->
                     <div class="d-flex justify-content-center align-items-center mt-3" *ngIf="totalPaginas > 1">
                         <button class="btn btn-outline-secondary me-2" (click)="cambiarPagina(paginaActual - 1)"
@@ -182,10 +188,6 @@
                     <button class="btn btn-secondary" (click)="modal.dismiss()">Cerrar</button>
                 </div>
             </ng-template>
-
-
-
-
 
             <!-- Modal: Datos Personales -->
             <ng-template #modalDatos let-modal>
@@ -269,8 +271,7 @@
                 </div>
             </ng-template>
 
-
-            <!-- Modal: Documentos Adjuntos -->
+            <!-- Modal: Documentos Adjuntos | PENDIENTE -->
             <ng-template #modalDocumentos let-modal>
                 <div class="modal-header">
                     <h5 class="modal-title">Documentos Adjuntos</h5>
