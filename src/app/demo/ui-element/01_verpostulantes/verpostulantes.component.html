@@ -117,7 +117,6 @@
                 </div>
             </div>
 
-
             <!-- Modal: Lista de Convocatorias -->
             <ng-template #modalConvocatorias let-modal>
                 <div class="modal-header">
@@ -274,11 +273,10 @@
             <!-- Modal: Documentos Adjuntos | PENDIENTE -->
             <ng-template #modalDocumentos let-modal>
                 <div class="modal-header">
-                    <h5 class="modal-title">Documentos Adjuntos</h5>
-                    <button type="button" class="btn-close" (click)="modal.dismiss()"></button>
+                    <h5 class="modal-title">Documentos del Postulante</h5>
+                    <button type="button" class="btn-close" (click)="cerrarModal()"></button>
                 </div>
                 <div class="modal-body">
-                    <button class="btn btn-success mb-2">Descargar Todos (ZIP)</button>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -294,9 +292,11 @@
                                 <td>{{ doc.tipo }}</td>
                                 <td>{{ doc.fecha }}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-info me-1">Ver</button>
-                                    <button class="btn btn-sm btn-primary">Descargar</button>
-                                </td>
+                                    <button class="btn btn-sm btn-info me-1"
+                                        (click)="verArchivo(doc.urlArchivo)">Ver</button>
+                                    <!-- <button class="btn btn-sm btn-primary"
+                                        (click)="descargarArchivo(doc.urlArchivo, doc.nombre)">Descargar</button>
+                                </td> -->
                             </tr>
                         </tbody>
                     </table>
@@ -314,6 +314,8 @@
                     </nav>
                 </div>
             </ng-template>
+
+
 
         </app-card>
     </div>

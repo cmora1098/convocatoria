@@ -1,0 +1,95 @@
+/* === TABLA === */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed; /* Fuerza proporciones */
+}
+
+.table th,
+.table td {
+  padding: 8px 10px;
+  vertical-align: middle;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Limitar columnas */
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  max-width: 300px;   /* ancho fijo para convocatoria */
+  min-width: 250px;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* Título más compacto */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Fechas */
+.table th:nth-child(5),
+.table td:nth-child(5),
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 120px;
+  text-align: center;
+}
+
+/* Estado y acción */
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 100px;
+  text-align: center;
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  width: 200px;
+  text-align: center;
+}
+
+/* Encabezado */
+.table thead {
+  background: linear-gradient(90deg, #1e8e3e, #34a853);
+  color: #fff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* Hover */
+.table tbody tr:hover td {
+  background: #f9f9f9;
+}
+
+/* Botones */
+.table .btn {
+  border-radius: 6px;
+  font-size: 11px;
+  padding: 4px 8px;
+  margin: 2px 1px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 1000px; /* mantiene scroll horizontal */
+  }
+}
+
+
+
+
+
+
+

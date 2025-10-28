@@ -334,71 +334,61 @@ export class VerPostulantesComponent {
     }
 
 
+
     @ViewChild('modalDocumentos') modalDocumentos!: TemplateRef<any>;
 
-    seleccionado: any;
+    documentos: any[] = [];
+    documentosPaginados: any[] = [];
     pagina = 1;
     elementosPorPagina = 10;
 
-    // postulantes = [
-    //     {
-    //         id: 1,
-    //         nombre: 'Juan Pérez',
-    //         dni: '123456',
-    //         telefono: '987654321',
-    //         correo: 'juan@example.com',
-    //         direccion: 'Av. Siempre Viva 123',
-    //         cv: 'CV_JuanPerez.pdf',
-    //         certificados: 'Cert_JuanPerez.pdf',
-    //         fechaPostulacion: '01/01/2025',
-    //         puntaje: '85%',
-    //         puntajeFinal: '88%',
-    //         estado: 'Evaluado',
-    //         documentos: [
-    //             { nombre: 'CV_JuanPerez.pdf', tipo: 'CV', fecha: '02/01/2025' },
-    //             { nombre: 'Cert_JuanPerez.pdf', tipo: 'Certificado', fecha: '02/01/2025' }
-    //         ]
-    //     },
-    //     {
-    //         id: 2,
-    //         nombre: 'Ana Gómez',
-    //         dni: '789012',
-    //         telefono: '998877665',
-    //         correo: 'ana@example.com',
-    //         direccion: 'Jr. Las Flores 456',
-    //         cv: 'CV_AnaGomez.pdf',
-    //         certificados: 'Cert_AnaGomez.pdf',
-    //         fechaPostulacion: '03/01/2025',
-    //         puntaje: '-',
-    //         puntajeFinal: '-',
-    //         estado: 'Pendiente',
-    //         documentos: [
-    //             { nombre: 'CV_AnaGomez.pdf', tipo: 'CV', fecha: '04/01/2025' },
-    //             { nombre: 'Cert_AnaGomez.pdf', tipo: 'Certificado', fecha: '04/01/2025' }
-    //         ]
-    //     }
-    // ];
+    abrirModalDocumentos(iCodUsuario: number) {
+        this.apiService.getArchivosPostulante(iCodUsuario).subscribe({
+            next: (archivos: any[]) => {
+                if (!archivos || archivos.length === 0) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Sin documentos',
+                        text: 'El postulante no tiene documentos subidos.',
+                        confirmButtonColor: '#2e7d32'
+                    });
+                    return;
+                }
 
-    documentosPaginados: any[] = [];
+                this.documentos = archivos.map(a => ({
+                    nombre: a.vNombreArchivo,
+                    tipo: a.vDescFormato,
+                    fecha: new Date(a.dtFechaRegistro).toLocaleDateString(),
+                    urlArchivo: a.urlArchivo
+                }));
 
+                this.pagina = 1;
+                this.totalPaginas = Math.ceil(this.documentos.length / this.elementosPorPagina);
+                this.actualizarDocumentosPaginados();
 
-    // abrirModalDetalle(postulante: any) {
-    //     this.seleccionado = postulante;
-    //     this.modalService.open(this.modalDatos, { size: 'lg' });
-    // }
+                // Abrir modal
+                this.modalRef = this.modalService.open(this.modalDocumentos, { size: 'lg' });
+            },
+            error: (err) => {
+                console.error('Error al obtener documentos:', err);
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¡Atención!',
+                    text: 'No se pudo cargar la información de los documentos.',
+                    confirmButtonColor: '#f8bb86'
+                });
+            }
+        });
+    }
 
-    abrirModalDocumentos(postulante: any) {
-        this.seleccionado = postulante;
-        this.pagina = 1;
-        this.actualizarDocumentosPaginados();
-        this.modalService.open(this.modalDocumentos, { size: 'lg' });
+    cerrarModal() {
+        this.modalRef.close();
     }
 
     actualizarDocumentosPaginados() {
         const inicio = (this.pagina - 1) * this.elementosPorPagina;
         const fin = inicio + this.elementosPorPagina;
-        this.documentosPaginados = this.seleccionado.documentos.slice(inicio, fin);
-        this.totalPaginas = Math.ceil(this.seleccionado.documentos.length / this.elementosPorPagina);
+        this.documentosPaginados = this.documentos.slice(inicio, fin);
     }
 
     paginaAnterior() {
@@ -414,5 +404,17 @@ export class VerPostulantesComponent {
             this.actualizarDocumentosPaginados();
         }
     }
+
+    verArchivo(urlArchivo: string) {
+        window.open(urlArchivo, '_blank');
+    }
+
+    descargarArchivo(urlArchivo: string, nombre: string) {
+        const link = document.createElement('a');
+        link.href = urlArchivo;
+        link.download = nombre;
+        link.click();
+    }
+
 
 }

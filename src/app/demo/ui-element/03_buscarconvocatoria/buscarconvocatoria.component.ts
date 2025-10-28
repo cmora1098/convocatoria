@@ -57,7 +57,6 @@ export class BuscarConvocatoriaComponent implements OnInit {
       return;
     }
 
-    // Paso 1️⃣ - Confirmación del usuario
     Swal.fire({
       title: '¿Deseas postular a la convocatoria?',
       icon: 'question',
@@ -68,7 +67,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
     }).then((result) => {
       if (!result.isConfirmed) return;
 
-      // Paso 2️⃣ - Construir objeto de postulación
+      // Datos para registrar la postulación
       const data = {
         iCodPostulacion: 0,
         iCodUsuario: this.codUsuario,
@@ -76,23 +75,37 @@ export class BuscarConvocatoriaComponent implements OnInit {
         iCodUsuarioRegistra: this.codUsuario,
       };
 
-      // Paso 3️⃣ - Registrar postulación primero
+      // 1️⃣ Registrar la postulación
       this.api.insertarPostulacion(data).subscribe({
-        next: () => {
-          // Paso 4️⃣ - Construir FormData para archivos
+        next: (response: any) => {
+          // ✅ Obtener iCodPostulacion del backend
+          const iCodPostulacion = response?.iCodPostulacion;
+          console.log('Código de postulación creado:', iCodPostulacion);
+
+          if (!iCodPostulacion) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se obtuvo el código de postulación del servidor.',
+              confirmButtonColor: '#dc3545'
+            });
+            return;
+          }
+
+          // 2️⃣ Construir FormData con el código correcto
           const formData = new FormData();
           formData.append('codUsuario', String(this.codUsuario));
-          formData.append('codPostulacion', String(this.codUsuario)); // Ambos con el mismo valor
+          formData.append('codPostulacion', String(iCodPostulacion)); // ✅ Usar el código real
 
-          // Archivos PDF
+          // Archivos seleccionados
           formData.append('files', this.archivos.anexo3!);
           formData.append('files', this.archivos.anexosMult!);
 
-          // Formatos (puedes ajustar los códigos según corresponda)
-          formData.append('formatos', '1');
-          formData.append('formatos', '1');
+          // Formatos (puedes ajustar los IDs si lo requieres)
+          formData.append('formatos', '1'); // Anexo 3
+          formData.append('formatos', '2'); // Anexos múltiples
 
-          // Paso 5️⃣ - Subir archivos
+          // 3️⃣ Subir archivos
           this.api.subirArchivosPostulacion(formData).subscribe({
             next: () => {
               Swal.fire({
@@ -107,7 +120,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
               const modalInstance = bootstrap.Modal.getInstance(modalEl!);
               modalInstance?.hide();
 
-              // Limpiar variables
+              // Limpiar datos
               this.archivos = {};
               this.convocatoriaSeleccionada = null;
             },
@@ -115,7 +128,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
               Swal.fire({
                 icon: 'error',
                 title: 'Error al subir documentos',
-                text: 'Tu postulación fue registrada, pero hubo un problema al subir los archivos.',
+                text: 'Tu postulación fue registrada, pero ocurrió un error al subir los archivos.',
                 confirmButtonColor: '#dc3545'
               });
               console.error('Error al subir archivos:', err);
@@ -135,7 +148,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
             Swal.fire({
               icon: 'error',
               title: 'Error',
-              text: 'No se pudo realizar la postulación. Intenta nuevamente.',
+              text: 'No se pudo registrar la postulación. Intenta nuevamente.',
               confirmButtonColor: '#dc3545'
             });
           }
@@ -165,6 +178,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
   ngOnInit(): void {
     this.buscarConvocatorias();
   }
+
 
   buscarConvocatorias(): void {
     this.api.getConvocatoriasPaginadoconFase({}).subscribe({

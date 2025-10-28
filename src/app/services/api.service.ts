@@ -145,9 +145,45 @@ export class ApiService {
     return this.http.post(`${this.baseUrl}/Postulaciones/insertar`, data);
   }
 
+  subirArchivosPostulacion(data: FormData) {
+    return this.http.post(`${this.baseUrl}/ArchivoPostulacion/subir-multiple`, data);
+  }
+
   eliminarPostulacion(iCodPostulacion: number) {
     return this.http.delete(`${this.baseUrl}/Postulaciones/eliminar/${iCodPostulacion}`);
   }
+
+  getArchivosPostulante(iCodUsuario: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/ArchivoPostulacion/listar-por-Postulante/?iCodUsuario=${iCodUsuario}`);
+  }
+
+  asignarEvaluadores(iCodConvocatoria: number, iCodUsuarioEvaluador: number, iCodUsuarioRegistra: number) {
+    const params = {
+      iCodConvocatoria,
+      iCodUsuarioEvaluador,
+      iCodUsuarioRegistra
+    };
+
+    // Body va vacío porque los datos van por query string
+    return this.http.post(`${this.baseUrl}/ConvocatoriaEvaluador/asignar`, null, { params });
+  }
+
+  getEvaluadoresPorConvocatoria(iCodConvocatoria: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/ConvocatoriaEvaluador/evaluadores/${iCodConvocatoria}`);
+  }
+  postDesactivarEvaluador(params: any) {
+    return this.http.post<any>(`${this.baseUrl}/ConvocatoriaEvaluador/desactivar`, null, { params });
+  }
+
+
+
+
+
+
+
+
+
+
 
   // ======================
   // Mi Perfil - Postulante
@@ -324,15 +360,5 @@ export class ApiService {
       responseType: 'blob', // <-- Importante, porque devuelve un PDF
     });
   }
-
-
-  // *******************************************************************
-  // ENVIAR POSTULACIÓN
-  // *******************************************************************
-  subirArchivosPostulacion(data: FormData) {
-    return this.http.post(`${this.baseUrl}/ArchivoPostulacion/subir-multiple`, data);
-  }
-
-
 
 }

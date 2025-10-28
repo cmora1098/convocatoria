@@ -444,13 +444,13 @@ export const NavigationItems: NavigationItem[] = [
             url: '/component/AsignarEvaluadores',
             roles: [1]
           },
-          {
-            id: 'ResultadosGenerales',
-            title: 'Ver Resultados Generales',
-            type: 'item',
-            url: '/component/ResultadosGenerales',
-            roles: [1]
-          }
+          // {
+          //   id: 'ResultadosGenerales',
+          //   title: 'Ver Resultados Generales',
+          //   type: 'item',
+          //   url: '/component/ResultadosGenerales',
+          //   roles: [1]
+          // }
         ]
       },
       {
