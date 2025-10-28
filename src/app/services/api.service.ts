@@ -148,7 +148,7 @@ export class ApiService {
   eliminarPostulacion(iCodPostulacion: number) {
     return this.http.delete(`${this.baseUrl}/Postulaciones/eliminar/${iCodPostulacion}`);
   }
- 
+
   // ======================
   // Mi Perfil - Postulante
   // ====================== 
@@ -324,6 +324,15 @@ export class ApiService {
       responseType: 'blob', // <-- Importante, porque devuelve un PDF
     });
   }
+
+
+  // *******************************************************************
+  // ENVIAR POSTULACIÓN
+  // *******************************************************************
+  subirArchivosPostulacion(data: FormData) {
+    return this.http.post(`${this.baseUrl}/ArchivoPostulacion/subir-multiple`, data);
+  }
+
 
 
 }

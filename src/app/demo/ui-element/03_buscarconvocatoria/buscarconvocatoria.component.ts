@@ -42,6 +42,7 @@ export class BuscarConvocatoriaComponent implements OnInit {
 
   abrirModalSubidaArchivos(convocatoria: any) {
     this.convocatoriaSeleccionada = convocatoria;
+    console.log(this.convocatoriaSeleccionada);
     this.archivos = {};
     const modal = new bootstrap.Modal(document.getElementById('modalSubidaDocumentos')!);
     modal.show();
@@ -51,78 +52,98 @@ export class BuscarConvocatoriaComponent implements OnInit {
     return !!this.archivos.anexo3 && !!this.archivos.anexosMult;
   }
 
-  // Usarlo con el API actualizado
-
-  // enviarPostulacion() { 
-  //   if (!this.convocatoriaSeleccionada) {
-  //     return;
-  //   }
-
-  //   // Construir FormData para enviar archivos
-  //   const formData = new FormData();
-  //   formData.append('iCodUsuario', String(this.codUsuario));
-  //   formData.append('iCodConvocatoria', this.convocatoriaSeleccionada.iCodConvocatoria.toString());
-  //   formData.append('anexo3', this.archivos.anexo3!);
-  //   formData.append('anexosMult', this.archivos.anexosMult!);
-
-  //   // Llamar servicio API para subir documentos y postular
-  //   this.api.subirDocumentosYPostular(formData).subscribe({
-  //     next: () => {
-  //       Swal.fire({
-  //         icon: 'success',
-  //         title: '¡Postulación exitosa!',
-  //         text: 'Tus documentos han sido subidos y la postulación registrada correctamente.',
-  //         confirmButtonColor: '#28a745'
-  //       });
-
-  //       // Cerrar modal manualmente
-  //       const modalEl = document.getElementById('modalSubidaDocumentos');
-  //       const modalInstance = bootstrap.Modal.getInstance(modalEl!);
-  //       modalInstance?.hide();
-
-  //       // Limpiar variables
-  //       this.archivos = {};
-  //       this.convocatoriaSeleccionada = null;
-  //     },
-  //     error: (err) => {
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Error',
-  //         text: 'No se pudo completar la postulación. Intenta nuevamente.',
-  //         confirmButtonColor: '#dc3545'
-  //       });
-  //       console.error('Error al subir documentos y postular:', err);
-  //     }
-  //   });
-  // }
-
   enviarPostulacion() {
     if (!this.convocatoriaSeleccionada) {
       return;
     }
 
-    console.log('Simulando subida de documentos y postulación con:', {
-      iCodUsuario: this.codUsuario,
-      iCodConvocatoria: this.convocatoriaSeleccionada.iCodConvocatoria,
-      archivos: this.archivos
-    });
-
+    // Paso 1️⃣ - Confirmación del usuario
     Swal.fire({
-      icon: 'success',
-      title: '¡Postulación exitosa!',
-      text: 'Tus documentos han sido subidos y la postulación registrada correctamente (simulado).',
+      title: '¿Deseas postular a la convocatoria?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, postular',
+      cancelButtonText: 'Cancelar',
       confirmButtonColor: '#28a745'
-    }).then(() => {
-      // Cerrar modal manualmente
-      const modalEl = document.getElementById('modalSubidaDocumentos');
-      const modalInstance = bootstrap.Modal.getInstance(modalEl!);
-      modalInstance?.hide();
+    }).then((result) => {
+      if (!result.isConfirmed) return;
 
-      // Limpiar variables
-      this.archivos = {};
-      this.convocatoriaSeleccionada = null;
+      // Paso 2️⃣ - Construir objeto de postulación
+      const data = {
+        iCodPostulacion: 0,
+        iCodUsuario: this.codUsuario,
+        iCodConvocatoria: this.convocatoriaSeleccionada.iCodConvocatoria || 0,
+        iCodUsuarioRegistra: this.codUsuario,
+      };
+
+      // Paso 3️⃣ - Registrar postulación primero
+      this.api.insertarPostulacion(data).subscribe({
+        next: () => {
+          // Paso 4️⃣ - Construir FormData para archivos
+          const formData = new FormData();
+          formData.append('codUsuario', String(this.codUsuario));
+          formData.append('codPostulacion', String(this.codUsuario)); // Ambos con el mismo valor
+
+          // Archivos PDF
+          formData.append('files', this.archivos.anexo3!);
+          formData.append('files', this.archivos.anexosMult!);
+
+          // Formatos (puedes ajustar los códigos según corresponda)
+          formData.append('formatos', '1');
+          formData.append('formatos', '1');
+
+          // Paso 5️⃣ - Subir archivos
+          this.api.subirArchivosPostulacion(formData).subscribe({
+            next: () => {
+              Swal.fire({
+                icon: 'success',
+                title: '¡Postulación exitosa!',
+                text: 'Tu postulación y documentos fueron registrados correctamente.',
+                confirmButtonColor: '#28a745'
+              });
+
+              // Cerrar modal
+              const modalEl = document.getElementById('modalSubidaDocumentos');
+              const modalInstance = bootstrap.Modal.getInstance(modalEl!);
+              modalInstance?.hide();
+
+              // Limpiar variables
+              this.archivos = {};
+              this.convocatoriaSeleccionada = null;
+            },
+            error: (err) => {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error al subir documentos',
+                text: 'Tu postulación fue registrada, pero hubo un problema al subir los archivos.',
+                confirmButtonColor: '#dc3545'
+              });
+              console.error('Error al subir archivos:', err);
+            }
+          });
+        },
+        error: (err) => {
+          const mensajeError = err?.error?.mensaje || '';
+          if (mensajeError.includes('El usuario ya está postulado')) {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Atención',
+              text: 'Ya te has postulado a esta convocatoria anteriormente.',
+              confirmButtonColor: '#f8bb86'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo realizar la postulación. Intenta nuevamente.',
+              confirmButtonColor: '#dc3545'
+            });
+          }
+          console.error('Error al registrar postulación:', err);
+        }
+      });
     });
-  } 
+  }
 
   onFileSelected(event: Event, tipo: 'anexo3' | 'anexosMult') {
     const input = event.target as HTMLInputElement;
@@ -140,8 +161,6 @@ export class BuscarConvocatoriaComponent implements OnInit {
       this.archivos[tipo] = archivo;
     }
   }
-
-
 
   ngOnInit(): void {
     this.buscarConvocatorias();
