@@ -1,5 +1,4 @@
-<div class="row">
-  <!-- order-card start -->
+<!-- <div class="row">
   @for (card of cards; track card) {
   <div class="col-md-6 col-xl-3">
     <app-card [hidHeader]="true" cardClass="{{ card.background }} order-card">
@@ -9,15 +8,11 @@
         <span>{{ card.number }}</span>
       </h2>
       <p class="m-b-0">
-        <!-- {{ card.text }} -->
-        <!-- <span class="float-end">{{ card.no }}</span> -->
       </p>
     </app-card>
   </div>
   }
-  <!-- order-card end -->
 
-  <!-- account-section start -->
   <div class="col-xl-6 col-md-12">
     <app-card cardTitle="Unique Visitor" [options]="false">
       <apx-chart [chart]="chartOptions.chart!" [dataLabels]="chartOptions.dataLabels!" [stroke]="chartOptions.stroke!"
@@ -105,24 +100,30 @@
       </div>
     </div>
   </div>
+</div> -->
 
+<div class="col-md-6 col-lg-12">
+  <app-card [hidHeader]="true" blockClass="text-center">
+    <i class="fa fa-user-check text-success d-block f-40"></i>
 
-  <div class="col-md-6 col-lg-12">
-    <app-card [hidHeader]="true" blockClass="text-center">
-      <!-- <i class="fa fa-envelope-open text-c-blue d-block f-40"></i>
-      <h4 class="m-t-20">
-        <span class="text-c-blue">8.62k</span>
-        Subscribers
-      </h4>
-      <p class="m-b-20">Your main list is growing</p> -->
+    <h4 class="m-t-20">
+      <span class="text-success">¡Bienvenido al Sistema de Convocatorias!</span>
+    </h4>
 
-      <!-- Botones centrados -->
-      <div class="d-flex justify-content-center gap-2">
-        <button class="btn btn-primary btn-sm btn-round">Nueva Convocatoria</button>
-        <button class="btn btn-primary btn-sm btn-round">Asignar Evaluadores</button>
-      </div>
-    </app-card>
-  </div>
+    <p class="m-b-20">
+      Estimado Administrador, gracias por ser parte de los procesos de <strong>AGRORURAL</strong>.
+    </p>
 
-
+    <p class="text-muted">
+      Desde esta plataforma podrás revisar las convocatorias, postulaciones, evaluaciones, reportes, gestión de usuarios.
+    </p>
+  </app-card>
 </div>
+
+
+
+
+
+
+
+

@@ -544,7 +544,17 @@ export const NavigationItems: NavigationItem[] = [
             roles: [2]
           }
         ]
-      }
+      },
+      {
+        id: 'signin',
+        title: 'Cerrar Sesión',
+        type: 'item',
+        url: '/login',
+        icon: 'feather icon-log-in',
+        target: true,
+        breadcrumbs: false,
+        roles: [1, 2, 3] // visible para todos
+      },
     ]
   },
   {
@@ -601,7 +611,7 @@ export const NavigationItems: NavigationItem[] = [
             roles: [3]
           }
         ]
-      }, 
+      },
       {
         id: 'signin',
         title: 'Cerrar Sesión',
@@ -611,7 +621,7 @@ export const NavigationItems: NavigationItem[] = [
         target: true,
         breadcrumbs: false,
         roles: [1, 2, 3] // visible para todos
-      }, 
+      },
     ]
   }
 ];

@@ -333,8 +333,6 @@ export class VerPostulantesComponent {
         });
     }
 
-
-
     @ViewChild('modalDocumentos') modalDocumentos!: TemplateRef<any>;
 
     documentos: any[] = [];

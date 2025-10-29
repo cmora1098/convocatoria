@@ -197,163 +197,163 @@ export class GestionConvocatoriaComponent {
 
 
   // Nueva Convocatoria
-  // Modelo de convocatoria 
-  archivosSeleccionados: File[] = [];
-  archivosExistentes: any[] = [];
+    // Modelo de convocatoria 
+    archivosSeleccionados: File[] = [];
+    archivosExistentes: any[] = [];
 
-  faseActual: string = ''; // 'bases', 'comunicado', 'resultados'
-  convocatoriaActual: any = null;
+    faseActual: string = ''; // 'bases', 'comunicado', 'resultados'
+    convocatoriaActual: any = null;
 
-  modalInfoMasiva: any; // Bootstrap modal
+    modalInfoMasiva: any; // Bootstrap modal
 
-  abrirModal(convocatoria: any, tipo: string) {
-    this.convocatoriaActual = convocatoria;
-    this.faseActual = tipo;
-    this.archivosSeleccionados = [];
-    this.archivosExistentes = [];
+    abrirModal(convocatoria: any, tipo: string) {
+      this.convocatoriaActual = convocatoria;
+      this.faseActual = tipo;
+      this.archivosSeleccionados = [];
+      this.archivosExistentes = [];
 
-    this.cargarArchivosExistentes();
+      this.cargarArchivosExistentes();
 
-    const modalElement = document.getElementById('modalInfoMasiva');
-    if (modalElement) {
-      this.modalInfoMasiva = new bootstrap.Modal(modalElement);
-      this.modalInfoMasiva.show();
-    }
-  }
-
-  private obtenerCodFormato(tipo: string): number {
-    switch (tipo) {
-      case 'bases': return 1;
-      case 'comunicado': return 2;
-      case 'resultados': return 3;
-      case 'perfil': return 4;
-      case 'cronograma': return 5;
-      default: return 0;
-    }
-  }
-
-  cargarArchivosExistentes() {
-    const codFormato = this.obtenerCodFormato(this.faseActual);
-    if (!this.convocatoriaActual || codFormato === 0) return;
-
-    this.apiService.getArchivosConvocatoria(this.convocatoriaActual.iCodConvocatoria, codFormato).subscribe({
-      next: (archivos: any[]) => {
-        this.archivosExistentes = archivos.map(a => ({
-          ...a,
-          // Deja solo la ruta tal cual para pasar al método de descarga/ver
-          urlArchivo: a.urlArchivo
-        }));
-      },
-      error: (err) => {
-        console.error('Error al obtener archivos:', err);
-      }
-    });
-  }
-
-  onArchivosSeleccionados(event: any) {
-    const archivos: FileList = event.target.files;
-    for (let i = 0; i < archivos.length; i++) {
-      const archivo = archivos[i];
-      if (!this.archivosSeleccionados.find(f => f.name === archivo.name && f.size === archivo.size)) {
-        this.archivosSeleccionados.push(archivo);
+      const modalElement = document.getElementById('modalInfoMasiva');
+      if (modalElement) {
+        this.modalInfoMasiva = new bootstrap.Modal(modalElement);
+        this.modalInfoMasiva.show();
       }
     }
-  }
 
-  eliminarArchivo(index: number) {
-    this.archivosSeleccionados.splice(index, 1);
-  }
-
-  verArchivo(rutaArchivo: string) {
-    const url = `${rutaArchivo}`;
-    window.open(url, '_blank');
-  }
-
-  eliminarArchivoGuardado(idAdjunto: string) {
-    const url = `${this.apiService.baseUrl}/ArchivosConvocatoria/${idAdjunto}`;
-
-    this.http.delete(url).subscribe({
-      next: () => {
-        Swal.fire({
-          title: 'Archivo eliminado',
-          text: 'Se eliminó correctamente el archivo seleccionado.',
-          icon: 'success',
-          confirmButtonColor: '#2e7d32'
-        }).then(() => {
-          window.location.reload(); // Esto recarga toda la página
-        });
-      },
-      error: (error) => {
-        console.error('Error al eliminar el archivo:', error);
-        Swal.fire({
-          title: 'Error',
-          text: 'Ocurrió un error al eliminar el archivo.',
-          icon: 'error',
-          confirmButtonColor: '#d32f2f'
-        });
+    private obtenerCodFormato(tipo: string): number {
+      switch (tipo) {
+        case 'bases': return 1;
+        case 'comunicado': return 2;
+        case 'resultados': return 3;
+        case 'perfil': return 4;
+        case 'cronograma': return 5;
+        default: return 0;
       }
-    });
-  }
+    }
 
-  subirArchivo() {
-    if (
-      this.archivosSeleccionados.length === 0 ||
-      !this.convocatoriaActual ||
-      !this.faseActual ||
-      !this.codUsuario
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Falta información',
-        text: 'Verifica que hayas seleccionado archivos, convocatoria y tipo de fase.',
-        confirmButtonColor: '#2e7d32'
+    cargarArchivosExistentes() {
+      const codFormato = this.obtenerCodFormato(this.faseActual);
+      if (!this.convocatoriaActual || codFormato === 0) return;
+
+      this.apiService.getArchivosConvocatoria(this.convocatoriaActual.iCodConvocatoria, codFormato).subscribe({
+        next: (archivos: any[]) => {
+          this.archivosExistentes = archivos.map(a => ({
+            ...a,
+            // Deja solo la ruta tal cual para pasar al método de descarga/ver
+            urlArchivo: a.urlArchivo
+          }));
+        },
+        error: (err) => {
+          console.error('Error al obtener archivos:', err);
+        }
       });
-      return;
     }
 
-    const codFormato = this.obtenerCodFormato(this.faseActual);
-    if (codFormato === 0) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Tipo no válido',
-        text: 'El tipo de fase no es válido.',
-        confirmButtonColor: '#2e7d32'
+    onArchivosSeleccionados(event: any) {
+      const archivos: FileList = event.target.files;
+      for (let i = 0; i < archivos.length; i++) {
+        const archivo = archivos[i];
+        if (!this.archivosSeleccionados.find(f => f.name === archivo.name && f.size === archivo.size)) {
+          this.archivosSeleccionados.push(archivo);
+        }
+      }
+    }
+
+    eliminarArchivo(index: number) {
+      this.archivosSeleccionados.splice(index, 1);
+    }
+
+    verArchivo(rutaArchivo: string) {
+      const url = `${rutaArchivo}`;
+      window.open(url, '_blank');
+    }
+
+    eliminarArchivoGuardado(idAdjunto: string) {
+      const url = `${this.apiService.baseUrl}/ArchivosConvocatoria/${idAdjunto}`;
+
+      this.http.delete(url).subscribe({
+        next: () => {
+          Swal.fire({
+            title: 'Archivo eliminado',
+            text: 'Se eliminó correctamente el archivo seleccionado.',
+            icon: 'success',
+            confirmButtonColor: '#2e7d32'
+          }).then(() => {
+            window.location.reload(); // Esto recarga toda la página
+          });
+        },
+        error: (error) => {
+          console.error('Error al eliminar el archivo:', error);
+          Swal.fire({
+            title: 'Error',
+            text: 'Ocurrió un error al eliminar el archivo.',
+            icon: 'error',
+            confirmButtonColor: '#d32f2f'
+          });
+        }
       });
-      return;
     }
 
-    const formData = new FormData();
-
-    this.archivosSeleccionados.forEach((archivo) => {
-      formData.append('files', archivo);
-      formData.append('formatos', codFormato.toString()); // uno por archivo
-    });
-
-    formData.append('codConvocatoria', this.convocatoriaActual.iCodConvocatoria);
-    formData.append('codUsuario', this.codUsuario.toString());
-
-    this.apiService.subirArchivoMasivo(formData).subscribe({
-      next: () => {
+    subirArchivo() {
+      if (
+        this.archivosSeleccionados.length === 0 ||
+        !this.convocatoriaActual ||
+        !this.faseActual ||
+        !this.codUsuario
+      ) {
         Swal.fire({
-          icon: 'success',
-          title: '¡Archivos subidos!',
-          text: 'Los archivos se han subido correctamente.',
+          icon: 'warning',
+          title: 'Falta información',
+          text: 'Verifica que hayas seleccionado archivos, convocatoria y tipo de fase.',
           confirmButtonColor: '#2e7d32'
         });
-        this.archivosSeleccionados = [];
-        this.cargarArchivosExistentes();
-      },
-      error: (error) => {
-        console.error('Error al subir archivos:', error);
+        return;
+      }
+
+      const codFormato = this.obtenerCodFormato(this.faseActual);
+      if (codFormato === 0) {
         Swal.fire({
           icon: 'error',
-          title: 'Error al subir',
-          text: 'No se pudo subir los archivos. Intente nuevamente.',
+          title: 'Tipo no válido',
+          text: 'El tipo de fase no es válido.',
           confirmButtonColor: '#2e7d32'
         });
+        return;
       }
-    });
-  }
+
+      const formData = new FormData();
+
+      this.archivosSeleccionados.forEach((archivo) => {
+        formData.append('files', archivo);
+        formData.append('formatos', codFormato.toString()); // uno por archivo
+      });
+
+      formData.append('codConvocatoria', this.convocatoriaActual.iCodConvocatoria);
+      formData.append('codUsuario', this.codUsuario.toString());
+
+      this.apiService.subirArchivoMasivo(formData).subscribe({
+        next: () => {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Archivos subidos!',
+            text: 'Los archivos se han subido correctamente.',
+            confirmButtonColor: '#2e7d32'
+          });
+          this.archivosSeleccionados = [];
+          this.cargarArchivosExistentes();
+        },
+        error: (error) => {
+          console.error('Error al subir archivos:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al subir',
+            text: 'No se pudo subir los archivos. Intente nuevamente.',
+            confirmButtonColor: '#2e7d32'
+          });
+        }
+      });
+    }
 
   // Volver a la lista
   volverALista() {

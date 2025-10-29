@@ -120,20 +120,6 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/Usuarios/eliminar/${idConvocatoria}`);
   }
 
-
-  // 
-
-
-
-
-
-
-
-
-
-
-
-
   // =================================
   // Buscar Convocatorias - Postulante
   // =================================
@@ -175,14 +161,13 @@ export class ApiService {
     return this.http.post<any>(`${this.baseUrl}/ConvocatoriaEvaluador/desactivar`, null, { params });
   }
 
+  // ======================
+  // Comite de Evaluación
+  // ====================== 
 
-
-
-
-
-
-
-
+  getCEListarConvocatoria(iCodUsuarioEvaluador: number) {
+    return this.http.get<any[]>(`${this.baseUrl}/ConvocatoriaEvaluador/convocatorias/${iCodUsuarioEvaluador}`);
+  }
 
 
   // ======================
@@ -225,7 +210,6 @@ export class ApiService {
   // *******************************************************************
   // COLEGIATURA
   // *******************************************************************
-
   getColegiaturaPorUsuario(idUsuario: number) {
     return this.http.get(`${this.baseUrl}/Colegiatura/usuario/${idUsuario}`);
   }
@@ -241,6 +225,7 @@ export class ApiService {
   eliminarColegiatura(id: number) {
     return this.http.delete(`${this.baseUrl}/Colegiatura/${id}`);
   }
+
   // *******************************************************************
   // EXPERIENCIA LABORAL
   // *******************************************************************  
@@ -264,7 +249,6 @@ export class ApiService {
     return this.http.delete(`${this.baseUrl}/ExperienciaLaboral/${id}`);
   }
 
-
   // *******************************************************************
   //  CURSOS, DIPLOMADOS Y/O ESPECIALIZACIÓN
   // *******************************************************************
@@ -287,7 +271,6 @@ export class ApiService {
   // *******************************************************************
   // IDIOMAS
   // *******************************************************************
-
   getListarIdiomas(iCodUsuario: number) {
     return this.http.get<any>(`${this.baseUrl}/Idioma/listar/${iCodUsuario}`);
   }

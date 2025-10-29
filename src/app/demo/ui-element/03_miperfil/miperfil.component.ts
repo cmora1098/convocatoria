@@ -316,8 +316,8 @@ export class MiPerfilComponent {
   cargarDatosPersonales() {
     if (this.codUsuario != null) {
 
-      this.tipoDocumento = Number(this.tpdoc); 
-      
+      this.tipoDocumento = Number(this.tpdoc);
+
       // Cuando guardes, pasas de vuelta:
       this.datos['Datos Personales'].tipoDocumento = this.tipoDocumento;
 
@@ -898,10 +898,12 @@ export class MiPerfilComponent {
   }
 
   calcularDuracionExperienciaLaboral() {
-    if (!this.experienciaLaboralActual.fechaInicio || !this.experienciaLaboralActual.fechaFin) return;
+    const { fechaInicio, fechaFin } = this.experienciaLaboralActual;
 
-    const inicio = dayjs(this.experienciaLaboralActual.fechaInicio);
-    const fin = dayjs(this.experienciaLaboralActual.fechaFin);
+    if (!fechaInicio || !fechaFin) return;
+
+    const inicio = dayjs(fechaInicio);
+    const fin = dayjs(fechaFin);
 
     if (fin.isBefore(inicio)) {
       this.experienciaLaboralActual.total = '';
@@ -909,14 +911,19 @@ export class MiPerfilComponent {
       return;
     }
 
-    const diff = dayjs.duration(fin.diff(inicio));
-    const años = Math.floor(diff.asYears());
-    const meses = Math.floor(diff.asMonths() % 12);
-    const días = Math.floor(diff.asDays() % 30);
+    // 🔹 Cálculo correcto por partes
+    let años = fin.diff(inicio, 'year');
+    const restoAños = inicio.add(años, 'year');
+
+    let meses = fin.diff(restoAños, 'month');
+    const restoMeses = restoAños.add(meses, 'month');
+
+    let días = fin.diff(restoMeses, 'day');
 
     this.experienciaLaboralActual.total = `${años} Años ${meses} Meses ${días} Días`;
     this.experienciaLaboralActual.duracion = { años, meses, días };
   }
+
 
   guardarExperienciaLaboral() {
     if (!this.experienciaLaboralActual) return;
@@ -1211,22 +1218,28 @@ export class MiPerfilComponent {
   }
 
   calcularTotalesExperienciaLaboral() {
-    let totalGeneral: Duracion = { años: 0, meses: 0, días: 0 };
-    let totalEspecifica: Duracion = { años: 0, meses: 0, días: 0 };
-    let totalPublica: Duracion = { años: 0, meses: 0, días: 0 };
+  let totalGeneral: Duracion = { años: 0, meses: 0, días: 0 };
+  let totalEspecifica: Duracion = { años: 0, meses: 0, días: 0 };
+  let totalPublica: Duracion = { años: 0, meses: 0, días: 0 };
 
-    for (const exp of this.experienciasLaborales) {
-      if (!exp.duracion) continue;
+  for (const exp of this.experienciasLaborales) {
+    if (!exp.duracion) continue;
 
-      if (exp.tipo === 'GENERAL') totalGeneral = this.sumarDuracion(totalGeneral, exp.duracion);
-      if (exp.tipo === 'ESPECIFICA') totalEspecifica = this.sumarDuracion(totalEspecifica, exp.duracion);
-      if (exp.sector === 'PÚBLICO') totalPublica = this.sumarDuracion(totalPublica, exp.duracion);
-    }
+    if (exp.tipo === 'GENERAL')
+      totalGeneral = this.sumarDuracionPrecisa(totalGeneral, exp.duracion);
 
-    this.experienciaLaboralGeneral = this.formatearDuracion(totalGeneral);
-    this.experienciaLaboralEspecifica = this.formatearDuracion(totalEspecifica);
-    this.experienciaLaboralPublica = this.formatearDuracion(totalPublica);
+    if (exp.tipo === 'ESPECIFICA')
+      totalEspecifica = this.sumarDuracionPrecisa(totalEspecifica, exp.duracion);
+
+    if (exp.sector === 'PÚBLICO')
+      totalPublica = this.sumarDuracionPrecisa(totalPublica, exp.duracion);
   }
+
+  this.experienciaLaboralGeneral = this.formatearDuracion(totalGeneral);
+  this.experienciaLaboralEspecifica = this.formatearDuracion(totalEspecifica);
+  this.experienciaLaboralPublica = this.formatearDuracion(totalPublica);
+}
+
 
   sumarDuracion(d1: Duracion, d2: Duracion): Duracion {
     let años = d1.años + d2.años;
@@ -1244,8 +1257,38 @@ export class MiPerfilComponent {
     return { años, meses, días };
   }
 
+  sumarDuracionPrecisa(total: Duracion, nueva: Duracion): Duracion {
+    // Partimos de una fecha base (arbitraria pero fija)
+    const base = dayjs('2000-01-01');
+
+    // Creamos la fecha final sumando la duración total existente
+    const fechaIntermedia = base
+      .add(total.años, 'year')
+      .add(total.meses, 'month')
+      .add(total.días, 'day');
+
+    // Luego sumamos la nueva duración
+    const fechaFinal = fechaIntermedia
+      .add(nueva.años, 'year')
+      .add(nueva.meses, 'month')
+      .add(nueva.días, 'day');
+
+    // Ahora calculamos la diferencia total real entre base y fechaFinal
+    const años = fechaFinal.diff(base, 'year');
+    const restoAños = base.add(años, 'year');
+    const meses = fechaFinal.diff(restoAños, 'month');
+    const restoMeses = restoAños.add(meses, 'month');
+    const días = fechaFinal.diff(restoMeses, 'day');
+
+    return { años, meses, días };
+  }
+
+
   formatearDuracion(d: Duracion): string {
-    return `${d.años} Años ${d.meses} Meses ${d.días} Días`;
+    const añosTxt = d.años === 1 ? 'Año' : 'Años';
+    const mesesTxt = d.meses === 1 ? 'Mes' : 'Meses';
+    const díasTxt = d.días === 1 ? 'Día' : 'Días';
+    return `${d.años} ${añosTxt} ${d.meses} ${mesesTxt} ${d.días} ${díasTxt}`;
   }
 
   // ********************************************************************************************************** //
