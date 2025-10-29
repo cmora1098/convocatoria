@@ -924,7 +924,6 @@ export class MiPerfilComponent {
     this.experienciaLaboralActual.duracion = { años, meses, días };
   }
 
-
   guardarExperienciaLaboral() {
     if (!this.experienciaLaboralActual) return;
 
@@ -1128,11 +1127,18 @@ export class MiPerfilComponent {
           const fechaInicio = dayjs(exp.dFechaInicio).format('YYYY-MM-DD');
           const fechaFin = dayjs(exp.dFechaFin).format('YYYY-MM-DD');
 
-          // Calculamos duración y texto total
-          const diff = dayjs.duration(dayjs(fechaFin).diff(dayjs(fechaInicio)));
-          const años = Math.floor(diff.asYears());
-          const meses = Math.floor(diff.asMonths() % 12);
-          const días = Math.floor(diff.asDays() % 30);
+          // 🔹 Cálculo preciso de duración
+          const inicio = dayjs(fechaInicio);
+          const fin = dayjs(fechaFin);
+
+          let años = fin.diff(inicio, 'year');
+          const restoAños = inicio.add(años, 'year');
+
+          let meses = fin.diff(restoAños, 'month');
+          const restoMeses = restoAños.add(meses, 'month');
+
+          let días = fin.diff(restoMeses, 'day');
+
           const total = `${años} Años ${meses} Meses ${días} Días`;
 
           // Sector: traducimos el código CHAR(1)
@@ -1218,28 +1224,27 @@ export class MiPerfilComponent {
   }
 
   calcularTotalesExperienciaLaboral() {
-  let totalGeneral: Duracion = { años: 0, meses: 0, días: 0 };
-  let totalEspecifica: Duracion = { años: 0, meses: 0, días: 0 };
-  let totalPublica: Duracion = { años: 0, meses: 0, días: 0 };
+    let totalGeneral: Duracion = { años: 0, meses: 0, días: 0 };
+    let totalEspecifica: Duracion = { años: 0, meses: 0, días: 0 };
+    let totalPublica: Duracion = { años: 0, meses: 0, días: 0 };
 
-  for (const exp of this.experienciasLaborales) {
-    if (!exp.duracion) continue;
+    for (const exp of this.experienciasLaborales) {
+      if (!exp.duracion) continue;
 
-    if (exp.tipo === 'GENERAL')
-      totalGeneral = this.sumarDuracionPrecisa(totalGeneral, exp.duracion);
+      if (exp.tipo === 'GENERAL')
+        totalGeneral = this.sumarDuracionPrecisa(totalGeneral, exp.duracion);
 
-    if (exp.tipo === 'ESPECIFICA')
-      totalEspecifica = this.sumarDuracionPrecisa(totalEspecifica, exp.duracion);
+      if (exp.tipo === 'ESPECIFICA')
+        totalEspecifica = this.sumarDuracionPrecisa(totalEspecifica, exp.duracion);
 
-    if (exp.sector === 'PÚBLICO')
-      totalPublica = this.sumarDuracionPrecisa(totalPublica, exp.duracion);
+      if (exp.sector === 'PÚBLICO')
+        totalPublica = this.sumarDuracionPrecisa(totalPublica, exp.duracion);
+    }
+
+    this.experienciaLaboralGeneral = this.formatearDuracion(totalGeneral);
+    this.experienciaLaboralEspecifica = this.formatearDuracion(totalEspecifica);
+    this.experienciaLaboralPublica = this.formatearDuracion(totalPublica);
   }
-
-  this.experienciaLaboralGeneral = this.formatearDuracion(totalGeneral);
-  this.experienciaLaboralEspecifica = this.formatearDuracion(totalEspecifica);
-  this.experienciaLaboralPublica = this.formatearDuracion(totalPublica);
-}
-
 
   sumarDuracion(d1: Duracion, d2: Duracion): Duracion {
     let años = d1.años + d2.años;
@@ -1282,7 +1287,6 @@ export class MiPerfilComponent {
 
     return { años, meses, días };
   }
-
 
   formatearDuracion(d: Duracion): string {
     const añosTxt = d.años === 1 ? 'Año' : 'Años';
