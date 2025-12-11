@@ -8,8 +8,10 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  public baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
-  public baseUrlConvocatoriaDoc = 'https://intranet.agrorural.gob.pe/convocatoriasAPI';
+  // public baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
+  // public baseUrlConvocatoriaDoc = 'https://intranet.agrorural.gob.pe/convocatoriasAPI';
+  public baseUrl = 'http://182.160.24.231/convocatoriasAPI/api';
+  public baseUrlConvocatoriaDoc = 'http://182.160.24.231/convocatoriasAPI';
   private apiUbigeoDpto = 'https://intranet.agrorural.gob.pe/apiubigeo';
 
   // public baseUrl = 'https://localhost:7106/api';
