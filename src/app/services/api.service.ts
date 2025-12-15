@@ -3,6 +3,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AppConfigService } from './app-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,13 +11,29 @@ import { Observable } from 'rxjs';
 export class ApiService {
   // public baseUrl = 'https://intranet.agrorural.gob.pe/convocatoriasAPI/api';
   // public baseUrlConvocatoriaDoc = 'https://intranet.agrorural.gob.pe/convocatoriasAPI';
-  public baseUrl = 'http://182.160.24.231/convocatoriasAPI/api';
-  public baseUrlConvocatoriaDoc = 'http://182.160.24.231/convocatoriasAPI';
-  private apiUbigeoDpto = 'https://intranet.agrorural.gob.pe/apiubigeo';
+  // private apiUbigeoDpto = 'https://intranet.agrorural.gob.pe/apiubigeo';
 
   // public baseUrl = 'https://localhost:7106/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private config: AppConfigService
+  ) {}
+
+  // ======================
+  // URLs desde config.json
+  // ======================
+  public get baseUrl(): string {
+    return this.config.baseUrl;
+  }
+
+  public get baseUrlConvocatoriaDoc(): string {
+    return this.config.baseUrlConvocatoriaDoc;
+  }
+
+  public get apiUbigeoDpto(): string {
+    return this.config.apiUbigeoDpto;
+  }
 
   post<T>(endpoint: string, body: any): Observable<T> {
     return this.http.post<T>(`${this.baseUrl}/${endpoint}`, body);
@@ -62,9 +79,10 @@ export class ApiService {
 
   // ======================
   // Convocatorias
-  // ====================== 
+  // ======================
 
-  getConvocatoriasPaginado(params: any) {  // Listar  
+  getConvocatoriasPaginado(params: any) {
+    // Listar
     return this.http.get<any>(`${this.baseUrl}/Convocatorias/paginado`, { params });
   }
 
@@ -102,15 +120,17 @@ export class ApiService {
   }
 
   // Listado con Paginado con Fase
-  getConvocatoriasPaginadoconFase(params: any) {  // Listar  
+  getConvocatoriasPaginadoconFase(params: any) {
+    // Listar
     return this.http.get<any>(`${this.baseUrl}/Convocatorias/listar-paginado-conFase`, { params });
   }
 
   // ======================
   // Usuario
-  // ====================== 
+  // ======================
 
-  getUsuarioPaginado(params: any) {  // Listar - Menú Principal
+  getUsuarioPaginado(params: any) {
+    // Listar - Menú Principal
     return this.http.get<any>(`${this.baseUrl}/Usuarios/listar`, { params });
   }
 
@@ -165,16 +185,15 @@ export class ApiService {
 
   // ======================
   // Comite de Evaluación
-  // ====================== 
+  // ======================
 
   getCEListarConvocatoria(iCodUsuarioEvaluador: number) {
     return this.http.get<any[]>(`${this.baseUrl}/ConvocatoriaEvaluador/convocatorias/${iCodUsuarioEvaluador}`);
   }
 
-
   // ======================
   // Mi Perfil - Postulante
-  // ====================== 
+  // ======================
 
   // *******************************************************************
   // DATOS PERSONALES
@@ -230,7 +249,7 @@ export class ApiService {
 
   // *******************************************************************
   // EXPERIENCIA LABORAL
-  // *******************************************************************  
+  // *******************************************************************
   getExperienciaLaboral(iCodUsuario: number) {
     return this.http.get<any[]>(`${this.baseUrl}/ExperienciaLaboral/usuario/${iCodUsuario}`);
   }
@@ -342,8 +361,7 @@ export class ApiService {
   // *******************************************************************
   generarFichaCurricular(data: any) {
     return this.http.post(`${this.baseUrl}/FichaCurricular/generar`, data, {
-      responseType: 'blob', // <-- Importante, porque devuelve un PDF
+      responseType: 'blob' // <-- Importante, porque devuelve un PDF
     });
   }
-
 }
