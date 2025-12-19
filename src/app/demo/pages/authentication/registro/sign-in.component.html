@@ -50,13 +50,13 @@
             <div class="col-6">
               <label for="apellido-paterno" class="form-label">Apellido Paterno</label>
               <input id="apellido-paterno" type="text" formControlName="apePaterno" placeholder="Apellido Paterno"
-                class="form-control" aria-label="Apellido Paterno" (keypress)="soloLetras($event)" />
+                class="form-control" aria-label="Apellido Paterno" (keypress)="soloLetras($event)" maxlength="20"/>
               <small class="text-danger" id="errorApePaterno"></small>
             </div>
             <div class="col-6">
               <label for="apellido-materno" class="form-label">Apellido Materno</label>
               <input id="apellido-materno" type="text" formControlName="apeMaterno" placeholder="Apellido Materno"
-                class="form-control" aria-label="Apellido Materno" (keypress)="soloLetras($event)" />
+                class="form-control" aria-label="Apellido Materno" (keypress)="soloLetras($event)" maxlength="20"/>
               <small class="text-danger" id="errorApeMaterno"></small>
             </div>
           </div>
@@ -65,7 +65,7 @@
           <div class="form-group mb-3">
             <label for="nombre-completo" class="form-label">Nombre Completo</label>
             <input id="nombre-completo" type="text" formControlName="nombres" placeholder="Nombre Completo"
-              class="form-control" aria-label="Nombre Completo" (keypress)="soloLetras($event)" />
+              class="form-control" aria-label="Nombre Completo" (keypress)="soloLetras($event)" maxlength="50"/>
             <small class="text-danger" id="errorNombres"></small>
           </div>
 

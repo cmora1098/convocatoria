@@ -2,7 +2,6 @@
 <div class="row btn-page" *ngIf="mostrarLista">
   <div class="col-md-12">
     <app-card cardTitle="" [options]="false">
-
       <!-- Botón principal -->
       <div class="mb-3 text-start">
         <button type="button" class="btn btn-primary" (click)="nuevaConvocatoria()">
@@ -15,7 +14,7 @@
       <hr />
 
       <!-- Filtros -->
-      <div class="row align-items-end g-2">
+      <!-- <div class="row align-items-end g-2">
         <div class="col-md-2">
           <label class="form-label">Tipo</label>
           <select class="form-control" [(ngModel)]="filtros.codTipoConvocatoria" name="tipo">
@@ -56,6 +55,37 @@
             <i class="feather icon-search me-1"></i> Buscar
           </button>
         </div>
+      </div> -->
+
+      <div class="row g-2">
+        <div class="col-md-2">
+          <select class="form-control" [(ngModel)]="filtros.codTipoConvocatoria" (change)="buscarAuto()">
+            <option value="">Tipo</option>
+            <option *ngFor="let tipo of tiposRegimen" [value]="tipo.codTipoConvocatoria">
+              {{ tipo.descripcion }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaInicio" (change)="buscarAuto()" />
+        </div>
+
+        <div class="col-md-2">
+          <input type="date" class="form-control" [(ngModel)]="filtros.fechaFin" (change)="buscarAuto()" />
+        </div>
+
+        <div class="col-md-3">
+          <input type="text" class="form-control" placeholder="Buscar..." [(ngModel)]="filtros.buscar" (input)="buscarAuto()" />
+        </div>
+
+        <div class="col-md-2">
+          <select class="form-control" [(ngModel)]="filtros.bActivo" (change)="buscarAuto()">
+            <option value="">Estado</option>
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </div>
       </div>
 
       <div class="my-4"></div>
@@ -86,57 +116,67 @@
               <td>{{ convocatoria.dtFechaInicio | date: 'dd/MM/yyyy' }}</td>
               <td>{{ convocatoria.dtFechaFin | date: 'dd/MM/yyyy' }}</td>
               <td>
-                <button type="button" class="btn btn-sm"
-                  [ngClass]="{'btn-success': convocatoria.bActivo,'btn-danger': !convocatoria.bActivo}"> {{
-                  convocatoria.bActivo ? 'Activo' : 'Inactivo' }}</button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [ngClass]="{ 'btn-success': convocatoria.bActivo, 'btn-danger': !convocatoria.bActivo }"
+                >
+                  {{ convocatoria.bActivo ? 'Activo' : 'Inactivo' }}
+                </button>
               </td>
               <td>
-
-                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')"
-                  [disabled]="!convocatoria.bActivo">
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'bases')" [disabled]="!convocatoria.bActivo">
                   Bases
                 </button>
 
-                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'perfil')"
-                  [disabled]="!convocatoria.bActivo">
+                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'perfil')" [disabled]="!convocatoria.bActivo">
                   Perfil de Puesto
                 </button>
 
-                <button class="btn btn-sm btn-primary me-1" (click)="abrirModal(convocatoria, 'cronograma')"
-                  [disabled]="!convocatoria.bActivo">
+                <button
+                  class="btn btn-sm btn-primary me-1"
+                  (click)="abrirModal(convocatoria, 'cronograma')"
+                  [disabled]="!convocatoria.bActivo"
+                >
                   Cronograma
                 </button>
 
-
-
-                <button class="btn btn-sm btn-info me-1" (click)="abrirModal(convocatoria, 'comunicado')"
-                  [disabled]="!convocatoria.bActivo">
+                <button
+                  class="btn btn-sm btn-info me-1"
+                  (click)="abrirModal(convocatoria, 'comunicado')"
+                  [disabled]="!convocatoria.bActivo"
+                >
                   Comunicado
                 </button>
 
-                <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')"
-                  [disabled]="!convocatoria.bActivo">
+                <button class="btn btn-sm btn-success" (click)="abrirModal(convocatoria, 'resultados')" [disabled]="!convocatoria.bActivo">
                   Resultados
                 </button>
 
-                <button class="btn btn-sm btn-dark me-1" (click)="abrirModalFases(convocatoria, 'fases')"
-                  [disabled]="!convocatoria.bActivo">
-                  <i class="feather icon-layers"></i> Fases
+                <button
+                  class="btn btn-sm btn-dark me-1"
+                  (click)="abrirModalFases(convocatoria, 'fases')"
+                  [disabled]="!convocatoria.bActivo"
+                >
+                  <i class="feather icon-layers"></i>
+                  Fases
                 </button>
 
-                <button class="btn btn-sm btn-warning me-1" (click)="editarConvocatoria(convocatoria)"
-                  [disabled]="!convocatoria.bActivo">
-                  <i class="feather icon-edit"></i> Editar
+                <button class="btn btn-sm btn-warning me-1" (click)="editarConvocatoria(convocatoria)" [disabled]="!convocatoria.bActivo">
+                  <i class="feather icon-edit"></i>
+                  Editar
                 </button>
 
-                <button class="btn btn-sm btn-danger" (click)="eliminarConvocatoria(convocatoria.iCodConvocatoria)"
-                  [disabled]="!convocatoria.bActivo">
-                  <i class="feather icon-trash-2"></i> Eliminar
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="eliminarConvocatoria(convocatoria.iCodConvocatoria)"
+                  [disabled]="!convocatoria.bActivo"
+                >
+                  <i class="feather icon-trash-2"></i>
+                  Eliminar
                 </button>
-
               </td>
             </tr>
-
           </tbody>
         </table>
 
@@ -147,22 +187,22 @@
       </div>
 
       <!-- Resumen -->
-      <div *ngIf="convocatorias.length > 0" class="text-end my-2">
-        Página {{ paginaActual }} de {{ totalPaginas }}
-      </div>
+      <div *ngIf="convocatorias.length > 0" class="text-end my-2">Página {{ paginaActual }} de {{ totalPaginas }}</div>
 
       <!-- Paginación -->
       <nav *ngIf="totalPaginas > 1">
         <ul class="pagination justify-content-end">
-
           <!-- Anterior -->
           <li class="page-item" [class.disabled]="paginaActual === 1">
             <a class="page-link" (click)="anteriorPagina()">Anterior</a>
           </li>
 
           <!-- Botones de página -->
-          <li class="page-item" *ngFor="let i of [].constructor(totalPaginas); let index = index"
-            [class.active]="paginaActual === (index + 1)">
+          <li
+            class="page-item"
+            *ngFor="let i of [].constructor(totalPaginas); let index = index"
+            [class.active]="paginaActual === index + 1"
+          >
             <a class="page-link" (click)="irPagina(index + 1)">{{ index + 1 }}</a>
           </li>
 
@@ -170,14 +210,11 @@
           <li class="page-item" [class.disabled]="paginaActual === totalPaginas">
             <a class="page-link" (click)="siguientePagina()">Siguiente</a>
           </li>
-
         </ul>
       </nav>
-
     </app-card>
   </div>
 </div>
-
 
 <!-- Vista de Formulario de Nueva o Edición de Convocatoria -->
 <div class="row btn-page" *ngIf="!mostrarLista">
@@ -187,7 +224,7 @@
         <!-- Código (solo si estamos en modo edición) -->
         <div *ngIf="modoEdicion" class="mb-3">
           <label class="form-label">ID</label>
-          <input class="form-control" type="text" [value]="convocatoriaSeleccionada?.id" readonly disabled>
+          <input class="form-control" type="text" [value]="convocatoriaSeleccionada?.id" readonly disabled />
         </div>
 
         <div class="row">
@@ -215,12 +252,11 @@
         <div class="row">
           <div class="col-md-6 mb-3">
             <label class="form-label">Fecha Inicio</label>
-            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaInicio"
-              name="fechaInicio">
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaInicio" name="fechaInicio" />
           </div>
           <div class="col-md-6 mb-3">
             <label class="form-label">Fecha Fin</label>
-            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaFin" name="fechaFin">
+            <input class="form-control" type="date" [(ngModel)]="convocatoriaSeleccionada.fechaFin" name="fechaFin" />
           </div>
         </div>
 
@@ -236,15 +272,18 @@
         <!-- Título de la convocatoria -->
         <div class="mb-3">
           <label class="form-label">Título</label>
-          <input class="form-control" type="text" [(ngModel)]="convocatoriaSeleccionada.nombre" name="titulo">
+          <input class="form-control" type="text" [(ngModel)]="convocatoriaSeleccionada.nombre" name="titulo" />
         </div>
 
         <!-- Editor WYSIWYG para requisitos -->
         <div class="mb-3">
           <label class="form-label">Requisitos</label>
-          <quill-editor [(ngModel)]="convocatoriaSeleccionada.requisitos" name="requisitos"
-            style="height: 300px; width: 100%;"></quill-editor><!-- [modules]="quillModules" -->
-
+          <quill-editor
+            [(ngModel)]="convocatoriaSeleccionada.requisitos"
+            name="requisitos"
+            style="height: 300px; width: 100%"
+          ></quill-editor>
+          <!-- [modules]="quillModules" -->
         </div>
 
         <!-- Botones -->
@@ -253,12 +292,10 @@
             <i class="feather icon-arrow-left me-1"></i>
             Volver
           </button>
-          <button type="button" class="btn btn-success"
-            (click)="modoEdicion ? actualizarConvocatoria() : guardarConvocatoria()">
+          <button type="button" class="btn btn-success" (click)="modoEdicion ? actualizarConvocatoria() : guardarConvocatoria()">
             <i class="feather icon-save me-1"></i>
             {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
           </button>
-
         </div>
       </form>
     </app-card>
@@ -269,7 +306,6 @@
 <div class="modal fade" id="modalInfoMasiva" tabindex="-1" aria-labelledby="modalInfoMasivaLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content shadow">
-
       <!-- Modal Header -->
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="modalInfoMasivaLabel">
@@ -281,11 +317,11 @@
 
       <!-- Modal Body -->
       <div class="modal-body">
-
         <!-- Archivos ya subidos -->
         <div *ngIf="archivosExistentes.length > 0" class="mb-4">
           <h6 class="text-success mb-3">
-            <i class="feather icon-folder"></i> Archivos ya subidos:
+            <i class="feather icon-folder"></i>
+            Archivos ya subidos:
           </h6>
           <div class="row g-2">
             <div *ngFor="let archivo of archivosExistentes" class="col-md-6">
@@ -296,12 +332,10 @@
                     {{ archivo.nombreArchivo || archivo.vNombreArchivo }}
                   </div>
                   <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)"
-                      title="Ver archivo">
+                    <button class="btn btn-outline-primary" (click)="verArchivo(archivo.urlArchivo)" title="Ver archivo">
                       <i class="feather icon-eye"></i>
                     </button>
-                    <button class="btn btn-outline-secondary" (click)="eliminarArchivoGuardado(archivo.iCodAdjunto)"
-                      title="Eliminar">
+                    <button class="btn btn-outline-secondary" (click)="eliminarArchivoGuardado(archivo.iCodAdjunto)" title="Eliminar">
                       <i class="feather icon-trash-2"></i>
                     </button>
                   </div>
@@ -314,17 +348,20 @@
         <!-- Subir nuevos archivos -->
         <div class="mb-3">
           <label class="form-label">Seleccionar archivos (PDF, DOCX, etc.):</label>
-          <input type="file" class="form-control" (change)="onArchivosSeleccionados($event)" multiple>
+          <input type="file" class="form-control" (change)="onArchivosSeleccionados($event)" multiple />
         </div>
 
         <!-- Archivos seleccionados -->
         <div *ngIf="archivosSeleccionados.length > 0" class="mt-3">
           <h6>
-            <i class="feather icon-file-plus"></i> Archivos seleccionados para subir:
+            <i class="feather icon-file-plus"></i>
+            Archivos seleccionados para subir:
           </h6>
           <ul class="list-group">
-            <li *ngFor="let archivo of archivosSeleccionados; let i = index"
-              class="list-group-item d-flex justify-content-between align-items-center">
+            <li
+              *ngFor="let archivo of archivosSeleccionados; let i = index"
+              class="list-group-item d-flex justify-content-between align-items-center"
+            >
               {{ archivo.name }}
               <button class="btn btn-sm btn-danger" (click)="eliminarArchivo(i)" title="Eliminar">
                 <i class="feather icon-trash-2"></i>
@@ -332,19 +369,19 @@
             </li>
           </ul>
         </div>
-
       </div>
 
       <!-- Modal Footer -->
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="feather icon-x"></i> Cancelar
+          <i class="feather icon-x"></i>
+          Cancelar
         </button>
         <button class="btn btn-success" (click)="subirArchivo()">
-          <i class="feather icon-upload"></i> Subir
+          <i class="feather icon-upload"></i>
+          Subir
         </button>
       </div>
-
     </div>
   </div>
 </div>
@@ -353,7 +390,6 @@
 <div class="modal fade" id="modalFases" tabindex="-1" aria-labelledby="modalFasesLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content shadow">
-
       <!-- Header -->
       <div class="modal-header bg-success text-white">
         <h5 class="modal-title" id="modalFasesLabel">
@@ -379,13 +415,13 @@
           <!-- Fecha Inicio -->
           <div class="col-md-3">
             <label class="form-label">Fecha Inicio</label>
-            <input type="date" class="form-control" [(ngModel)]="fase.fechaInicio" name="fechaInicio">
+            <input type="date" class="form-control" [(ngModel)]="fase.fechaInicio" name="fechaInicio" />
           </div>
 
           <!-- Fecha Fin -->
           <div class="col-md-3">
             <label class="form-label">Fecha Fin</label>
-            <input type="date" class="form-control" [(ngModel)]="fase.fechaFin" name="fechaFin">
+            <input type="date" class="form-control" [(ngModel)]="fase.fechaFin" name="fechaFin" />
           </div>
 
           <!-- Botón agregar -->
@@ -455,16 +491,17 @@
             </tbody>
           </table>
         </div>
-
       </div>
 
       <!-- Footer -->
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">
-          <i class="feather icon-x"></i> Cancelar
+          <i class="feather icon-x"></i>
+          Cancelar
         </button>
         <button class="btn btn-success" (click)="guardarFases()">
-          <i class="feather icon-save"></i> Guardar
+          <i class="feather icon-save"></i>
+          Guardar
         </button>
       </div>
     </div>

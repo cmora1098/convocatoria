@@ -45,7 +45,6 @@
 //   }
 // }
 
-
 // Angular imports
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -55,14 +54,12 @@ import { FormsModule } from '@angular/forms';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { QuillModule } from 'ngx-quill';
 
-
 import { ApiService } from '../../../services/api.service';
-import Swal from 'sweetalert2';  // Importamos SweetAlert2
+import Swal from 'sweetalert2'; // Importamos SweetAlert2
 
 import { AuthService } from '../../../services/auth.service';
 
 declare var bootstrap: any;
-
 
 @Component({
   selector: 'app-asignarevaluadores',
@@ -74,15 +71,27 @@ declare var bootstrap: any;
 export class AsignarEvaluadoresComponent {
   codUsuario: number | null;
 
-  constructor(private apiService: ApiService, private authService: AuthService) {
-    this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService
+  ) {
+    this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí
   }
 
   tiposRegimen: any[] = []; // Para almacenar los tipos de documentos que vienen de la API
   tiposUnidadZonal: any[] = [];
 
-  ngOnInit(): void {
+  private timeout: any;
 
+  buscarAuto() {
+    clearTimeout(this.timeout);
+
+    this.timeout = setTimeout(() => {
+      this.listarConvocatorias();
+    }, 400); // ⏱️ puedes ajustar el tiempo
+  }
+
+  ngOnInit(): void {
     this.listarConvocatorias();
 
     this.apiService.getTipoConvocatoria().subscribe({
@@ -96,7 +105,7 @@ export class AsignarEvaluadoresComponent {
           title: '¡Error!',
           text: 'Ocurrió un error al cargar los tipos de regimen.',
           confirmButtonText: 'Aceptar',
-          confirmButtonColor: '#2e7d32'   // Verde AgroRural
+          confirmButtonColor: '#2e7d32' // Verde AgroRural
         });
       }
     });
@@ -132,7 +141,6 @@ export class AsignarEvaluadoresComponent {
     //     });
     //   }
     // });
-
   }
 
   filtros: any = {
@@ -153,7 +161,6 @@ export class AsignarEvaluadoresComponent {
 
   archivosSeleccionados: File[] = [];
   archivosExistentes: any[] = [];
-
 
   listarConvocatorias() {
     const params: any = {
@@ -272,7 +279,6 @@ export class AsignarEvaluadoresComponent {
           correoElectronico: item.correoElectronico || '',
           seleccionado: false
         }));
-
       },
       error: (err) => {
         console.error('Error al cargar evaluadores:', err);
@@ -288,7 +294,7 @@ export class AsignarEvaluadoresComponent {
   }
 
   guardarAsignacion() {
-    const seleccionados = this.evaluadores.filter(e => e.seleccionado);
+    const seleccionados = this.evaluadores.filter((e) => e.seleccionado);
 
     if (seleccionados.length === 0) {
       Swal.fire({
@@ -303,17 +309,15 @@ export class AsignarEvaluadoresComponent {
 
     // 🔎 Dividimos evaluadores asignados en activos y desactivados
     const activosIds = this.evaluadoresAsignados
-      .filter(a => a.bActivo)   // bActivo = true significa que está asignado actualmente
-      .map(a => a.iCodUsuarioEvaluador);
+      .filter((a) => a.bActivo) // bActivo = true significa que está asignado actualmente
+      .map((a) => a.iCodUsuarioEvaluador);
 
     const desactivadosIds = this.evaluadoresAsignados
-      .filter(a => !a.bActivo)   // bActivo = false significa que fue desactivado
-      .map(a => a.iCodUsuarioEvaluador);
+      .filter((a) => !a.bActivo) // bActivo = false significa que fue desactivado
+      .map((a) => a.iCodUsuarioEvaluador);
 
     // 🔹 Evaluadores que son nuevos o que fueron desactivados
-    const pendientes = seleccionados.filter(e =>
-      !activosIds.includes(e.idUsuario)
-    );
+    const pendientes = seleccionados.filter((e) => !activosIds.includes(e.idUsuario));
 
     if (pendientes.length === 0) {
       Swal.fire({
@@ -350,11 +354,7 @@ export class AsignarEvaluadoresComponent {
       const total = pendientes.length;
 
       pendientes.forEach((evaluador) => {
-        this.apiService.asignarEvaluadores(
-          this.convocatoriaActual.iCodConvocatoria,
-          evaluador.idUsuario,
-          this.codUsuario!
-        ).subscribe({
+        this.apiService.asignarEvaluadores(this.convocatoriaActual.iCodConvocatoria, evaluador.idUsuario, this.codUsuario!).subscribe({
           next: (res: any) => {
             if (res.mensaje?.includes('reactivada')) {
               reactivados++;
@@ -378,7 +378,6 @@ export class AsignarEvaluadoresComponent {
     });
   }
 
-
   // Nueva función para mostrar resultado con nuevos + reactivados
   finalizarAsignacionAvanzada(nuevos: number, reactivados: number, errores: number) {
     Swal.close();
@@ -388,7 +387,7 @@ export class AsignarEvaluadoresComponent {
     if (reactivados > 0) mensaje += `${reactivados} evaluador(es) reactivados correctamente.\n`;
     if (errores > 0) mensaje += `${errores} evaluador(es) no pudieron ser asignados.\n`;
 
-    const icon = errores === 0 ? 'success' : (nuevos + reactivados === 0 ? 'info' : 'warning');
+    const icon = errores === 0 ? 'success' : nuevos + reactivados === 0 ? 'info' : 'warning';
 
     Swal.fire({
       icon,
@@ -401,7 +400,6 @@ export class AsignarEvaluadoresComponent {
       this.listarConvocatorias();
     });
   }
-
 
   desactivarEvaluador(iCodConvocatoria: number, iCodUsuarioEvaluador: number) {
     const iCodUsuarioAccion = this.codUsuario;
@@ -437,22 +435,20 @@ export class AsignarEvaluadoresComponent {
   listarEvaluadoresAsignados() {
     if (!this.convocatoriaActual?.iCodConvocatoria) return;
 
-    this.apiService.getEvaluadoresPorConvocatoria(this.convocatoriaActual.iCodConvocatoria)
-      .subscribe({
-        next: (data) => {
-          this.evaluadoresAsignados = data || [];
-        },
-        error: (err) => {
-          console.error('Error al cargar evaluadores asignados', err);
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudieron cargar los evaluadores asignados.',
-            confirmButtonText: 'Aceptar',
-            confirmButtonColor: '#d33'
-          });
-        }
-      });
+    this.apiService.getEvaluadoresPorConvocatoria(this.convocatoriaActual.iCodConvocatoria).subscribe({
+      next: (data) => {
+        this.evaluadoresAsignados = data || [];
+      },
+      error: (err) => {
+        console.error('Error al cargar evaluadores asignados', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudieron cargar los evaluadores asignados.',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: '#d33'
+        });
+      }
+    });
   }
-
 }

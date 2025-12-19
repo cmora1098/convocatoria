@@ -30,6 +30,17 @@ export class GestionUsuarioComponent {
     this.codUsuario = this.authService.getUserId(); // ✅ Ya tienes codUsuario aquí   
   }
 
+  private timeout: any;
+
+buscarAuto() {
+  clearTimeout(this.timeout);
+
+  this.timeout = setTimeout(() => {
+    this.Buscar();
+  }, 400); // ⏱️ tiempo de espera
+}
+
+
   ngOnInit(): void {
     this.listarUsuario();
     this.apiService.getTipoDocumentos().subscribe({

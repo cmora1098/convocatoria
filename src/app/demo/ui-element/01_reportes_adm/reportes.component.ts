@@ -205,8 +205,8 @@ export class ReportesComponent {
       FechaInicio: fechaInicioISO,
       FechaFin: fechaFinISO,
       FiltroGeneral: '',
-      PageNumber: '',
-      PageSize: ''
+      PageNumber: '1',
+      PageSize: '1000'
     };
 
     // 🔹 Llamar al servicio

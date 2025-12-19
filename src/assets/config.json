@@ -1,5 +1,9 @@
 {
-  "baseUrl": "https://intranet.agrorural.gob.pe/convocatoriasAPI/api",
+  "_baseUrl": "https://intranet.agrorural.gob.pe/convocatoriasAPI/api",
+  "_baseUrlConvocatoriaDoc": "https://intranet.agrorural.gob.pe/convocatoriasAPI",
+  "_apiUbigeoDpto": "https://intranet.agrorural.gob.pe/apiubigeo",
+
+  "baseUrl": "https://localhost:7106/api",
   "baseUrlConvocatoriaDoc": "https://intranet.agrorural.gob.pe/convocatoriasAPI",
   "apiUbigeoDpto": "https://intranet.agrorural.gob.pe/apiubigeo"
 }

@@ -21,7 +21,7 @@ export class SignUpComponent implements AfterViewInit {
 
   email: string = '';
   password: string = '';
-  mostrarContrasenia: boolean = false;  // variable para mostrar/ocultar
+  mostrarContrasenia: boolean = false; // variable para mostrar/ocultar
 
   @ViewChild('captchaCanvas', { static: false }) captchaCanvas!: ElementRef<HTMLCanvasElement>;
 
@@ -30,7 +30,7 @@ export class SignUpComponent implements AfterViewInit {
     private apiService: ApiService,
     private router: Router,
     private authService: AuthService
-  ) { }
+  ) {}
 
   toggleMostrarContrasenia() {
     this.mostrarContrasenia = !this.mostrarContrasenia;
@@ -59,49 +59,21 @@ export class SignUpComponent implements AfterViewInit {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const width = canvas.width;
-    const height = canvas.height;
+    const width = 236;
+    const height = 64;
+    canvas.width = width;
+    canvas.height = height;
 
-    // Limpiar canvas
+    // Limpiar
     ctx.clearRect(0, 0, width, height);
 
-    // Fondo degradado
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#038C3E');
-    gradient.addColorStop(1, '#38A640');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Texto captcha
-    const chars = this.captchaCode.split('');
-    const fontSize = 45;
-    ctx.font = `bold ${fontSize}px Arial`;
+    // Texto CAPTCHA (sin ruido, sin efectos)
+    ctx.font = '600 28px "Segoe UI", Arial, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    let x = 12;
 
-    chars.forEach((char, i) => {
-      ctx.fillStyle = i % 2 === 0 ? '#ffffff' : '#e6ffe6';
-      const y = height / 2 + (Math.random() * 6 - 3);
-      ctx.fillText(char, x, y);
-      x += fontSize - 2;
-    });
-
-    // Líneas de interferencia
-    for (let i = 0; i < 6; i++) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.7)';
-      ctx.beginPath();
-      ctx.moveTo(Math.random() * width, Math.random() * height);
-      ctx.lineTo(Math.random() * width, Math.random() * height);
-      ctx.stroke();
-    }
-
-    // Puntos de ruido
-    for (let i = 0; i < 35; i++) {
-      ctx.fillStyle = 'rgba(255,255,255,0.8)';
-      ctx.beginPath();
-      ctx.arc(Math.random() * width, Math.random() * height, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    ctx.fillText(this.captchaCode, width / 2, height / 2);
   }
 
   validateCaptcha() {
@@ -144,16 +116,16 @@ export class SignUpComponent implements AfterViewInit {
         // Redirigir según el rol del usuario
         switch (response.codRol) {
           case 1:
-            this.router.navigate(['dashboard']);  // Admin
+            this.router.navigate(['dashboard']); // Admin
             break;
           case 2:
             this.router.navigate(['edashboard']); // Evaluador
             break;
           case 3:
-            this.router.navigate(['pinicio']);    // Postulante
+            this.router.navigate(['pinicio']); // Postulante
             break;
           default:
-            this.router.navigate(['Inicio']);     // fallback
+            this.router.navigate(['Inicio']); // fallback
             break;
         }
       },
