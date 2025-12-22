@@ -1,4 +1,3 @@
- 
 // import { enableProdMode, importProvidersFrom, LOCALE_ID } from '@angular/core';
 // import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 // import { AppComponent } from './app/app.component';
@@ -71,7 +70,9 @@ import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 import { APP_BASE_HREF } from '@angular/common';
 
-import { AppConfigService } from './app/services/app-config.service'; // 👈 NUEVO
+import { AppConfigService } from './app/services/app-config.service';
+
+import { IdleTimeoutService } from './app/services/idle-timeout.service';
 
 registerLocaleData(localeEs, 'es'); // Registrar locale español
 
@@ -80,13 +81,12 @@ export function initConfig(config: AppConfigService) {
   return () => config.load();
 }
 
+export function initIdleTimeout(idleService: IdleTimeoutService) {
+  return () => idleService.startWatching();
+}
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(
-      BrowserModule,
-      AppRoutingModule,
-      HttpClientModule
-    ),
+    importProvidersFrom(BrowserModule, AppRoutingModule, HttpClientModule),
     provideAnimations(),
 
     // Locale
@@ -103,6 +103,12 @@ bootstrapApplication(AppComponent, {
       provide: APP_INITIALIZER,
       useFactory: initConfig,
       deps: [AppConfigService],
+      multi: true
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initIdleTimeout,
+      deps: [IdleTimeoutService],
       multi: true
     }
   ]
